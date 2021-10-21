@@ -1,0 +1,18 @@
+.navbar {
+  flex: 1;
+}
+
+.right-collapse {
+  justify-content: flex-end;
+}
+
+::-webkit-calendar-picker-indicator {
+  filter: invert();
+}
+
+.date-picker {
+  background-color: transparent;
+  border-style: none;
+  color: white;
+  text-align: end;
+}

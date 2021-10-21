@@ -1,0 +1,58 @@
+.content-area-body {
+  flex: 1;
+  background-color: gray;
+  overflow: hidden;
+}
+
+.content-container {
+  display: flex;
+  flex-flow: column;
+  flex: 1;
+  overflow: hidden;
+  max-height: 100%;
+}
+
+.reverse-padding {
+  margin-left: -15px;
+  margin-right: -15px;
+}
+
+.content-row {
+  flex: 1;
+  overflow: hidden;
+}
+
+.content-col {
+  background-color: rgb(68, 68, 68);
+  padding-top: 10px;
+  padding-bottom: 10px;
+  display: flex;
+  flex-flow: wrap;
+}
+
+.content-container .content-col-sm {
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.grouped {
+  overflow: auto;
+  max-height: 100%;
+}
+
+.ungrouped {
+  background-color: grey;
+  display: flex;
+  flex-flow: column;
+  color: white;
+  background-color: #232323;
+}
+
+.ungrouped-section {
+  display: flex;
+  flex-flow: column;
+  flex: 1 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0px 12px;
+}

@@ -1,0 +1,15 @@
+.bar {
+  flex: 1;
+  user-select: none;
+}
+
+.bar-item-area {
+  display: flex;
+  justify-content: space-evenly;
+  flex: 1;
+}
+
+.bar .item {
+  color: white;
+  margin: 0 5px;
+}

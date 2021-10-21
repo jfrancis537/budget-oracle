@@ -1,0 +1,7 @@
+.item-body {
+  display: flex;
+  justify-content: unset;
+  align-items: center;
+  user-select: none;
+  margin-bottom: 10px;
+}

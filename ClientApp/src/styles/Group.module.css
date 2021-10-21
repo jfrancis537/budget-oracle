@@ -1,0 +1,72 @@
+.card {
+  width: 30%;
+  max-width: 300px;
+  min-width: 180px !important;
+  margin: 10px;
+  height: 250px;
+  flex: 1;
+}
+
+.group-title {
+  overflow: hidden;
+  max-width: 50%;
+}
+
+.items {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.header {
+  position: relative;
+}
+
+.button-group {
+  position: absolute;
+  right: calc(.75rem - .3em);
+  top: calc(.75rem - .15em);
+  display: flex;
+}
+
+.add-button {
+  font-size: large;
+  padding: .6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-origin: padding-box;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  border: .3em solid transparent;
+}
+
+.add-button:hover {
+  background-color: rgb(141 99 0);
+  border-radius: 50%;
+  filter: invert(1);
+  cursor: pointer;
+}
+
+.add-button:active {
+  background-color: rgb(203 148 0);
+}
+
+.delete-button {
+  font-size: large;
+  padding: .6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.delete-button:hover {
+  background-color: rgb(141 99 0);
+  border-radius: 50%;
+  filter: invert(1);
+  cursor: pointer;
+}
+
+.delete-button:active {
+  background-color: rgb(203 148 0);
+}
