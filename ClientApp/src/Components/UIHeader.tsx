@@ -21,6 +21,7 @@ export class UIHeader extends React.Component {
     this.addIncomeSource = this.addIncomeSource.bind(this);
     this.addAccount = this.addAccount.bind(this);
     this.export = this.export.bind(this);
+    this.import = this.import.bind(this);
     this.reset = this.reset.bind(this);
   }
 
@@ -90,6 +91,7 @@ export class UIHeader extends React.Component {
                 <NavDropdown.Item onClick={this.addGroup}>Group</NavDropdown.Item>
               </NavDropdown>
               <Nav.Link onClick={this.export}>Export</Nav.Link>
+              <Nav.Link onClick={this.import}>Import</Nav.Link>
               <Nav.Link onClick={this.reset}>Reset</Nav.Link>
             </Nav>
           </Navbar.Collapse>
