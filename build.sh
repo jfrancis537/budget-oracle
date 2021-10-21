@@ -1,0 +1,1 @@
+dotnet -c Release -o publish
