@@ -1,7 +1,7 @@
 import { Action } from "../../Utilities/Action";
 import { AppStateManager } from "./AppStateManager";
 
-const GroupStateKey = 'group_state_data'
+export const GroupStateKey = 'group_state_data'
 
 type GroupState = {
   billGroups: [string, string[]][];
@@ -154,6 +154,23 @@ class GroupManager {
         this.debtGroups.set(key, idSet);
       }
     }
+  }
+
+  public export()
+  {
+    return localStorage.getItem(GroupStateKey);
+  }
+
+  public import(groups: string)
+  {
+    localStorage.setItem(GroupStateKey,groups);
+    //clear group things
+    this.billGroups.clear();
+    this.debtGroups.clear();
+    //Reload
+    this.load();
+    //update UI
+    this.ongroupsupdated.invoke(this.groups);
   }
 
 }

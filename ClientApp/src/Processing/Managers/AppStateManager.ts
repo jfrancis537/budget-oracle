@@ -7,7 +7,7 @@ import { Account, SerializedAccount } from "../Models/Account";
 import { Bill, SerializedBill } from "../Models/Bill";
 import { Debt, SerializedDebt } from "../Models/Debt";
 import { IncomeSource, SerializedIncomeSource } from "../Models/IncomeSource";
-import { GroupManager, GroupType } from "./GroupManager";
+import { GroupManager, GroupStateKey, GroupType } from "./GroupManager";
 
 interface StateData {
   accounts: SerializedAccount[];
@@ -267,10 +267,7 @@ class AppStateManager {
 
   public export() {
     const data = localStorage.getItem(StateDataKey);
-    if(data)
-    {
-      download("export.json", data);
-    }
+    return data;
   }
 
   public import(data: string)
@@ -293,4 +290,5 @@ class AppStateManager {
 }
 
 let instance = new AppStateManager();
+
 export { instance as AppStateManager };

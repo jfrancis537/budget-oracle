@@ -6,6 +6,7 @@ import { PromptManager } from "../Processing/Managers/PromptManager";
 import { DatePicker } from "./Inputs/DatePicker";
 import navStyles from '../styles/Nav.module.css';
 import { CalculationsManager } from "../Processing/Managers/CalculationsManager";
+import { download, FileLoader } from "../Utilities/FileUtils";
 
 export class UIHeader extends React.Component {
 
@@ -42,7 +43,28 @@ export class UIHeader extends React.Component {
   }
 
   private export() {
-    AppStateManager.export();
+    let stateData = AppStateManager.export();
+    let groupData = GroupManager.export();
+    if (groupData && stateData) {
+      download("export.json", JSON.stringify({
+        stateData: stateData,
+        groupData: groupData
+      }));
+    }
+  }
+
+  private async import() {
+    try {
+      let file = await FileLoader.openWithDialog();
+      let text = await FileLoader.readAsText(file);
+      let obj: { stateData: string, groupData: string } = JSON.parse(text);
+      AppStateManager.import(obj.stateData);
+      GroupManager.import(obj.groupData);
+    } catch (errCode) {
+      if ((errCode as number) < 0) {
+        alert('Something went wrong');
+      }
+    }
   }
 
   private reset() {

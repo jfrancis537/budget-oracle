@@ -444,5 +444,6 @@ class CalculationsManager {
     return value;
   }
 }
+
 const instance = new Lazy(() => new CalculationsManager());
 export { instance as CalculationsManager }
