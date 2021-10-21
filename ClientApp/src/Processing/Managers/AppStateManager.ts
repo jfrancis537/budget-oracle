@@ -1,13 +1,12 @@
 import { Moment } from "moment";
 import { Action } from "../../Utilities/Action";
-import { download } from "../../Utilities/FileUtils";
 import { FrequencyType } from "../Enums/FrequencyType";
 import { IncomeFrequency } from "../Enums/IncomeFrequency";
 import { Account, SerializedAccount } from "../Models/Account";
 import { Bill, SerializedBill } from "../Models/Bill";
 import { Debt, SerializedDebt } from "../Models/Debt";
 import { IncomeSource, SerializedIncomeSource } from "../Models/IncomeSource";
-import { GroupManager, GroupStateKey, GroupType } from "./GroupManager";
+import { GroupManager, GroupType } from "./GroupManager";
 
 interface StateData {
   accounts: SerializedAccount[];

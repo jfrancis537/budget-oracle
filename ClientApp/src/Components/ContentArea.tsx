@@ -11,7 +11,6 @@ import { Debt } from "../Processing/Models/Debt";
 import { Bill } from "../Processing/Models/Bill";
 import { ValueItem } from "./Items/ValueItem";
 import { BottomTabs } from "./BottomTabs";
-import { Content } from "react-bootstrap/lib/Tab";
 
 export enum ContentTab {
   BillsAndDebts = "bd",

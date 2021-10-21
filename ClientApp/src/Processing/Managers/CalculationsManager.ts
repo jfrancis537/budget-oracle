@@ -1,6 +1,5 @@
 import moment, { Moment } from "moment";
 import { Action } from "../../Utilities/Action";
-import { Lazy } from "../../Utilities/Lazy";
 import { FrequencyType } from "../Enums/FrequencyType";
 import { IncomeFrequency } from "../Enums/IncomeFrequency";
 import { Account } from "../Models/Account";
@@ -45,7 +44,7 @@ class CalculationsManager {
 
   public async requestCalculations(): Promise<CalculationResult> {
     const start = moment().startOf('day');
-    const end = this.endDate;
+    const end = this.endDate.clone();
     let debtCost = this.calculateDebts(AppStateManager.debts);
     let accountValue = this.calculateAccountValue(AppStateManager.accounts);
     let billCost = await this.calculateAllBillsCost(start, end, AppStateManager.bills);
@@ -358,13 +357,11 @@ class CalculationsManager {
     let value = 0;
     switch (bill.frequencyType) {
       case FrequencyType.Daily:
-        {
-          if (currentDate.isAfter(bill.initialDate)) {
-            let nextBillDate = bill.initialDate.clone().add(bill.frequency, 'days');
-            while (nextBillDate.isBefore(currentDate)) {
-              nextBillDate.add(bill.frequency, 'days');
-            }
-          }
+
+        //we already moved up to the next bill date
+        if (currentDate.isAfter(end)) {
+          value = 0;
+        } else {
           let days = currentDate.diff(end, 'days', true);
           days = Math.round(Math.abs(days)) + 1;
           let multiplier = 0;
@@ -376,6 +373,7 @@ class CalculationsManager {
           }
           value = multiplier * bill.amount;
         }
+
         break;
       case FrequencyType.Weekly:
         {
@@ -445,5 +443,5 @@ class CalculationsManager {
   }
 }
 
-const instance = new Lazy(() => new CalculationsManager());
+const instance = { instance: new CalculationsManager() }
 export { instance as CalculationsManager }

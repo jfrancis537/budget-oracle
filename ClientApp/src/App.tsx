@@ -1,6 +1,5 @@
 import React from "react";
 import { Container } from "react-bootstrap";
-import { BottomTabs } from "./Components/BottomTabs";
 import { ContentArea } from "./Components/ContentArea";
 import { Prompts } from "./Components/Prompts/Prompts";
 import { ResultsBar } from "./Components/ResultsBar";
