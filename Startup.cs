@@ -35,7 +35,8 @@ namespace BudgetOracle
       }
       else
       {
-        services.AddSingleton<IUserDatabase, MongoUserDatabase>();
+        //services.AddSingleton<IUserDatabase, MongoUserDatabase>();
+        services.AddSingleton<IUserDatabase, InMemoryUserDatabase>();
       }
       services.AddSingleton<IAuthFactory, AuthFactory>();
       services.AddAntiforgery();
