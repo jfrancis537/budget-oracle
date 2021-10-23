@@ -1,27 +1,59 @@
+using BudgetOracle.Storage;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using BudgetOracle.Auth;
+using BudgetOracle.Middleware;
 
 namespace BudgetOracle
 {
   public class Startup
   {
-    public Startup(IConfiguration configuration)
+    public Startup(IConfiguration configuration, IWebHostEnvironment env)
     {
       Configuration = configuration;
+      Environment = env;
     }
 
     public IConfiguration Configuration { get; }
+    public IWebHostEnvironment Environment { get; }
 
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
 
-      services.AddControllersWithViews();
+      services.AddControllers().AddNewtonsoftJson();
 
+      if (Environment.IsDevelopment())
+      {
+        services.AddSingleton<IUserDatabase, InMemoryUserDatabase>();
+      }
+      else
+      {
+        services.AddSingleton<IUserDatabase, MongoUserDatabase>();
+      }
+      services.AddSingleton<IAuthFactory, AuthFactory>();
+      services.AddAntiforgery();
+      services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+      {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+          ValidateIssuer = true,
+          ValidateAudience = true,
+          ValidateLifetime = true,
+          ValidateIssuerSigningKey = true,
+          ValidIssuer = AuthConstants.Issuer,
+          ValidAudience = AuthConstants.Audience,
+          IssuerSigningKey = AuthConstants.PrivateKey
+        };
+
+        options.Audience = AuthConstants.Audience;
+      });
       // In production, the React files will be served from this directory
       services.AddSpaStaticFiles(configuration =>
       {
@@ -45,7 +77,10 @@ namespace BudgetOracle
       app.UseStaticFiles();
       app.UseSpaStaticFiles();
 
+      app.UseJwtFromCookie();
+      app.UseAuthentication();
       app.UseRouting();
+      app.UseAuthorization();
 
       app.UseEndpoints(endpoints =>
       {

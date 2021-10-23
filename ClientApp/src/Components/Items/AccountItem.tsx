@@ -1,6 +1,5 @@
 import React from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
-import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { Account } from "../../Processing/Models/Account";
 

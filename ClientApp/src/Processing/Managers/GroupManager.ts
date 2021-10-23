@@ -1,5 +1,7 @@
+import { DataAPI } from "../../APIs/DataAPI";
 import { Action } from "../../Utilities/Action";
 import { AppStateManager } from "./AppStateManager";
+import { LoginManager } from "./LoginManager";
 
 export const GroupStateKey = 'group_state_data'
 
@@ -28,6 +30,10 @@ class GroupManager {
     this.billGroups = new Map();
     this.debtGroups = new Map();
     this.ongroupsupdated = new Action();
+
+    this.reload = this.reload.bind(this);
+    LoginManager.onuserloggedin.addListener(this.reload);
+    LoginManager.onuserloggedout.addListener(this.reload);
     this.load();
   }
 
@@ -137,13 +143,29 @@ class GroupManager {
       billGroups: this.groupMapToArray(this.billGroups),
       debtGroups: this.groupMapToArray(this.debtGroups)
     };
+    let serialized = JSON.stringify(data);
+    serialized = btoa(serialized);
+    if (LoginManager.isLoggedIn) {
+      DataAPI.updateGroups(serialized);
+    } else {
+      localStorage.setItem(GroupStateKey, serialized);
+    }
 
-    localStorage.setItem(GroupStateKey, JSON.stringify(data));
   }
 
-  private load() {
-    let groupState = localStorage.getItem(GroupStateKey);
+  private async load() {
+    let groupState: string | null;
+    if (LoginManager.isLoggedIn) {
+      try {
+        groupState = await DataAPI.getGroupData();
+      } catch {
+        groupState = null;
+      }
+    } else {
+      groupState = localStorage.getItem(GroupStateKey);
+    }
     if (groupState) {
+      groupState = atob(groupState);
       const data: GroupState = JSON.parse(groupState);
       for (let [key, set] of data.billGroups) {
         let idSet = new Set(set);
@@ -156,14 +178,7 @@ class GroupManager {
     }
   }
 
-  public export()
-  {
-    return localStorage.getItem(GroupStateKey);
-  }
-
-  public import(groups: string)
-  {
-    localStorage.setItem(GroupStateKey,groups);
+  private reload() {
     //clear group things
     this.billGroups.clear();
     this.debtGroups.clear();
@@ -172,6 +187,17 @@ class GroupManager {
     //update UI
     this.ongroupsupdated.invoke(this.groups);
   }
+
+  public export() {
+    return localStorage.getItem(GroupStateKey);
+  }
+
+  public import(groups: string) {
+    localStorage.setItem(GroupStateKey, groups);
+    this.reload();
+  }
+
+
 
 }
 

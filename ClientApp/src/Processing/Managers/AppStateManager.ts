@@ -1,4 +1,5 @@
 import { Moment } from "moment";
+import { DataAPI } from "../../APIs/DataAPI";
 import { Action } from "../../Utilities/Action";
 import { FrequencyType } from "../Enums/FrequencyType";
 import { IncomeFrequency } from "../Enums/IncomeFrequency";
@@ -7,6 +8,7 @@ import { Bill, SerializedBill } from "../Models/Bill";
 import { Debt, SerializedDebt } from "../Models/Debt";
 import { IncomeSource, SerializedIncomeSource } from "../Models/IncomeSource";
 import { GroupManager, GroupType } from "./GroupManager";
+import { LoginManager } from "./LoginManager";
 
 interface StateData {
   accounts: SerializedAccount[];
@@ -42,6 +44,9 @@ class AppStateManager {
     this.ondebtsupdated = new Action();
     this.onbillsupdated = new Action();
 
+    this.reload = this.reload.bind(this);
+    LoginManager.onuserloggedout.addListener(this.reload)
+    LoginManager.onuserloggedin.addListener(this.reload);
     this.load();
   }
 
@@ -233,21 +238,37 @@ class AppStateManager {
     this.onbillsupdated.invoke(this.bills);
   }
 
-  private save() {
+  private async save() {
     if (!this.blockSave) {
-      const data = {
+      let data = {
         accounts: [...this._accounts.values()],
         debts: [...this._debts.values()],
         bills: [...this._bills.values()],
         income: [...this._incomeSources.values()]
       }
-      localStorage.setItem(StateDataKey, JSON.stringify(data));
+      let serialized = JSON.stringify(data);
+      serialized = btoa(serialized);
+      if (LoginManager.isLoggedIn) {
+        DataAPI.updateState(serialized);
+      } else {
+        localStorage.setItem(StateDataKey, serialized);
+      }
     }
   }
 
-  private load() {
-    const data = localStorage.getItem(StateDataKey);
+  private async load() {
+    let data;
+    if (LoginManager.isLoggedIn) {
+      try {
+        data = await DataAPI.getStateData();
+      } catch {
+        data = null;
+      }
+    } else {
+      data = localStorage.getItem(StateDataKey);
+    }
     if (data) {
+      data = atob(data);
       let parsed: StateData = JSON.parse(data);
       for (let bill of parsed.bills) {
         this._bills.set(bill.id, Bill.deserialize(bill));
@@ -264,27 +285,30 @@ class AppStateManager {
     }
   }
 
-  public export() {
-    const data = localStorage.getItem(StateDataKey);
-    return data;
-  }
-
-  public import(data: string)
-  {
-    //Set storage
-    localStorage.setItem(StateDataKey,data);
+  public async reload() {
     //clear the data
     this._accounts.clear();
     this._bills.clear();
     this._debts.clear();
     this._incomeSources.clear();
     //Load the new data
-    this.load();
+    await this.load();
     //Update the UI
     this.onincomesourcesupdated.invoke(this.incomeSources);
     this.onaccountsupdated.invoke(this.accounts);
     this.ondebtsupdated.invoke(this.debts);
     this.onbillsupdated.invoke(this.bills);
+  }
+
+  public export() {
+    const data = localStorage.getItem(StateDataKey);
+    return data;
+  }
+
+  public import(data: string) {
+    //Set storage
+    localStorage.setItem(StateDataKey, data);
+    this.reload();
   }
 }
 

@@ -19,7 +19,7 @@ export interface SerializedBill extends SerializedIdentifiable{
   name: string;
 }
 
-export class Bill extends Identifiable implements IValued{
+export class Bill extends Identifiable implements IValued {
 
   readonly amount: number;
   readonly frequency: number;
@@ -42,8 +42,7 @@ export class Bill extends Identifiable implements IValued{
       frequency: data.frequency,
       id: data.id,
       initialDate: moment(data.initialDate),
-      //@ts-ignore
-      amount: data.amount ?? data.value,
+      amount: data.amount,
       frequencyType: data.frequencyType
     });
   }
