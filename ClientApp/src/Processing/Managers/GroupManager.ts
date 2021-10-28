@@ -192,7 +192,10 @@ class GroupManager {
     return localStorage.getItem(GroupStateKey);
   }
 
-  public import(groups: string) {
+  public import(groups: string, encoded = false) {
+    if (!encoded) {
+      groups = btoa(groups);
+    }
     localStorage.setItem(GroupStateKey, groups);
     this.reload();
   }

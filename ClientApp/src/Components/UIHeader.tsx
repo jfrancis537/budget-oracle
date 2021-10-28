@@ -110,7 +110,10 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
       )
     } else {
       return (
-        <Nav.Link onClick={this.logout}>Logout</Nav.Link>
+        <>
+          <Nav.Link onClick={this.logout}>Logout</Nav.Link>
+          <Nav.Link onClick={this.import}>Import</Nav.Link>
+        </>
       );
     }
   }

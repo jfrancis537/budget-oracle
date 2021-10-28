@@ -305,8 +305,11 @@ class AppStateManager {
     return data;
   }
 
-  public import(data: string) {
+  public import(data: string, encoded = false) {
     //Set storage
+    if (!encoded) {
+      data = btoa(data);
+    }
     localStorage.setItem(StateDataKey, data);
     this.reload();
   }
