@@ -144,7 +144,6 @@ class GroupManager {
       debtGroups: this.groupMapToArray(this.debtGroups)
     };
     let serialized = JSON.stringify(data);
-    serialized = btoa(serialized);
     if (LoginManager.isLoggedIn) {
       DataAPI.updateGroups(serialized);
     } else {
@@ -165,7 +164,6 @@ class GroupManager {
       groupState = localStorage.getItem(GroupStateKey);
     }
     if (groupState) {
-      groupState = atob(groupState);
       const data: GroupState = JSON.parse(groupState);
       for (let [key, set] of data.billGroups) {
         let idSet = new Set(set);
@@ -192,10 +190,7 @@ class GroupManager {
     return localStorage.getItem(GroupStateKey);
   }
 
-  public import(groups: string, encoded = false) {
-    if (!encoded) {
-      groups = btoa(groups);
-    }
+  public import(groups: string) {
     localStorage.setItem(GroupStateKey, groups);
     this.reload();
   }

@@ -247,7 +247,6 @@ class AppStateManager {
         income: [...this._incomeSources.values()]
       }
       let serialized = JSON.stringify(data);
-      serialized = btoa(serialized);
       if (LoginManager.isLoggedIn) {
         DataAPI.updateState(serialized);
       } else {
@@ -268,7 +267,6 @@ class AppStateManager {
       data = localStorage.getItem(StateDataKey);
     }
     if (data) {
-      data = atob(data);
       let parsed: StateData = JSON.parse(data);
       for (let bill of parsed.bills) {
         this._bills.set(bill.id, Bill.deserialize(bill));
@@ -305,11 +303,8 @@ class AppStateManager {
     return data;
   }
 
-  public import(data: string, encoded = false) {
+  public import(data: string) {
     //Set storage
-    if (!encoded) {
-      data = btoa(data);
-    }
     localStorage.setItem(StateDataKey, data);
     this.reload();
   }
