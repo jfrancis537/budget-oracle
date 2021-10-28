@@ -124,13 +124,13 @@ class GroupManager {
   }
 
   public reset() {
-    //clear localStorage
-    localStorage.removeItem(GroupStateKey);
     //clear group things
     this.billGroups.clear();
     this.debtGroups.clear();
     //update UI
     this.ongroupsupdated.invoke(this.groups);
+    //Save
+    this.save();
   }
 
   private groupMapToArray(map: Map<string, Set<string>>): [string, string[]][] {
@@ -186,12 +186,20 @@ class GroupManager {
     this.ongroupsupdated.invoke(this.groups);
   }
 
-  public export() {
-    return localStorage.getItem(GroupStateKey);
+  public async export() {
+    if (LoginManager.isLoggedIn) {
+      return await DataAPI.getGroupData();
+    } else {
+      return localStorage.getItem(GroupStateKey);
+    }
   }
 
-  public import(groups: string) {
-    localStorage.setItem(GroupStateKey, groups);
+  public async import(groups: string) {
+    if (LoginManager.isLoggedIn) {
+      await DataAPI.updateGroups(groups);
+    } else {
+      localStorage.setItem(GroupStateKey, groups);
+    }
     this.reload();
   }
 

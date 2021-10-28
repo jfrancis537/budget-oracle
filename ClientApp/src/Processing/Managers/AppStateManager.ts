@@ -223,9 +223,7 @@ class AppStateManager {
     return this._incomeSources.get(id);
   }
 
-  public reset() {
-    //Clear local storage
-    localStorage.removeItem(StateDataKey);
+  public async reset() {
     //clear the data
     this._accounts.clear();
     this._bills.clear();
@@ -236,6 +234,8 @@ class AppStateManager {
     this.onaccountsupdated.invoke(this.accounts);
     this.ondebtsupdated.invoke(this.debts);
     this.onbillsupdated.invoke(this.bills);
+    //Save
+    await this.save();
   }
 
   private async save() {
@@ -298,14 +298,23 @@ class AppStateManager {
     this.onbillsupdated.invoke(this.bills);
   }
 
-  public export() {
-    const data = localStorage.getItem(StateDataKey);
+  public async export() {
+    let data: string | null;
+    if (LoginManager.isLoggedIn) {
+      data = await DataAPI.getStateData();
+    } else {
+      data = localStorage.getItem(StateDataKey);
+    }
     return data;
   }
 
-  public import(data: string) {
-    //Set storage
-    localStorage.setItem(StateDataKey, data);
+  public async import(data: string) {
+    if (LoginManager.isLoggedIn) {
+      await DataAPI.updateState(data);
+    } else {
+      //Set storage
+      localStorage.setItem(StateDataKey, data);
+    }
     this.reload();
   }
 }
