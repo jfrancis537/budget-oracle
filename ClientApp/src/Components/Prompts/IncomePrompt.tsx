@@ -3,6 +3,7 @@ import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
 import { IncomeFrequency } from "../../Processing/Enums/IncomeFrequency";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
+import { LoadingButton } from "./LoadingButton";
 
 export interface IIncomePromptProps {
   editing: boolean;
@@ -14,7 +15,8 @@ interface IIncomePromptState {
   value: number,
   incomeFrequency: IncomeFrequency,
   paysOnWeekends: boolean,
-  dayOfMonth: number
+  dayOfMonth: number,
+  isSaving: boolean
 }
 
 export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePromptState> {
@@ -31,7 +33,8 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
           value: source.amount,
           incomeFrequency: source.frequencyType,
           paysOnWeekends: source.paysOnWeekends,
-          dayOfMonth: source.dayOfMonth
+          dayOfMonth: source.dayOfMonth,
+          isSaving: false
         }
       } else {
         throw new Error('An account to edit must be provided if editing flag is true');
@@ -42,7 +45,8 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
         value: 0,
         incomeFrequency: IncomeFrequency.Monthly,
         paysOnWeekends: false,
-        dayOfMonth: 1
+        dayOfMonth: 1,
+        isSaving: false
       };
     }
 
@@ -83,8 +87,7 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
     });
   }
 
-  private handleDayOfMonthChanged(event: React.ChangeEvent<HTMLSelectElement>)
-  {
+  private handleDayOfMonthChanged(event: React.ChangeEvent<HTMLSelectElement>) {
     const newValue = Number(event.target.value);
     if (!isNaN(newValue)) {
       this.setState({
@@ -93,9 +96,12 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
     }
   }
 
-  private accept() {
+  private async accept() {
+    this.setState({
+      isSaving: true
+    });
     if (this.props.editing) {
-      AppStateManager.updateIncomeSource(
+      await AppStateManager.updateIncomeSource(
         this.props.sourceToEdit,
         this.state.name,
         this.state.value,
@@ -104,13 +110,16 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
         this.state.dayOfMonth
       );
     } else {
-      AppStateManager.addIncomeSource(
+      await AppStateManager.addIncomeSource(
         this.state.name,
         this.state.value,
         this.state.incomeFrequency,
         this.state.paysOnWeekends,
         this.state.dayOfMonth);
     }
+    this.setState({
+      isSaving: false
+    });
     PromptManager.requestClosePrompt();
   }
 
@@ -198,7 +207,7 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
               onChange={this.handleDayOfMonthChanged}
               value={`${this.state.dayOfMonth}`}
             >
-              {function(){
+              {function () {
                 let results: JSX.Element[] = [];
                 for (let i = 1; i <= 28; i++) {
                   results.push(<option key={`option_${i}`} value={`${i}`}>{i}</option>);
@@ -212,9 +221,9 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
           <Button variant="secondary" onClick={this.cancel}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={this.accept} disabled={!this.state.name}>
+          <LoadingButton isLoading={this.state.isSaving} loadingText="Saving..." variant="primary" onClick={this.accept} disabled={!this.state.name || this.state.isSaving}>
             {this.props.editing ? "Update" : "Add"}
-          </Button>
+          </LoadingButton>
         </Modal.Footer>
       </Modal>
     )

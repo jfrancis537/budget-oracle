@@ -5,6 +5,7 @@ import { LoginManager } from "../../Processing/Managers/LoginManager";
 import { LinkButton } from "../LinkButton";
 
 import loginStyles from "../../styles/LoginPrompt.module.css";
+import { LoadingButton } from "./LoadingButton";
 
 interface ILoginPromptProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ interface ILoginPromptState {
   confirmPassword: string;
   errorMessage: string | undefined;
   registering: boolean;
+  isLoading: boolean;
 }
 
 export class LoginPrompt extends React.Component<ILoginPromptProps, ILoginPromptState> {
@@ -28,7 +30,8 @@ export class LoginPrompt extends React.Component<ILoginPromptProps, ILoginPrompt
       password: "",
       confirmPassword: "",
       errorMessage: undefined,
-      registering: false
+      registering: false,
+      isLoading: false
     }
 
     this.login = this.login.bind(this);
@@ -69,6 +72,9 @@ export class LoginPrompt extends React.Component<ILoginPromptProps, ILoginPrompt
   }
 
   private async login() {
+    this.setState({
+      isLoading: true
+    });
     try {
       await LoginManager.login(this.state.username, this.state.password);
       this.close();
@@ -79,9 +85,15 @@ export class LoginPrompt extends React.Component<ILoginPromptProps, ILoginPrompt
         });
       }
     }
+    this.setState({
+      isLoading: false
+    });
   }
 
   private async register() {
+    this.setState({
+      isLoading: true
+    });
     try {
       await LoginManager.register(this.state.username, this.state.password, this.state.confirmPassword);
       this.close();
@@ -92,6 +104,9 @@ export class LoginPrompt extends React.Component<ILoginPromptProps, ILoginPrompt
         });
       }
     }
+    this.setState({
+      isLoading: false
+    });
   }
 
   private handleUsernameChanged(event: React.ChangeEvent<HTMLInputElement>) {
@@ -194,7 +209,15 @@ export class LoginPrompt extends React.Component<ILoginPromptProps, ILoginPrompt
         <Modal.Footer>
           <LinkButton className={loginStyles["register-link"]} onClick={() => this.setRegistrationActive(!this.state.registering)}>{this.state.registering ? "Login" : "Register"}</LinkButton>
           <Button variant="secondary" onClick={this.close}>Cancel</Button>
-          <Button variant="primary" onClick={this.state.registering ? this.register : this.login}>{!this.state.registering ? "Login" : "Register"}</Button>
+          <LoadingButton
+            isLoading={this.state.isLoading}
+            loadingText={this.state.registering ? "Registering..." : "Logging in..."}
+            variant="primary"
+            onClick={this.state.registering ? this.register : this.login}
+            disabled={this.state.isLoading}
+          >
+            {!this.state.registering ? "Login" : "Register"}
+          </LoadingButton>
         </Modal.Footer>
       </Modal>
     )

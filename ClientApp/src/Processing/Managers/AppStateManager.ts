@@ -47,7 +47,11 @@ class AppStateManager {
     this.reload = this.reload.bind(this);
     LoginManager.onuserloggedout.addListener(this.reload)
     LoginManager.onuserloggedin.addListener(this.reload);
-    this.load();
+    this.loadLocal();
+  }
+
+  public async init() {
+    await this.load();
   }
 
   get accounts() {
@@ -66,7 +70,7 @@ class AppStateManager {
     return this._bills.values();
   }
 
-  public deleteItems(ids: Set<string>) {
+  public async deleteItems(ids: Set<string>) {
     if (ids.size > 0) {
       //Block stuff
       this.blockSave = true;
@@ -75,7 +79,7 @@ class AppStateManager {
       let debtBlock = this.ondebtsupdated.setBlocked(true);
       let billBlock = this.onbillsupdated.setBlocked(true);
       for (let id of ids) {
-        this.deleteItem(id);
+        await this.deleteItem(id);
       }
       //unblock stuff
       this.onincomesourcesupdated.setBlocked(incomeBlock);
@@ -89,36 +93,36 @@ class AppStateManager {
       this.ondebtsupdated.invoke(this.debts);
       this.onbillsupdated.invoke(this.bills);
       //save
-      this.save();
+      await this.save();
     }
   }
 
-  public deleteItem(id: string) {
+  public async deleteItem(id: string) {
     if (this._bills.has(id)) {
-      GroupManager.deleteItem(id, GroupType.Bill);
+      await GroupManager.deleteItem(id, GroupType.Bill);
       this._bills.delete(id);
       this.onbillsupdated.invoke(this.bills);
-      this.save();
+      await this.save();
     } else if (this._debts.has(id)) {
-      GroupManager.deleteItem(id, GroupType.Debt);
+      await GroupManager.deleteItem(id, GroupType.Debt);
       this._debts.delete(id);
       this.ondebtsupdated.invoke(this.debts);
-      this.save();
+      await this.save();
     } else if (this._accounts.has(id)) {
       this._accounts.delete(id);
       this.onaccountsupdated.invoke(this.accounts);
-      this.save();
+      await this.save();
     } else if (this._incomeSources.has(id)) {
       this._incomeSources.delete(id);
       this.onincomesourcesupdated.invoke(this.incomeSources);
-      this.save();
+      await this.save();
     }
   }
 
-  public addAccount(name: string, amount: number) {
-    this.updateAccount(undefined, name, amount);
+  public async addAccount(name: string, amount: number) {
+    await this.updateAccount(undefined, name, amount);
   }
-  public updateAccount(id: string | undefined, name: string, amount: number) {
+  public async updateAccount(id: string | undefined, name: string, amount: number) {
     const account = new Account({
       name: name,
       amount: amount,
@@ -126,7 +130,7 @@ class AppStateManager {
     });
     this._accounts.set(account.id, account);
     this.onaccountsupdated.invoke(this.accounts);
-    this.save();
+    await this.save();
   }
   public hasAccount(id: string) {
     return this._accounts.has(id);
@@ -141,7 +145,7 @@ class AppStateManager {
   public getDebt(id: string) {
     return this._debts.get(id);
   }
-  public updateDebt(id: string | undefined, name: string, amount: number) {
+  public async updateDebt(id: string | undefined, name: string, amount: number) {
     const debt = new Debt({
       name: name,
       amount: amount,
@@ -149,12 +153,12 @@ class AppStateManager {
     });
     this._debts.set(debt.id, debt);
     this.ondebtsupdated.invoke(this.debts);
-    this.save();
+    await this.save();
     return debt.id;
   }
 
-  public addDebt(name: string, value: number) {
-    return this.updateDebt(undefined, name, value);
+  public async addDebt(name: string, value: number) {
+    return await this.updateDebt(undefined, name, value);
   }
 
   public hasBill(id: string) {
@@ -163,7 +167,7 @@ class AppStateManager {
   public getBill(id: string) {
     return this._bills.get(id);
   }
-  public updateBill(
+  public async updateBill(
     id: string | undefined,
     name: string,
     amount: number,
@@ -181,24 +185,24 @@ class AppStateManager {
     });
     this._bills.set(bill.id, bill);
     this.onbillsupdated.invoke(this.bills);
-    this.save();
+    await this.save();
     return bill.id;
   }
-  public addBill(
+  public async addBill(
     name: string,
     amount: number,
     frequency: number,
     frequencyType: FrequencyType,
     initialDate: Moment
   ) {
-    return this.updateBill(undefined, name, amount, frequency, frequencyType, initialDate);
+    return await this.updateBill(undefined, name, amount, frequency, frequencyType, initialDate);
   }
 
-  public addIncomeSource(name: string, amount: number, frequency: IncomeFrequency, paysOnWeekends: boolean, dayOfMonth: number) {
-    this.updateIncomeSource(undefined, name, amount, frequency, paysOnWeekends, dayOfMonth);
+  public async addIncomeSource(name: string, amount: number, frequency: IncomeFrequency, paysOnWeekends: boolean, dayOfMonth: number) {
+    await this.updateIncomeSource(undefined, name, amount, frequency, paysOnWeekends, dayOfMonth);
   }
 
-  public updateIncomeSource(id: string | undefined,
+  public async updateIncomeSource(id: string | undefined,
     name: string,
     amount: number,
     frequency: IncomeFrequency,
@@ -214,7 +218,7 @@ class AppStateManager {
     });
     this._incomeSources.set(incomeSource.id, incomeSource);
     this.onincomesourcesupdated.invoke(this.incomeSources);
-    this.save();
+    await this.save();
   }
   public hasIncomeSource(id: string) {
     return this._incomeSources.has(id);
@@ -248,7 +252,7 @@ class AppStateManager {
       }
       let serialized = JSON.stringify(data);
       if (LoginManager.isLoggedIn) {
-        DataAPI.updateState(serialized);
+        await DataAPI.updateState(serialized);
       } else {
         localStorage.setItem(StateDataKey, serialized);
       }
@@ -266,6 +270,25 @@ class AppStateManager {
     } else {
       data = localStorage.getItem(StateDataKey);
     }
+    if (data) {
+      let parsed: StateData = JSON.parse(data);
+      for (let bill of parsed.bills) {
+        this._bills.set(bill.id, Bill.deserialize(bill));
+      }
+      for (let account of parsed.accounts) {
+        this._accounts.set(account.id, Account.deserialize(account));
+      }
+      for (let source of parsed.income) {
+        this._incomeSources.set(source.id, IncomeSource.deserialize(source));
+      }
+      for (let debt of parsed.debts) {
+        this._debts.set(debt.id, Debt.deserialize(debt));
+      }
+    }
+  }
+
+  private loadLocal() {
+    const data = localStorage.getItem(StateDataKey);
     if (data) {
       let parsed: StateData = JSON.parse(data);
       for (let bill of parsed.bills) {

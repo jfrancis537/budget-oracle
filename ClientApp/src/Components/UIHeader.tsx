@@ -60,8 +60,11 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
   }
 
   private async export() {
-    let stateData = await AppStateManager.export();
-    let groupData = await GroupManager.export();
+    let promises = [
+      AppStateManager.export(),
+      GroupManager.export()
+    ];
+    let [stateData, groupData] = await Promise.all(promises);
     if (groupData && stateData) {
       download("export.json", JSON.stringify({
         stateData: stateData,
@@ -81,8 +84,11 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
       let file = await FileLoader.openWithDialog();
       let text = await FileLoader.readAsText(file);
       let obj: { stateData: string, groupData: string } = JSON.parse(text);
-      await AppStateManager.import(obj.stateData);
-      await GroupManager.import(obj.groupData);
+      let promises = [
+        AppStateManager.import(obj.stateData),
+        GroupManager.import(obj.groupData)
+      ];
+      await Promise.all(promises);
     } catch (errCode) {
       if ((errCode as number) < 0) {
         alert('Something went wrong');
@@ -93,8 +99,11 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
   private async reset() {
     var doIt = window.confirm("Are you sure you want to reset?");
     if (doIt) {
-      await AppStateManager.reset();
-      await GroupManager.reset();
+      let promises = [
+        AppStateManager.reset(),
+        GroupManager.reset()
+      ];
+      await Promise.all(promises);
     }
   }
 

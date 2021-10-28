@@ -2,6 +2,7 @@ import React from "react"
 import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
 import { GroupManager, GroupType } from "../../Processing/Managers/GroupManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
+import { LoadingButton } from "./LoadingButton";
 
 export interface IGroupPromptProps {
   editing: boolean;
@@ -9,8 +10,9 @@ export interface IGroupPromptProps {
 }
 
 interface GroupPromptState {
-  name: string
-  groupType: GroupType
+  name: string;
+  groupType: GroupType;
+  isSaving: boolean;
 }
 
 export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptState> {
@@ -20,10 +22,11 @@ export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptS
 
     if (this.props.editing) {
       if (this.props.groupToEdit && GroupManager.hasGroup(...this.props.groupToEdit)) {
-        const [type,name] = this.props.groupToEdit;
+        const [type, name] = this.props.groupToEdit;
         this.state = {
           groupType: type,
-          name: name
+          name: name,
+          isSaving: false
         };
       } else {
         throw new Error('If editing is enabled, you must select the group to edit');
@@ -31,7 +34,8 @@ export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptS
     } else {
       this.state = {
         name: '',
-        groupType: GroupType.Bill
+        groupType: GroupType.Bill,
+        isSaving: false
       };
     }
 
@@ -41,15 +45,19 @@ export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptS
     this.handleGroupTypeChanged = this.handleGroupTypeChanged.bind(this);
   }
 
-  private accept() {
-    if(!this.props.editing)
-    {
-      GroupManager.addGroup(this.state.name, this.state.groupType);
+  private async accept() {
+    this.setState({
+      isSaving: true
+    });
+    if (!this.props.editing) {
+      await GroupManager.addGroup(this.state.name, this.state.groupType);
     } else {
       let oldName = this.props.groupToEdit![1];
-      GroupManager.updateGroup(this.state.groupType, oldName, this.state.name);
+      await GroupManager.updateGroup(this.state.groupType, oldName, this.state.name);
     }
-
+    this.setState({
+      isSaving: false
+    });
     PromptManager.requestClosePrompt();
   }
 
@@ -70,8 +78,7 @@ export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptS
   }
 
   private checkNameValid() {
-    if(this.props.editing)
-    {
+    if (this.props.editing) {
       let exists = GroupManager.hasGroup(this.state.groupType, this.state.name);
       let isStartingName = this.state.name === this.props.groupToEdit![1];
       return isStartingName || !exists;
@@ -82,13 +89,11 @@ export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptS
 
   private acceptEnabled() {
     let result = this.state.name !== '';
-    if(this.props.editing)
-    {
+    if (this.props.editing) {
       let isStartingName = this.state.name === this.props.groupToEdit![1];
-      console.log(isStartingName);
       result = !isStartingName && result;
     }
-    return result && this.checkNameValid();
+    return result && this.checkNameValid() && !this.state.isSaving;
   }
 
   render() {
@@ -100,7 +105,7 @@ export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptS
         keyboard={false}
       >
         <Modal.Header closeButton>
-        <Modal.Title>{this.props.editing ? "Update" : "Add"} Group</Modal.Title>
+          <Modal.Title>{this.props.editing ? "Update" : "Add"} Group</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <InputGroup className="mb-3" hasValidation>
@@ -129,9 +134,9 @@ export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptS
           <Button variant="secondary" onClick={this.cancel}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={this.accept} disabled={!this.acceptEnabled()}>
+          <LoadingButton isLoading={this.state.isSaving} loadingText="Saving..." variant="primary" onClick={this.accept} disabled={!this.acceptEnabled()}>
             {this.props.editing ? "Update" : "Add"}
-          </Button>
+          </LoadingButton>
         </Modal.Footer>
       </Modal>
     )

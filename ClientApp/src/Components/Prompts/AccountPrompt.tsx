@@ -2,6 +2,7 @@ import React from "react"
 import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
+import { LoadingButton } from "./LoadingButton";
 
 export interface IAccountPromptProps {
   editing: boolean;
@@ -10,7 +11,8 @@ export interface IAccountPromptProps {
 
 interface AccountPromptState {
   name: string,
-  value: number
+  value: number,
+  isSaving: boolean
 }
 
 export class AccountPrompt extends React.Component<IAccountPromptProps, AccountPromptState> {
@@ -24,7 +26,8 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
         const account = AppStateManager.getAccount(accountId)!;
         this.state = {
           name: account.name,
-          value: account.amount
+          value: account.amount,
+          isSaving: false
         }
       } else {
         throw new Error('An account to edit must be provided if editing flag is true');
@@ -32,7 +35,8 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
     } else {
       this.state = {
         name: '',
-        value: 0
+        value: 0,
+        isSaving: false
       };
     }
 
@@ -57,11 +61,11 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
     }
   }
 
-  private accept() {
+  private async accept() {
     if (this.props.editing) {
-      AppStateManager.updateAccount(this.props.accountToEdit, this.state.name, this.state.value);
+      await AppStateManager.updateAccount(this.props.accountToEdit, this.state.name, this.state.value);
     } else {
-      AppStateManager.addAccount(this.state.name, this.state.value);
+      await AppStateManager.addAccount(this.state.name, this.state.value);
     }
     PromptManager.requestClosePrompt();
   }
@@ -79,7 +83,7 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
         keyboard={false}
       >
         <Modal.Header closeButton>
-        <Modal.Title>{this.props.editing ? "Update" : "Add"} Account</Modal.Title>
+          <Modal.Title>{this.props.editing ? "Update" : "Add"} Account</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <InputGroup className="mb-3">
@@ -105,9 +109,9 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
           <Button variant="secondary" onClick={this.cancel}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={this.accept} disabled={!this.state.name}>
+          <LoadingButton isLoading={this.state.isSaving} loadingText="Saving..." variant="primary" onClick={this.accept} disabled={!this.state.name || this.state.isSaving}>
             {this.props.editing ? "Update" : "Add"}
-          </Button>
+          </LoadingButton>
         </Modal.Footer>
       </Modal>
     )

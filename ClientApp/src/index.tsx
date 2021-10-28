@@ -1,8 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { App } from './App';
-import { AppStateManager } from './Processing/Managers/AppStateManager';
-import { GroupManager } from './Processing/Managers/GroupManager';
 import { LoginManager } from './Processing/Managers/LoginManager';
 
 import './styles/global.css';

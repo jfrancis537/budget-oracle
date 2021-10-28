@@ -3,6 +3,7 @@ import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { GroupManager, GroupType } from "../../Processing/Managers/GroupManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
+import { LoadingButton } from "./LoadingButton";
 
 export interface IDebtPromptProps {
   editing: boolean;
@@ -12,7 +13,8 @@ export interface IDebtPromptProps {
 
 interface IDebtPromptState {
   name: string,
-  value: number
+  value: number,
+  isSaving: boolean
 }
 
 export class DebtPrompt extends React.Component<IDebtPromptProps, IDebtPromptState> {
@@ -26,7 +28,8 @@ export class DebtPrompt extends React.Component<IDebtPromptProps, IDebtPromptSta
         const account = AppStateManager.getDebt(debtId)!;
         this.state = {
           name: account.name,
-          value: account.amount
+          value: account.amount,
+          isSaving: false
         }
       } else {
         throw new Error('An account to edit must be provided if editing flag is true');
@@ -34,7 +37,8 @@ export class DebtPrompt extends React.Component<IDebtPromptProps, IDebtPromptSta
     } else {
       this.state = {
         name: '',
-        value: 0
+        value: 0,
+        isSaving: false
       };
     }
 
@@ -59,14 +63,19 @@ export class DebtPrompt extends React.Component<IDebtPromptProps, IDebtPromptSta
     }
   }
 
-  private accept() {
+  private async accept() {
+    this.setState({
+      isSaving: true
+    });
     if (this.props.editing) {
-      AppStateManager.updateDebt(this.props.debtToEdit, this.state.name, this.state.value);
-
+      await AppStateManager.updateDebt(this.props.debtToEdit, this.state.name, this.state.value);
     } else {
-      const debtId = AppStateManager.addDebt(this.state.name, this.state.value);
-      GroupManager.addItemToGroup(debtId, GroupType.Debt, this.props.groupName);
+      const debtId = await AppStateManager.addDebt(this.state.name, this.state.value);
+      await GroupManager.addItemToGroup(debtId, GroupType.Debt, this.props.groupName);
     }
+    this.setState({
+      isSaving: false
+    });
     PromptManager.requestClosePrompt();
   }
 
@@ -109,9 +118,9 @@ export class DebtPrompt extends React.Component<IDebtPromptProps, IDebtPromptSta
           <Button variant="secondary" onClick={this.cancel}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={this.accept} disabled={!this.state.name}>
+          <LoadingButton isLoading={this.state.isSaving} loadingText="Saving..." variant="primary" onClick={this.accept} disabled={!this.state.name || this.state.isSaving}>
             {this.props.editing ? "Update" : "Add"}
-          </Button>
+          </LoadingButton>
         </Modal.Footer>
       </Modal>
     )

@@ -56,8 +56,8 @@ export class Group extends React.Component<IGroupProps> {
     }
   }
 
-  private delete() {
-    GroupManager.deleteGroup(this.props.name, this.props.type);
+  private async delete() {
+    await GroupManager.deleteGroup(this.props.name, this.props.type);
   }
 
   render() {
@@ -75,21 +75,6 @@ export class Group extends React.Component<IGroupProps> {
               </Button>
             </ButtonGroup>
           </div>
-          {/* <div className={groupStyles['button-group']}>
-            <div
-              className={groupStyles['add-button']}
-              style={{
-                backgroundImage: `url('${createPlusIcon()}')`
-              }}
-              onClick={this.add}
-            />
-            <div
-              className={groupStyles['delete-button']}
-              onClick={this.delete}
-            >
-              <i className="bi bi-trash"></i>
-            </div>
-          </div> */}
         </Card.Header>
         <Card.Body className={groupStyles['items']}>
           {[...this.props.items].map(this.renderItem)}

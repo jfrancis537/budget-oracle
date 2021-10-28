@@ -17,8 +17,8 @@ export const ValueItem: React.FC<ValueItemProps> = (props) => {
     PromptManager.requestPromptForItem(props.item, props.groupName);
   }
 
-  function remove() {
-    AppStateManager.deleteItem(props.item.id);
+  async function remove() {
+    await AppStateManager.deleteItem(props.item.id);
   }
 
   return (

@@ -34,7 +34,7 @@ class GroupManager {
     this.reload = this.reload.bind(this);
     LoginManager.onuserloggedin.addListener(this.reload);
     LoginManager.onuserloggedout.addListener(this.reload);
-    this.load();
+    this.loadLocal();
   }
 
   get groups() {
@@ -56,7 +56,7 @@ class GroupManager {
     return type === GroupType.Bill ? this.billGroups.get(name) : this.debtGroups.get(name);
   }
 
-  public addGroup(name: string, type: GroupType) {
+  public async addGroup(name: string, type: GroupType) {
     if (this.hasGroup(type, name)) {
       throw new Error(`Group with name: ${name} already exists.`);
     } else if (type === GroupType.Bill) {
@@ -65,10 +65,10 @@ class GroupManager {
       this.debtGroups.set(name, new Set());
     }
     this.ongroupsupdated.invoke(this.groups);
-    this.save();
+    await this.save();
   }
 
-  public updateGroup(type: GroupType, oldName: string, newName: string) {
+  public async updateGroup(type: GroupType, oldName: string, newName: string) {
     if (this.hasGroup(type, newName)) {
       throw new Error(`Group with name: ${newName} already exists.`);
     } else if (!this.hasGroup(type, oldName)) {
@@ -83,54 +83,54 @@ class GroupManager {
       this.debtGroups.delete(oldName);
     }
     this.ongroupsupdated.invoke(this.groups);
-    this.save();
+    await this.save();
   }
 
-  public deleteGroup(name: string, type: GroupType) {
+  public async deleteGroup(name: string, type: GroupType) {
     let group = this.getGroup(type, name);
     if (group) {
-      AppStateManager.deleteItems(group);
+      await AppStateManager.deleteItems(group);
     }
     let map = type === GroupType.Bill ? this.billGroups : this.debtGroups;
     map.delete(name);
     this.ongroupsupdated.invoke(this.groups);
-    this.save();
+    await this.save();
   }
 
-  public deleteItem(itemId: string, type: GroupType) {
+  public async deleteItem(itemId: string, type: GroupType) {
     let groups = type === GroupType.Bill ? this.billGroups : this.debtGroups;
     for (let [, set] of groups) {
       if (set.delete(itemId)) {
         break;
       }
     }
-    this.save();
+    await this.save();
   }
 
-  public deleteItemFromGroup(itemId: string, type: GroupType, name: string) {
+  public async deleteItemFromGroup(itemId: string, type: GroupType, name: string) {
     let set = this.getGroup(type, name);
     set?.delete(itemId);
-    this.save();
+    await this.save();
   }
 
-  public addItemToGroup(id: string, type: GroupType, name: string) {
+  public async addItemToGroup(id: string, type: GroupType, name: string) {
     let set = this.getGroup(type, name);
     if (set) {
       set.add(id);
     } else {
       throw new Error('Can not add item to non-existant group');
     }
-    this.save();
+    await this.save();
   }
 
-  public reset() {
+  public async reset() {
     //clear group things
     this.billGroups.clear();
     this.debtGroups.clear();
     //update UI
     this.ongroupsupdated.invoke(this.groups);
     //Save
-    this.save();
+    await this.save();
   }
 
   private groupMapToArray(map: Map<string, Set<string>>): [string, string[]][] {
@@ -138,18 +138,17 @@ class GroupManager {
     return result.map(mapper);
   }
 
-  private save() {
+  private async save() {
     const data: GroupState = {
       billGroups: this.groupMapToArray(this.billGroups),
       debtGroups: this.groupMapToArray(this.debtGroups)
     };
     let serialized = JSON.stringify(data);
     if (LoginManager.isLoggedIn) {
-      DataAPI.updateGroups(serialized);
+      await DataAPI.updateGroups(serialized);
     } else {
       localStorage.setItem(GroupStateKey, serialized);
     }
-
   }
 
   private async load() {
@@ -176,12 +175,27 @@ class GroupManager {
     }
   }
 
-  private reload() {
+  private loadLocal() {
+    const groupState = localStorage.getItem(GroupStateKey);
+    if (groupState) {
+      const data: GroupState = JSON.parse(groupState);
+      for (let [key, set] of data.billGroups) {
+        let idSet = new Set(set);
+        this.billGroups.set(key, idSet);
+      }
+      for (let [key, set] of data.debtGroups) {
+        let idSet = new Set(set);
+        this.debtGroups.set(key, idSet);
+      }
+    }
+  }
+
+  private async reload() {
     //clear group things
     this.billGroups.clear();
     this.debtGroups.clear();
     //Reload
-    this.load();
+    await this.load();
     //update UI
     this.ongroupsupdated.invoke(this.groups);
   }
@@ -200,10 +214,8 @@ class GroupManager {
     } else {
       localStorage.setItem(GroupStateKey, groups);
     }
-    this.reload();
+    await this.reload();
   }
-
-
 
 }
 

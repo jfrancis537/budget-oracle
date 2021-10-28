@@ -5,6 +5,7 @@ import { FrequencyType } from "../../Processing/Enums/FrequencyType";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { GroupManager, GroupType } from "../../Processing/Managers/GroupManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
+import { LoadingButton } from "./LoadingButton";
 
 export interface IBillPromptProps {
   editing: boolean;
@@ -17,7 +18,8 @@ interface BillPromptState {
   value: number,
   frequency: number,
   frequencyType: FrequencyType,
-  initalDate: Moment
+  initalDate: Moment,
+  isSaving: boolean
 }
 
 export class BillPrompt extends React.Component<IBillPromptProps, BillPromptState> {
@@ -34,7 +36,8 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
           value: bill.amount,
           frequencyType: bill.frequencyType,
           frequency: bill.frequency,
-          initalDate: bill.initialDate
+          initalDate: bill.initialDate,
+          isSaving: false
         }
       } else {
         throw new Error('A Bill to edit must be provided if editing flag is true');
@@ -45,7 +48,8 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
         value: 0,
         initalDate: moment(),
         frequency: 1,
-        frequencyType: FrequencyType.Monthly
+        frequencyType: FrequencyType.Monthly,
+        isSaving: false
       };
     }
 
@@ -100,9 +104,12 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
     }
   }
 
-  private accept() {
+  private async accept() {
+    this.setState({
+      isSaving: true
+    });
     if (this.props.editing) {
-      AppStateManager.updateBill(
+      await AppStateManager.updateBill(
         this.props.billToEdit,
         this.state.name,
         this.state.value,
@@ -111,15 +118,18 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
         this.state.initalDate
       );
     } else {
-      let billId = AppStateManager.addBill(
+      let billId = await AppStateManager.addBill(
         this.state.name,
         this.state.value,
         this.state.frequency,
         this.state.frequencyType,
         this.state.initalDate
       );
-      GroupManager.addItemToGroup(billId, GroupType.Bill, this.props.groupName);
+      await GroupManager.addItemToGroup(billId, GroupType.Bill, this.props.groupName);
     }
+    this.setState({
+      isSaving: false
+    });
     PromptManager.requestClosePrompt();
   }
 
@@ -198,9 +208,9 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
           <Button variant="secondary" onClick={this.cancel}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={this.accept} disabled={!this.state.name}>
+          <LoadingButton isLoading={this.state.isSaving} loadingText="Saving..." variant="primary" onClick={this.accept} disabled={!this.state.name || this.state.isSaving}>
             {this.props.editing ? "Update" : "Add"}
-          </Button>
+          </LoadingButton>
         </Modal.Footer>
       </Modal>
     )
