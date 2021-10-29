@@ -151,6 +151,29 @@ describe('Income Calc Semi-Monthly', () => {
   };
 
   let sources = new Set<IncomeSource>();
+
+  test('Paid Today, end same day, Middle of month', async () => {
+    TestLogger.setLogsEnabled(true);
+    sources.clear();
+    sources.add(new IncomeSource(options));
+    var result = await CalculationsManager.instance.calculateTotalIncome(
+      moment("2021-10-29"), moment("2021-10-29"), sources.values()
+    );
+    TestLogger.setLogsEnabled(false);
+    expect(result).toEqual(0);
+  });
+
+  test('Paid Today, end next day, Middle of month', async () => {
+    sources.clear();
+    sources.add(new IncomeSource(options));
+    TestLogger.setLogsEnabled(true);
+    var result = await CalculationsManager.instance.calculateTotalIncome(
+      moment("2021-10-29"), moment("2021-10-29"), sources.values()
+    );
+    TestLogger.setLogsEnabled(false);
+    expect(result).toEqual(0);
+  });
+
   test('Middle of Month, 1st of start last of end', async () => {
     sources.clear();
     let opts = { ...options };

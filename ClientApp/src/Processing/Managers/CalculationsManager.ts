@@ -138,8 +138,7 @@ class CalculationsManager {
           if (paidThisWeek && startDow > endDow) {
             weeks++;
           }
-          if(paidThisWeek && startDow === 5)
-          {
+          if (paidThisWeek && startDow === 5) {
             weeks--;
           }
           value = weeks * source.amount;
@@ -171,13 +170,16 @@ class CalculationsManager {
             }
             if (currentDate.isBefore(paydayA)) {
               if (end.isSameOrAfter(paydayB)) {
+                TestLogger.log("Adding 2 because end is same or after paydayB")
                 paydays += 2;
               } else if (end.isSameOrAfter(paydayA)) {
                 paydays++;
+                TestLogger.log("Adding 1 because end is same or after paydayA")
               }
-            } else {
+            } else if (currentDate.isBefore(paydayB)) {
               if (end.isSameOrAfter(paydayB)) {
                 paydays++;
+                TestLogger.log("Adding 1 because end is same or after paydayB but start is same or after paydayA")
               }
             }
             value = paydays * source.amount;
