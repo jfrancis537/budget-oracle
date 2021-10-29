@@ -32,7 +32,6 @@ export namespace DataAPI {
   export async function updateState(state: string) {
     let url = `${baseUrl}/updateState`;
     let body = { state: state };
-    console.log(body);
     let response = await fetch(url, {
       method: "PUT",
       body: JSON.stringify(body),

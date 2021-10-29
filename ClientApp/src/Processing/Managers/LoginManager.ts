@@ -32,6 +32,9 @@ class LoginManager {
 
   public async login(username: string, password: string) {
     await AuthAPI.login(username, password);
+    //call will fail and this point will not be reached if login failed
+    this._username = username;
+    this.loggedIn = true;
     this.onuserloggedin.invoke();
   }
 

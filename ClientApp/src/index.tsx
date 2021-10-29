@@ -7,9 +7,7 @@ import './styles/global.css';
 
 async function start() {
   ReactDOM.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>,
+    <App />,
     document.getElementById('root')
   );
   await LoginManager.init();

@@ -84,11 +84,8 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
       let file = await FileLoader.openWithDialog();
       let text = await FileLoader.readAsText(file);
       let obj: { stateData: string, groupData: string } = JSON.parse(text);
-      let promises = [
-        AppStateManager.import(obj.stateData),
-        GroupManager.import(obj.groupData)
-      ];
-      await Promise.all(promises);
+      await AppStateManager.import(obj.stateData);
+      await GroupManager.import(obj.groupData);
     } catch (errCode) {
       if ((errCode as number) < 0) {
         alert('Something went wrong');

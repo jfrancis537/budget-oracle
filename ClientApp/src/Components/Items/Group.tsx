@@ -37,7 +37,8 @@ export class Group extends React.Component<IGroupProps> {
         <ValueItem key={item.id} item={item} groupName={this.props.name} />
       );
     } else {
-      throw new Error('Can not render item that does not exist.');
+      //throw new Error('Can not render item that does not exist.');
+      result = null;
     }
     return result;
   }

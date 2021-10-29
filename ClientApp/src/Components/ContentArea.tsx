@@ -69,7 +69,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
 
   private handleBillsUpdated(bills: Iterable<Bill>) {
     this.setState({
-      bills: [...AppStateManager.bills]
+      bills: [...bills]
     });
   }
 

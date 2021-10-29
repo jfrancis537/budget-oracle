@@ -21,7 +21,10 @@ export class LoadingButton extends React.Component<ILoadingButtonProps> {
   }
 
   public render() {
-    let buttonProps = { ...this.props, isLoading: undefined, children: undefined };
+    let buttonProps: any = { ...this.props };
+    delete buttonProps.isLoading;
+    delete buttonProps.children;
+    delete buttonProps.loadingText;
     let children = this.props.children;
     const loadingText = this.props.loadingText ?? "Loading...";
     return (
