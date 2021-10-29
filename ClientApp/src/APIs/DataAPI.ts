@@ -11,11 +11,7 @@ export namespace DataAPI {
       method: "GET"
     });
     if (response.ok) {
-      if (response.bodyUsed) {
-        return await response.text();
-      } else {
-        return "";
-      }
+      return await response.text();
     } else {
       throw new Error("Failed to get data.");
     }
@@ -27,11 +23,7 @@ export namespace DataAPI {
       method: "GET"
     });
     if (response.ok) {
-      if (response.bodyUsed) {
-        return await response.text();
-      } else {
-        return "";
-      }
+      return await response.text();
     } else {
       throw new Error("Failed to get data.");
     }
@@ -47,10 +39,8 @@ export namespace DataAPI {
         "Content-Type": "application/json"
       }
     });
-    if (response.ok) {
-      return await response.json();
-    } else {
-      throw new Error("Failed to get data.");
+    if (!response.ok) {
+      throw new Error("Failed to update data!");
     }
   }
 
@@ -63,10 +53,8 @@ export namespace DataAPI {
         "Content-Type": "application/json"
       }
     });
-    if (response.ok) {
-      return await response.json();
-    } else {
-      throw new Error("Failed to get data.");
+    if (!response.ok) {
+      throw new Error("Failed to update data!");
     }
   }
 }
