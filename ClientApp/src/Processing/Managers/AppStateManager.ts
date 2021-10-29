@@ -338,7 +338,7 @@ class AppStateManager {
       //Set storage
       localStorage.setItem(StateDataKey, data);
     }
-    this.reload();
+    await this.reload();
   }
 }
 

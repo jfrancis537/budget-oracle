@@ -11,7 +11,11 @@ export namespace DataAPI {
       method: "GET"
     });
     if (response.ok) {
-      return await response.text();
+      if (response.bodyUsed) {
+        return await response.text();
+      } else {
+        return "";
+      }
     } else {
       throw new Error("Failed to get data.");
     }
@@ -23,7 +27,11 @@ export namespace DataAPI {
       method: "GET"
     });
     if (response.ok) {
-      return await response.text();
+      if (response.bodyUsed) {
+        return await response.text();
+      } else {
+        return "";
+      }
     } else {
       throw new Error("Failed to get data.");
     }
