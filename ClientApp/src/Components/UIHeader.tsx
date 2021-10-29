@@ -66,7 +66,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
     ];
     let [stateData, groupData] = await Promise.all(promises);
     if (groupData && stateData) {
-      download("export.json", JSON.stringify({
+      download(`budget_export_${(new Date()).toLocaleString().replace(", ","-")}.json`, JSON.stringify({
         stateData: stateData,
         groupData: groupData
       }));
@@ -109,8 +109,8 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
       return (
         <>
           <Nav.Link onClick={this.login}>Login</Nav.Link>
-          <Nav.Link onClick={this.export}>Export</Nav.Link>
           <Nav.Link onClick={this.import}>Import</Nav.Link>
+          <Nav.Link onClick={this.export}>Export</Nav.Link>
           <Nav.Link onClick={this.reset}>Reset</Nav.Link>
         </>
       )
@@ -119,6 +119,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
         <>
           <Nav.Link onClick={this.logout}>Logout</Nav.Link>
           <Nav.Link onClick={this.import}>Import</Nav.Link>
+          <Nav.Link onClick={this.export}>Export</Nav.Link>
         </>
       );
     }
