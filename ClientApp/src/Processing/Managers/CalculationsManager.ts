@@ -1,5 +1,6 @@
 import moment, { Moment } from "moment";
 import { Action } from "../../Utilities/Action";
+import { TestLogger } from "../../Utilities/TestLogger";
 import { FrequencyType } from "../Enums/FrequencyType";
 import { IncomeFrequency } from "../Enums/IncomeFrequency";
 import { Account } from "../Models/Account";
@@ -103,7 +104,7 @@ class CalculationsManager {
           let startDow = currentDate.weekday();
           let endDow = end.weekday();
           let weeks = Math.abs(currentDate.diff(end, 'weeks'));
-          if (startDow > payDow) {
+          if (startDow >= payDow) {
             weeks--;
           }
           if (endDow > payDow) {
@@ -134,8 +135,12 @@ class CalculationsManager {
           if (!paidThisWeek && startIsInPayWeek) {
             weeks--;
           }
-          if (startDow > endDow) {
+          if (paidThisWeek && startDow > endDow) {
             weeks++;
+          }
+          if(paidThisWeek && startDow === 5)
+          {
+            weeks--;
           }
           value = weeks * source.amount;
         }
@@ -164,7 +169,7 @@ class CalculationsManager {
               paydayA = this.calculatePaydayOffWeekend(paydayA);
               paydayB = this.calculatePaydayOffWeekend(paydayB);
             }
-            if (currentDate.isSameOrBefore(paydayA)) {
+            if (currentDate.isBefore(paydayA)) {
               if (end.isSameOrAfter(paydayB)) {
                 paydays += 2;
               } else if (end.isSameOrAfter(paydayA)) {
@@ -202,9 +207,9 @@ class CalculationsManager {
               lastMonthPayDayA = this.calculatePaydayOffWeekend(lastMonthPayDayA);
               lastMonthPayDayB = this.calculatePaydayOffWeekend(lastMonthPayDayB);
             }
-            if (currentDate.isSameOrBefore(firstMonthPayDayA)) {
+            if (currentDate.isBefore(firstMonthPayDayA)) {
               totalPaydays += 2;
-            } else if (currentDate.isSameOrBefore(firstMonthPayDayB)) {
+            } else if (currentDate.isBefore(firstMonthPayDayB)) {
               totalPaydays++;
             }
             if (end.isSameOrAfter(lastMonthPayDayB)) {

@@ -11,6 +11,12 @@
     .mb-xs-5 {
         margin-bottom: 5px;
     }
+    .pb-xs-5 {
+        padding-bottom: 5px;
+    }
+    .pb-xs-40 {
+        padding-bottom: 40px;
+    }
 }
 
 /* SM */

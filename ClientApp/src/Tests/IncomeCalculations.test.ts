@@ -2,6 +2,7 @@ import moment from 'moment';
 import { IncomeFrequency } from '../Processing/Enums/IncomeFrequency';
 import { CalculationsManager } from '../Processing/Managers/CalculationsManager';
 import { IncomeSource } from '../Processing/Models/IncomeSource';
+import { TestLogger } from '../Utilities/TestLogger';
 
 describe('Income Calc Weekly', () => {
   let options = {
@@ -56,6 +57,15 @@ describe('Income Calc Weekly', () => {
       moment("2021-08-28"), moment("2021-09-20"), sources.values()
     );
     expect(result).toEqual(30);
+  });
+
+  test('Paid Today', async () => {
+    sources.clear();
+    sources.add(new IncomeSource(options));
+    var result = await CalculationsManager.instance.calculateTotalIncome(
+      moment("2021-10-29"), moment("2021-11-02"), sources.values()
+    );
+    expect(result).toEqual(0);
   });
 });
 
@@ -120,6 +130,15 @@ describe('Income Calc Bi-Weekly', () => {
     );
     expect(result).toEqual(20);
   });
+
+  test('Paid Today', async () => {
+    sources.clear();
+    sources.add(new IncomeSource(options));
+    var result = await CalculationsManager.instance.calculateTotalIncome(
+      moment("2021-10-29"), moment("2021-11-02"), sources.values()
+    );
+    expect(result).toEqual(0);
+  });
 });
 
 describe('Income Calc Semi-Monthly', () => {
@@ -178,7 +197,7 @@ describe('Income Calc Semi-Monthly', () => {
     opts.frequencyType = IncomeFrequency.SemiMonthlyStartOM
     sources.add(new IncomeSource(opts));
     var result = await CalculationsManager.instance.calculateTotalIncome(
-      moment("2021-09-01"), moment("2021-12-31"), sources.values()
+      moment("2021-08-31"), moment("2021-12-31"), sources.values()
     );
     expect(result).toEqual(80);
   });
@@ -200,7 +219,7 @@ describe('Income Calc Semi-Monthly', () => {
     opts.frequencyType = IncomeFrequency.SemiMonthlyStartOM
     sources.add(new IncomeSource(opts));
     var result = await CalculationsManager.instance.calculateTotalIncome(
-      moment("2021-09-01"), moment("2021-12-13"), sources.values()
+      moment("2021-08-31"), moment("2021-12-13"), sources.values()
     );
     expect(result).toEqual(70);
   });
@@ -276,6 +295,15 @@ describe('Income Calc Semi-Monthly', () => {
       moment("2021-09-03"), moment("2021-09-17"), sources.values()
     );
     expect(result).toEqual(10);
+  });
+
+  test('Paid Today', async () => {
+    sources.clear();
+    sources.add(new IncomeSource(options));
+    var result = await CalculationsManager.instance.calculateTotalIncome(
+      moment("2021-10-29"), moment("2021-11-02"), sources.values()
+    );
+    expect(result).toEqual(0);
   });
 });
 
@@ -429,6 +457,15 @@ describe('Income Calc Monthly', () => {
       moment("2021-10-14"), moment("2021-11-16"), sources.values()
     );
     expect(result).toEqual(20);
+  });
+
+  test('Paid Today', async () => {
+    sources.clear();
+    sources.add(new IncomeSource(options));
+    var result = await CalculationsManager.instance.calculateTotalIncome(
+      moment("2021-10-15"), moment("2021-11-02"), sources.values()
+    );
+    expect(result).toEqual(0);
   });
 
 });

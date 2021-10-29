@@ -4,6 +4,7 @@ import { CalculationsManager, CalculationResult } from "../Processing/Managers/C
 
 import barStyles from '../styles/ResultsBar.module.css';
 import mobileStyles from '../styles/MobileHelper.module.css';
+import { MobileHelper } from "../Utilities/MobileUtils";
 
 interface ResultsBarState {
   calculations: CalculationResult | undefined
@@ -52,9 +53,12 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
   }
 
   render() {
+
+    const isIphoneInStandalone = MobileHelper.isiPhoneInStandalone();
+
     return (
-      <Row className={mobileStyles["mb-xs-5"]}>
-        <Navbar bg="dark" variant="dark" expand='md' className={barStyles['bar']}>
+      <Row>
+        <Navbar bg="dark" variant="dark" expand='md' className={`${barStyles['bar']} ${isIphoneInStandalone ? mobileStyles["pb-xs-40"] : ""}`}>
           <Nav>
             <div className={barStyles['bar-item-area']}>
               {this.renderCalculations()}
