@@ -104,12 +104,14 @@ class GroupManager {
         break;
       }
     }
+    this.ongroupsupdated.invoke(this.groups);
     await this.save();
   }
 
   public async deleteItemFromGroup(itemId: string, type: GroupType, name: string) {
     let set = this.getGroup(type, name);
     set?.delete(itemId);
+    this.ongroupsupdated.invoke(this.groups);
     await this.save();
   }
 
@@ -117,6 +119,7 @@ class GroupManager {
     let set = this.getGroup(type, name);
     if (set) {
       set.add(id);
+      this.ongroupsupdated.invoke(this.groups);
     } else {
       throw new Error('Can not add item to non-existant group');
     }
