@@ -7,6 +7,10 @@
     .desktop-only {
         display: none !important;
     }
+
+    .mb-xs-5 {
+        margin-bottom: 5px;
+    }
 }
 
 /* SM */

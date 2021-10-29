@@ -3,6 +3,7 @@ import { Row, Navbar, Nav } from "react-bootstrap";
 import { CalculationsManager, CalculationResult } from "../Processing/Managers/CalculationsManager";
 
 import barStyles from '../styles/ResultsBar.module.css';
+import mobileStyles from '../styles/MobileHelper.module.css';
 
 interface ResultsBarState {
   calculations: CalculationResult | undefined
@@ -52,7 +53,7 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
 
   render() {
     return (
-      <Row>
+      <Row className={mobileStyles["mb-xs-5"]}>
         <Navbar bg="dark" variant="dark" expand='md' className={barStyles['bar']}>
           <Nav>
             <div className={barStyles['bar-item-area']}>
