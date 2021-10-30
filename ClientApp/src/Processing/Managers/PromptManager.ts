@@ -3,6 +3,7 @@ import { IBillPromptProps } from "../../Components/Prompts/BillPrompt";
 import { IDebtPromptProps } from "../../Components/Prompts/DebtPrompt";
 import { IGroupPromptProps } from "../../Components/Prompts/GroupPrompt";
 import { IIncomePromptProps } from "../../Components/Prompts/IncomePrompt";
+import { IInvestmentPromptProps } from "../../Components/Prompts/InvestmentPrompt";
 import { Action } from "../../Utilities/Action";
 import { Account } from "../Models/Account";
 import { Bill } from "../Models/Bill";
@@ -17,10 +18,12 @@ class PromptManager {
   readonly onincomepromptrequested: Action<IIncomePromptProps>;
   readonly ondebtpromptrequested: Action<IDebtPromptProps>;
   readonly onbillpromptrequested: Action<IBillPromptProps>;
+  readonly oninvestmentpromptrequested: Action<IInvestmentPromptProps>;
   readonly onstockapikeypromptrequested: Action<void>;
   readonly oncloserequested: Action<void>;
 
   private promptActive: boolean;
+
 
   constructor() {
     this.ongrouppromptrequested = new Action();
@@ -30,6 +33,7 @@ class PromptManager {
     this.ondebtpromptrequested = new Action();
     this.onbillpromptrequested = new Action();
     this.onstockapikeypromptrequested = new Action();
+    this.oninvestmentpromptrequested = new Action();
 
     this.promptActive = false;
   }
@@ -51,6 +55,16 @@ class PromptManager {
       throw new Error("You can't open two prompts at once");
     }
   }
+
+  public requestInvestmentPrompt(props: IInvestmentPromptProps) {
+    if (!this.promptActive) {
+      this.oninvestmentpromptrequested.invoke(props);
+      this.promptActive = true;
+    } else {
+      throw new Error("You can't open two prompts at once");
+    }
+  }
+
 
   public requestIncomePrompt(props: IIncomePromptProps) {
     if (!this.promptActive) {
@@ -79,8 +93,7 @@ class PromptManager {
     }
   }
 
-  public requestStockAPIKeyPrompt()
-  {
+  public requestStockAPIKeyPrompt() {
     if (!this.promptActive) {
       this.onstockapikeypromptrequested.invoke();
       this.promptActive = true;

@@ -7,6 +7,7 @@ import { Account, SerializedAccount } from "../Models/Account";
 import { Bill, SerializedBill } from "../Models/Bill";
 import { Debt, SerializedDebt } from "../Models/Debt";
 import { IncomeSource, SerializedIncomeSource } from "../Models/IncomeSource";
+import { Investment, SerializedInvestment } from "../Models/Investment";
 import { GroupManager, GroupType } from "./GroupManager";
 import { UserManager } from "./UserManager";
 
@@ -15,6 +16,7 @@ interface StateData {
   debts: SerializedDebt[];
   bills: SerializedBill[];
   income: SerializedIncomeSource[];
+  investments: SerializedInvestment[];
 }
 
 const StateDataKey = "app_state_data";
@@ -25,24 +27,30 @@ class AppStateManager {
   private _debts: Map<string, Debt>;
   private _bills: Map<string, Bill>;
   private _incomeSources: Map<string, IncomeSource>;
+  private _investments: Map<string, Investment>;
   private blockSave: boolean;
 
-  public onaccountsupdated: Action<Iterable<Account>>;
-  public onincomesourcesupdated: Action<Iterable<IncomeSource>>;
-  public ondebtsupdated: Action<Iterable<Debt>>;
-  public onbillsupdated: Action<Iterable<Bill>>;
+  public onaccountsupdated: Action<Account[]>;
+  public onincomesourcesupdated: Action<IncomeSource[]>;
+  public ondebtsupdated: Action<Debt[]>;
+  public onbillsupdated: Action<Bill[]>;
+  public oninvestmentsupdated: Action<Investment[]>;
+  public onspecificinvestmentupdated: Action<Investment>;
 
   constructor() {
     this._accounts = new Map();
     this._debts = new Map();
     this._bills = new Map();
     this._incomeSources = new Map();
+    this._investments = new Map();
     this.blockSave = false;
 
     this.onaccountsupdated = new Action();
     this.onincomesourcesupdated = new Action();
     this.ondebtsupdated = new Action();
     this.onbillsupdated = new Action();
+    this.oninvestmentsupdated = new Action();
+    this.onspecificinvestmentupdated = new Action();
 
     this.reload = this.reload.bind(this);
     UserManager.onuserloggedout.addListener(this.reload)
@@ -50,24 +58,24 @@ class AppStateManager {
     this.loadLocal();
   }
 
-  public async init() {
-    await this.load();
-  }
-
   get accounts() {
-    return this._accounts.values();
+    return [...this._accounts.values()];
   }
 
   get incomeSources() {
-    return this._incomeSources.values();
+    return [...this._incomeSources.values()];
   }
 
   get debts() {
-    return this._debts.values();
+    return [...this._debts.values()];
   }
 
   get bills() {
-    return this._bills.values();
+    return [...this._bills.values()];
+  }
+
+  get investments() {
+    return [...this._investments.values()];
   }
 
   public async deleteItems(ids: Set<string>) {
@@ -78,6 +86,7 @@ class AppStateManager {
       let accountBlock = this.onaccountsupdated.setBlocked(true);
       let debtBlock = this.ondebtsupdated.setBlocked(true);
       let billBlock = this.onbillsupdated.setBlocked(true);
+      let investmentBlock = this.oninvestmentsupdated.setBlocked(true);
       for (let id of ids) {
         await this.deleteItem(id);
       }
@@ -86,12 +95,14 @@ class AppStateManager {
       this.onaccountsupdated.setBlocked(accountBlock);
       this.ondebtsupdated.setBlocked(debtBlock);
       this.onbillsupdated.setBlocked(billBlock);
+      this.oninvestmentsupdated.setBlocked(investmentBlock);
       this.blockSave = false;
       //send updates
       this.onincomesourcesupdated.invoke(this.incomeSources);
       this.onaccountsupdated.invoke(this.accounts);
       this.ondebtsupdated.invoke(this.debts);
       this.onbillsupdated.invoke(this.bills);
+      this.oninvestmentsupdated.invoke(this.investments);
       //save
       await this.save();
     }
@@ -115,6 +126,10 @@ class AppStateManager {
     } else if (this._incomeSources.has(id)) {
       this._incomeSources.delete(id);
       this.onincomesourcesupdated.invoke(this.incomeSources);
+      await this.save();
+    } else if (this._investments.has(id)) {
+      this._investments.delete(id);
+      this.oninvestmentsupdated.invoke(this.investments);
       await this.save();
     }
   }
@@ -198,6 +213,8 @@ class AppStateManager {
     return await this.updateBill(undefined, name, amount, frequency, frequencyType, initialDate);
   }
 
+  //INCOME SOURCES
+
   public async addIncomeSource(name: string, amount: number, frequency: IncomeFrequency, paysOnWeekends: boolean, dayOfMonth: number) {
     await this.updateIncomeSource(undefined, name, amount, frequency, paysOnWeekends, dayOfMonth);
   }
@@ -227,17 +244,55 @@ class AppStateManager {
     return this._incomeSources.get(id);
   }
 
+  //INVESTMENTS
+
+  public async addInvestment(
+    name: string,
+    shares: number,
+    symbol: string,
+    costBasisPerShare: number) {
+    await this.updateInvestment(undefined, name, shares, symbol, costBasisPerShare);
+  }
+
+  public async updateInvestment(id: string | undefined,
+    name: string,
+    shares: number,
+    symbol: string,
+    costBasisPerShare: number
+  ) {
+    const investment = new Investment({
+      id: id,
+      name: name,
+      shares,
+      symbol,
+      costBasisPerShare
+    });
+
+    this._investments.set(investment.id, investment);
+    this.oninvestmentsupdated.invoke(this.investments);
+    this.onspecificinvestmentupdated.invoke(investment);
+    await this.save();
+  }
+  public hasInvestment(id: string) {
+    return this._investments.has(id);
+  }
+  public getInvestment(id: string) {
+    return this._investments.get(id);
+  }
+
   public async reset() {
     //clear the data
     this._accounts.clear();
     this._bills.clear();
     this._debts.clear();
     this._incomeSources.clear();
+    this._investments.clear();
     //Update the UI
     this.onincomesourcesupdated.invoke(this.incomeSources);
     this.onaccountsupdated.invoke(this.accounts);
     this.ondebtsupdated.invoke(this.debts);
     this.onbillsupdated.invoke(this.bills);
+    this.oninvestmentsupdated.invoke(this.investments);
     //Save
     await this.save();
   }
@@ -248,7 +303,8 @@ class AppStateManager {
         accounts: [...this._accounts.values()],
         debts: [...this._debts.values()],
         bills: [...this._bills.values()],
-        income: [...this._incomeSources.values()]
+        income: [...this._incomeSources.values()],
+        investments: [...this._investments.values()]
       }
       let serialized = JSON.stringify(data);
       if (UserManager.isLoggedIn) {
@@ -260,6 +316,7 @@ class AppStateManager {
   }
 
   private async load() {
+    //load
     let data;
     if (UserManager.isLoggedIn) {
       try {
@@ -272,39 +329,48 @@ class AppStateManager {
     }
     if (data) {
       let parsed: StateData = JSON.parse(data);
-      for (let bill of parsed.bills) {
+      for (let bill of parsed.bills ?? []) {
         this._bills.set(bill.id, Bill.deserialize(bill));
       }
-      for (let account of parsed.accounts) {
+      for (let account of parsed.accounts ?? []) {
         this._accounts.set(account.id, Account.deserialize(account));
       }
-      for (let source of parsed.income) {
+      for (let source of parsed.income ?? []) {
         this._incomeSources.set(source.id, IncomeSource.deserialize(source));
       }
-      for (let debt of parsed.debts) {
+      for (let debt of parsed.debts ?? []) {
         this._debts.set(debt.id, Debt.deserialize(debt));
+      }
+      for (let investment of parsed.investments ?? []) {
+        this._investments.set(investment.id, Investment.deserialize(investment));
       }
     }
   }
 
   private loadLocal() {
+    console.log(this);
     const data = localStorage.getItem(StateDataKey);
     if (data) {
       let parsed: StateData = JSON.parse(data);
-      for (let bill of parsed.bills) {
+      for (let bill of parsed.bills ?? []) {
         this._bills.set(bill.id, Bill.deserialize(bill));
       }
-      for (let account of parsed.accounts) {
+      for (let account of parsed.accounts ?? []) {
         this._accounts.set(account.id, Account.deserialize(account));
       }
-      for (let source of parsed.income) {
+      for (let source of parsed.income ?? []) {
         this._incomeSources.set(source.id, IncomeSource.deserialize(source));
       }
-      for (let debt of parsed.debts) {
+      for (let debt of parsed.debts ?? []) {
         this._debts.set(debt.id, Debt.deserialize(debt));
+      }
+      for (let investment of parsed.investments ?? []) {
+        this._investments.set(investment.id, Investment.deserialize(investment));
       }
     }
   }
+
+
 
   public async reload() {
     //clear the data
@@ -312,6 +378,7 @@ class AppStateManager {
     this._bills.clear();
     this._debts.clear();
     this._incomeSources.clear();
+    this._investments.clear();
     //Load the new data
     await this.load();
     //Update the UI
@@ -319,6 +386,7 @@ class AppStateManager {
     this.onaccountsupdated.invoke(this.accounts);
     this.ondebtsupdated.invoke(this.debts);
     this.onbillsupdated.invoke(this.bills);
+    this.oninvestmentsupdated.invoke(this.investments);
   }
 
   public async export() {

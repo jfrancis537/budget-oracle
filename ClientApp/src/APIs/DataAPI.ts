@@ -72,13 +72,15 @@ export namespace DataAPI {
     }
   }
 
-  export async function getStockAPIKey(): Promise<string> {
+  export async function getStockAPIKey(): Promise<string | undefined> {
     let url = `${baseUrl}/getStockAPIKey`;
     let response = await fetch(url, {
       method: "GET"
     });
     if (response.ok) {
       return await response.text();
+    } else if (response.status === 401 || response.status === 400) {
+      return undefined;
     } else {
       throw new Error("Failed to get data.");
     }

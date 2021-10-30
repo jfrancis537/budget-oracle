@@ -2,11 +2,13 @@ import React from "react";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 
 import promptStyles from '../../styles/Prompts.module.css';
+import { autobind } from "../../Utilities/Decorators";
 import { AccountPrompt, IAccountPromptProps } from "./AccountPrompt";
 import { BillPrompt, IBillPromptProps } from "./BillPrompt";
 import { DebtPrompt, IDebtPromptProps } from "./DebtPrompt";
 import { GroupPrompt, IGroupPromptProps } from "./GroupPrompt";
 import { IIncomePromptProps, IncomePrompt } from "./IncomePrompt";
+import { IInvestmentPromptProps, InvestmentPrompt } from "./InvestmentPrompt";
 import { StockAPIKeyPrompt } from "./StockAPIKeyPrompt";
 
 export enum PromptType {
@@ -15,10 +17,11 @@ export enum PromptType {
   Bill,
   Debt,
   IncomeSource,
-  Stock
+  APIKey,
+  Investment
 }
 
-export type PromptProps = IGroupPromptProps | IAccountPromptProps | IIncomePromptProps;
+export type PromptProps = IGroupPromptProps | IAccountPromptProps | IIncomePromptProps | IInvestmentPromptProps;
 
 interface PromptsState {
   activePrompt?: PromptType;
@@ -34,14 +37,6 @@ export class Prompts extends React.Component<{}, PromptsState> {
       activePrompt: undefined,
       props: undefined
     }
-
-    this.showGroupPrompt = this.showGroupPrompt.bind(this);
-    this.showAccountPrompt = this.showAccountPrompt.bind(this);
-    this.showIncomePrompt = this.showIncomePrompt.bind(this);
-    this.showDebtPrompt = this.showDebtPrompt.bind(this);
-    this.showBillPrompt = this.showBillPrompt.bind(this);
-    this.closePrompt = this.closePrompt.bind(this);
-    this.showStockAPIKeyPrompt = this.showStockAPIKeyPrompt.bind(this);
   }
 
   componentDidMount() {
@@ -52,14 +47,17 @@ export class Prompts extends React.Component<{}, PromptsState> {
     PromptManager.onbillpromptrequested.addListener(this.showBillPrompt);
     PromptManager.oncloserequested.addListener(this.closePrompt);
     PromptManager.onstockapikeypromptrequested.addListener(this.showStockAPIKeyPrompt);
+    PromptManager.oninvestmentpromptrequested.addListener(this.showInvestmentPrompt);
   }
 
+  @autobind
   private showStockAPIKeyPrompt() {
     this.setState({
-      activePrompt: PromptType.Stock
+      activePrompt: PromptType.APIKey
     });
   }
 
+  @autobind
   private showGroupPrompt(props: IGroupPromptProps) {
     this.setState({
       activePrompt: PromptType.Group,
@@ -67,6 +65,7 @@ export class Prompts extends React.Component<{}, PromptsState> {
     });
   }
 
+  @autobind
   private showAccountPrompt(props: IAccountPromptProps) {
     this.setState({
       activePrompt: PromptType.Account,
@@ -74,6 +73,7 @@ export class Prompts extends React.Component<{}, PromptsState> {
     });
   }
 
+  @autobind
   private showIncomePrompt(props: IIncomePromptProps) {
     this.setState({
       activePrompt: PromptType.IncomeSource,
@@ -81,6 +81,7 @@ export class Prompts extends React.Component<{}, PromptsState> {
     });
   }
 
+  @autobind
   private showDebtPrompt(props: IDebtPromptProps) {
     this.setState({
       activePrompt: PromptType.Debt,
@@ -88,6 +89,7 @@ export class Prompts extends React.Component<{}, PromptsState> {
     });
   }
 
+  @autobind
   private showBillPrompt(props: IBillPromptProps) {
     this.setState({
       activePrompt: PromptType.Bill,
@@ -95,6 +97,15 @@ export class Prompts extends React.Component<{}, PromptsState> {
     });
   }
 
+  @autobind
+  private showInvestmentPrompt(props: IInvestmentPromptProps) {
+    this.setState({
+      activePrompt: PromptType.Investment,
+      props: props
+    });
+  }
+
+  @autobind
   private closePrompt() {
     this.setState({
       activePrompt: undefined,
@@ -135,7 +146,13 @@ export class Prompts extends React.Component<{}, PromptsState> {
           <BillPrompt {...billProps} />
         );
         break;
-      case PromptType.Stock:
+      case PromptType.Investment:
+        const investmentProps = this.state.props as IInvestmentPromptProps;
+        result = (
+          <InvestmentPrompt {...investmentProps} />
+        );
+        break;
+      case PromptType.APIKey:
         result = (
           <StockAPIKeyPrompt />
         );

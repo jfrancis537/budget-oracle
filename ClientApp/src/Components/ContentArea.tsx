@@ -11,19 +11,24 @@ import { Debt } from "../Processing/Models/Debt";
 import { Bill } from "../Processing/Models/Bill";
 import { ValueItem } from "./Items/ValueItem";
 import { BottomTabs } from "./BottomTabs";
+import { Divider } from "./UIElements/Divider";
+import { Investment } from "../Processing/Models/Investment";
+import { autobind } from "../Utilities/Decorators";
+import { InvestmentItem } from "./Items/InvestmentItem";
 
 export enum ContentTab {
-  BillsAndDebts = "bd",
-  AccountsAndIncome = "ai"
+  Costs = "costs",
+  Reserves = "reserves"
 }
 
 interface ContentAreaState {
   groups?: GroupsData;
   accounts?: Account[];
-  incomeSources?: IncomeSource[]
-  debts?: Debt[]
-  bills?: Bill[]
-  tab: ContentTab
+  incomeSources?: IncomeSource[];
+  debts?: Debt[];
+  bills?: Bill[];
+  investments?: Investment[];
+  tab: ContentTab;
 }
 
 export class ContentArea extends React.Component<{}, ContentAreaState> {
@@ -35,14 +40,8 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
       groups: GroupManager.groups,
       accounts: [...AppStateManager.accounts],
       incomeSources: [...AppStateManager.incomeSources],
-      tab: ContentTab.BillsAndDebts
+      tab: ContentTab.Costs
     }
-
-    this.handleGroupsUpdated = this.handleGroupsUpdated.bind(this);
-    this.handleAccountsUpdated = this.handleAccountsUpdated.bind(this);
-    this.handleIncomeSourcesUpdated = this.handleIncomeSourcesUpdated.bind(this);
-    this.handleBillsUpdated = this.handleBillsUpdated.bind(this);
-    this.handleDebtsUpdated = this.handleDebtsUpdated.bind(this);
   }
 
   componentDidMount() {
@@ -51,6 +50,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     AppStateManager.onincomesourcesupdated.addListener(this.handleIncomeSourcesUpdated);
     AppStateManager.ondebtsupdated.addListener(this.handleDebtsUpdated);
     AppStateManager.onbillsupdated.addListener(this.handleBillsUpdated);
+    AppStateManager.oninvestmentsupdated.addListener(this.handleInvestmentsUpdated);
   }
 
   componentWillUnmount() {
@@ -59,35 +59,49 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     AppStateManager.onincomesourcesupdated.removeListener(this.handleIncomeSourcesUpdated);
     AppStateManager.ondebtsupdated.removeListener(this.handleDebtsUpdated);
     AppStateManager.onbillsupdated.removeListener(this.handleBillsUpdated);
+    AppStateManager.oninvestmentsupdated.removeListener(this.handleInvestmentsUpdated);
   }
 
+  @autobind
   private handleGroupsUpdated(data: GroupsData) {
     this.setState({
       groups: data
     });
   }
 
+  @autobind
   private handleBillsUpdated(bills: Iterable<Bill>) {
     this.setState({
       bills: [...bills]
     });
   }
 
+  @autobind
   private handleAccountsUpdated(accounts: Iterable<Account>) {
     this.setState({
       accounts: [...accounts]
     });
   }
 
+  @autobind
   private handleIncomeSourcesUpdated(sources: Iterable<IncomeSource>) {
     this.setState({
       incomeSources: [...sources]
     });
   }
 
+  @autobind
   private handleDebtsUpdated(debts: Iterable<Debt>) {
     this.setState({
       debts: [...debts]
+    });
+  }
+
+  @autobind
+  private handleInvestmentsUpdated(investments: Iterable<Investment>) {
+    console.log(investments)
+    this.setState({
+      investments: [...investments]
     });
   }
 
@@ -156,14 +170,54 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     return result;
   }
 
+  private renderInvestments() {
+    const result: JSX.Element[] = [];
+    if (this.state.investments) {
+      for (let investment of this.state.investments) {
+        result.push(
+          <InvestmentItem item={investment} key={investment.id} />
+        );
+      }
+    }
+    return result;
+  }
+
+  private renderUngroupedArea() {
+    let sections: JSX.Element[] = [];
+    if (this.state.accounts?.length) {
+      sections.push(
+        <div className={contentStyles['ungrouped-section']} key="account_section">
+          {this.renderAccounts()}
+        </div>
+      );
+    }
+    if (this.state.incomeSources?.length) {
+      sections.push(
+        <div className={contentStyles['ungrouped-section']} key="income_section">
+          {this.renderIncomeSources()}
+        </div>
+      );
+    }
+    if (this.state.investments?.length) {
+      sections.push(
+        <div className={contentStyles['ungrouped-section']} key="invest_section">
+          {this.renderInvestments()}
+        </div>
+      );
+    }
+    let components: JSX.Element[] = [];
+    for (let i = 0; i < sections.length; i++) {
+      if (i === 0) {
+        components.push(sections[i]);
+      } else {
+        components.push(<Divider key={`divider_${i}`} />);
+        components.push(sections[i]);
+      }
+    }
+    return components;
+  }
+
   render() {
-
-    //Using a mobile device probably
-    let smallClass = "";
-    // if (window.visualViewport.width <= 576) {
-    //   smallClass = contentStyles['content-col-sm'];
-    // }
-
     return (
       <>
         <Row className={contentStyles['content-area-body']}>
@@ -173,26 +227,19 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
                 className={[
                   contentStyles['content-col'],
                   contentStyles['grouped'],
-                  smallClass,
-                  this.state.tab === ContentTab.BillsAndDebts ? '' : mobileStyles["desktop-only"]
+                  this.state.tab === ContentTab.Costs ? '' : mobileStyles["desktop-only"]
                 ].join(" ")}
-                >
+              >
                 {this.renderGroups()}
               </Col>
               <Col xs sm={3}
                 className={[
                   contentStyles['content-col'],
                   contentStyles['ungrouped'],
-                  smallClass,
-                  this.state.tab === ContentTab.AccountsAndIncome ? '' : mobileStyles["desktop-only"]
+                  this.state.tab === ContentTab.Reserves ? '' : mobileStyles["desktop-only"]
                 ].join(" ")
                 }>
-                <div className={contentStyles['ungrouped-section']}>
-                  {this.renderAccounts()}
-                </div>
-                <div className={contentStyles['ungrouped-section']}>
-                  {this.renderIncomeSources()}
-                </div>
+                {this.renderUngroupedArea()}
               </Col>
             </Row>
           </Container>

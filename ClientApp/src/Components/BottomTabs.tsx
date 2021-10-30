@@ -22,16 +22,16 @@ export class BottomTabs extends React.Component<IBottomTabProps> {
         <Nav variant="pills" justify activeKey={this.props.currentTab} style={{ flex: 1 }}>
           <Nav.Item>
             <Nav.Link
-              onClick={() => this.handleChange(ContentTab.BillsAndDebts)}
-              eventKey={ContentTab.BillsAndDebts}
+              onClick={() => this.handleChange(ContentTab.Costs)}
+              eventKey={ContentTab.Costs}
             >
               Bills / Debts
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
             <Nav.Link
-              onClick={() => this.handleChange(ContentTab.AccountsAndIncome)}
-              eventKey={ContentTab.AccountsAndIncome}
+              onClick={() => this.handleChange(ContentTab.Reserves)}
+              eventKey={ContentTab.Reserves}
             >
               Income / Accounts
             </Nav.Link>

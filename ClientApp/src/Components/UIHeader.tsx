@@ -9,10 +9,12 @@ import { CalculationsManager } from "../Processing/Managers/CalculationsManager"
 import { download, FileLoader } from "../Utilities/FileUtils";
 import { UserManager } from "../Processing/Managers/UserManager";
 import { LoginPrompt } from "./Prompts/LoginPrompt";
+import { autobind } from "../Utilities/Decorators";
 
 interface IUIHeaderState {
   loginPromptVisible: boolean;
   userLoggedIn: boolean;
+  stockApiKey: string;
 }
 
 export class UIHeader extends React.Component<{}, IUIHeaderState> {
@@ -22,48 +24,52 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
 
     this.state = {
       loginPromptVisible: false,
-      userLoggedIn: false
+      userLoggedIn: false,
+      stockApiKey: UserManager.stockApiKey
     }
 
-    this.addGroup = this.addGroup.bind(this);
-    this.addIncomeSource = this.addIncomeSource.bind(this);
-    this.addAccount = this.addAccount.bind(this);
-    this.updateStockApiKey = this.updateStockApiKey.bind(this);
-    this.export = this.export.bind(this);
-    this.import = this.import.bind(this);
-    this.reset = this.reset.bind(this);
-    this.login = this.login.bind(this);
-    this.logout = this.logout.bind(this);
-    this.closeLoginPrompt = this.closeLoginPrompt.bind(this);
   }
 
   componentDidMount() {
     UserManager.onuserloggedin.addListener(() => this.setState({ userLoggedIn: true }));
     UserManager.onuserloggedout.addListener(() => this.setState({ userLoggedIn: false }));
+    UserManager.onstockapikeychanged.addListener((key) => this.setState({stockApiKey: key}));
   }
 
+  @autobind
   private addGroup() {
     PromptManager.requestGroupPrompt({
       editing: false,
     });
   }
 
+  @autobind
   private updateStockApiKey() {
     PromptManager.requestStockAPIKeyPrompt();
   }
 
+  @autobind
   private addIncomeSource() {
     PromptManager.requestIncomePrompt({
       editing: false
     });
   }
 
+  @autobind
   private addAccount() {
     PromptManager.requestAccountPrompt({
       editing: false,
     });
   }
 
+  @autobind
+  private addInvestment() {
+    PromptManager.requestInvestmentPrompt({
+      editing: false
+    });
+  }
+
+  @autobind
   private async export() {
     let promises = [
       AppStateManager.export(),
@@ -78,12 +84,14 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
     }
   }
 
+  @autobind
   private closeLoginPrompt() {
     this.setState({
       loginPromptVisible: false
     });
   }
 
+  @autobind
   private async import() {
     try {
       let file = await FileLoader.openWithDialog();
@@ -98,6 +106,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
     }
   }
 
+  @autobind
   private async reset() {
     var doIt = window.confirm("Are you sure you want to reset?");
     if (doIt) {
@@ -117,12 +126,14 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
     }
   }
 
+  @autobind
   private login() {
     this.setState({
       loginPromptVisible: true
     })
   }
 
+  @autobind
   private logout() {
     UserManager.logout();
   }
@@ -152,6 +163,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
                 <NavDropdown title="Add" id='add_dropdown'>
                   <NavDropdown.Item onClick={this.addAccount}>Account</NavDropdown.Item>
                   <NavDropdown.Item onClick={this.addIncomeSource}>Income</NavDropdown.Item>
+                  <NavDropdown.Item disabled={!UserManager.hasStockApiKey} onClick={this.addInvestment}>Investment</NavDropdown.Item>
                   <NavDropdown.Divider />
                   <NavDropdown.Item onClick={this.addGroup}>Group</NavDropdown.Item>
                 </NavDropdown>

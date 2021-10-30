@@ -4,9 +4,7 @@ using System.Threading.Tasks;
 using System.Security.Claims;
 using System.Linq;
 using BudgetOracle.Storage;
-using BudgetOracle.Models;
 using Newtonsoft.Json.Linq;
-using System.Net.Http.Headers;
 
 namespace BudgetOracle_.Controllers
 {

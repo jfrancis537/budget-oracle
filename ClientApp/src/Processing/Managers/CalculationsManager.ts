@@ -65,7 +65,7 @@ class CalculationsManager {
     this.onresultscalculated.invoke(results);
   }
 
-  private calculateDebts(debts: IterableIterator<Debt>) {
+  private calculateDebts(debts: Iterable<Debt>) {
     let result = 0;
     for (let debt of debts) {
       result += debt.amount;
@@ -73,7 +73,7 @@ class CalculationsManager {
     return result;
   }
 
-  private calculateAccountValue(accounts: IterableIterator<Account>) {
+  private calculateAccountValue(accounts: Iterable<Account>) {
     let result = 0;
     for (let account of accounts) {
       result += account.amount;
@@ -81,7 +81,7 @@ class CalculationsManager {
     return result;
   }
 
-  public async calculateTotalIncome(start: Moment, end: Moment, incomeSources: IterableIterator<IncomeSource>) {
+  public async calculateTotalIncome(start: Moment, end: Moment, incomeSources: Iterable<IncomeSource>) {
     let result = 0;
     var promises: Promise<number>[] = [];
     for (let source of incomeSources) {
@@ -335,7 +335,7 @@ class CalculationsManager {
     return payDay;
   }
 
-  public async calculateAllBillsCost(start: Moment, end: Moment, bills: IterableIterator<Bill>) {
+  public async calculateAllBillsCost(start: Moment, end: Moment, bills: Iterable<Bill>) {
     let value = 0;
     var promises: Promise<number>[] = [];
     for (let bill of bills) {
