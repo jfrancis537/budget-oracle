@@ -17,6 +17,7 @@ class PromptManager {
   readonly onincomepromptrequested: Action<IIncomePromptProps>;
   readonly ondebtpromptrequested: Action<IDebtPromptProps>;
   readonly onbillpromptrequested: Action<IBillPromptProps>;
+  readonly onstockapikeypromptrequested: Action<void>;
   readonly oncloserequested: Action<void>;
 
   private promptActive: boolean;
@@ -28,6 +29,7 @@ class PromptManager {
     this.onincomepromptrequested = new Action();
     this.ondebtpromptrequested = new Action();
     this.onbillpromptrequested = new Action();
+    this.onstockapikeypromptrequested = new Action();
 
     this.promptActive = false;
   }
@@ -71,6 +73,16 @@ class PromptManager {
   public requestBillPrompt(props: IBillPromptProps) {
     if (!this.promptActive) {
       this.onbillpromptrequested.invoke(props);
+      this.promptActive = true;
+    } else {
+      throw new Error("You can't open two prompts at once");
+    }
+  }
+
+  public requestStockAPIKeyPrompt()
+  {
+    if (!this.promptActive) {
+      this.onstockapikeypromptrequested.invoke();
       this.promptActive = true;
     } else {
       throw new Error("You can't open two prompts at once");

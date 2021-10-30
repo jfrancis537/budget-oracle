@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { App } from './App';
-import { LoginManager } from './Processing/Managers/LoginManager';
+import { UserManager } from './Processing/Managers/UserManager';
 
 import './styles/global.css';
 
@@ -10,7 +10,7 @@ async function start() {
     <App />,
     document.getElementById('root')
   );
-  await LoginManager.init();
+  await UserManager.init();
 }
 
 start();

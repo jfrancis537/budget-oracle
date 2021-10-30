@@ -63,6 +63,20 @@ namespace BudgetOracle.Storage
       }
     }
 
+    public async Task UpdateAlphaVantageKey(string username, string key)
+    {
+      var user = await GetUser(username);
+      if (user != null)
+      {
+        user.AlphaVantageKey = key;
+        database[username] = user;
+      }
+      else
+      {
+        throw new InvalidOperationException("Can not set API key of a user that does not exist");
+      }
+    }
+
     public async Task UpdateState(string username, string state)
     {
       var user = await GetUser(username);

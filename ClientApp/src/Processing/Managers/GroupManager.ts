@@ -1,7 +1,7 @@
 import { DataAPI } from "../../APIs/DataAPI";
 import { Action } from "../../Utilities/Action";
 import { AppStateManager } from "./AppStateManager";
-import { LoginManager } from "./LoginManager";
+import { UserManager } from "./UserManager";
 
 export const GroupStateKey = 'group_state_data'
 
@@ -32,8 +32,8 @@ class GroupManager {
     this.ongroupsupdated = new Action();
 
     this.reload = this.reload.bind(this);
-    LoginManager.onuserloggedin.addListener(this.reload);
-    LoginManager.onuserloggedout.addListener(this.reload);
+    UserManager.onuserloggedin.addListener(this.reload);
+    UserManager.onuserloggedout.addListener(this.reload);
     this.loadLocal();
   }
 
@@ -147,7 +147,7 @@ class GroupManager {
       debtGroups: this.groupMapToArray(this.debtGroups)
     };
     let serialized = JSON.stringify(data);
-    if (LoginManager.isLoggedIn) {
+    if (UserManager.isLoggedIn) {
       await DataAPI.updateGroups(serialized);
     } else {
       localStorage.setItem(GroupStateKey, serialized);
@@ -156,7 +156,7 @@ class GroupManager {
 
   private async load() {
     let groupState: string | null;
-    if (LoginManager.isLoggedIn) {
+    if (UserManager.isLoggedIn) {
       try {
         groupState = await DataAPI.getGroupData();
       } catch {
@@ -204,7 +204,7 @@ class GroupManager {
   }
 
   public async export() {
-    if (LoginManager.isLoggedIn) {
+    if (UserManager.isLoggedIn) {
       return await DataAPI.getGroupData();
     } else {
       return localStorage.getItem(GroupStateKey);
@@ -212,7 +212,7 @@ class GroupManager {
   }
 
   public async import(groups: string) {
-    if (LoginManager.isLoggedIn) {
+    if (UserManager.isLoggedIn) {
       await DataAPI.updateGroups(groups);
     } else {
       localStorage.setItem(GroupStateKey, groups);

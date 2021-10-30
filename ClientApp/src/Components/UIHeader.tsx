@@ -7,7 +7,7 @@ import { DatePicker } from "./Inputs/DatePicker";
 import navStyles from '../styles/Nav.module.css';
 import { CalculationsManager } from "../Processing/Managers/CalculationsManager";
 import { download, FileLoader } from "../Utilities/FileUtils";
-import { LoginManager } from "../Processing/Managers/LoginManager";
+import { UserManager } from "../Processing/Managers/UserManager";
 import { LoginPrompt } from "./Prompts/LoginPrompt";
 
 interface IUIHeaderState {
@@ -28,6 +28,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
     this.addGroup = this.addGroup.bind(this);
     this.addIncomeSource = this.addIncomeSource.bind(this);
     this.addAccount = this.addAccount.bind(this);
+    this.updateStockApiKey = this.updateStockApiKey.bind(this);
     this.export = this.export.bind(this);
     this.import = this.import.bind(this);
     this.reset = this.reset.bind(this);
@@ -37,14 +38,18 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
   }
 
   componentDidMount() {
-    LoginManager.onuserloggedin.addListener(() => this.setState({ userLoggedIn: true }));
-    LoginManager.onuserloggedout.addListener(() => this.setState({ userLoggedIn: false }));
+    UserManager.onuserloggedin.addListener(() => this.setState({ userLoggedIn: true }));
+    UserManager.onuserloggedout.addListener(() => this.setState({ userLoggedIn: false }));
   }
 
   private addGroup() {
     PromptManager.requestGroupPrompt({
       editing: false,
     });
+  }
+
+  private updateStockApiKey() {
+    PromptManager.requestStockAPIKeyPrompt();
   }
 
   private addIncomeSource() {
@@ -66,7 +71,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
     ];
     let [stateData, groupData] = await Promise.all(promises);
     if (groupData && stateData) {
-      download(`budget_export_${(new Date()).toLocaleString().replace(", ","-")}.json`, JSON.stringify({
+      download(`budget_export_${(new Date()).toLocaleString().replace(", ", "-")}.json`, JSON.stringify({
         stateData: stateData,
         groupData: groupData
       }));
@@ -104,24 +109,11 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
     }
   }
 
-  private renderControls() {
+  private renderLoginControl() {
     if (!this.state.userLoggedIn) {
-      return (
-        <>
-          <Nav.Link onClick={this.login}>Login</Nav.Link>
-          <Nav.Link onClick={this.import}>Import</Nav.Link>
-          <Nav.Link onClick={this.export}>Export</Nav.Link>
-          <Nav.Link onClick={this.reset}>Reset</Nav.Link>
-        </>
-      )
+      return <Nav.Link onClick={this.login}>Login</Nav.Link>
     } else {
-      return (
-        <>
-          <Nav.Link onClick={this.logout}>Logout</Nav.Link>
-          <Nav.Link onClick={this.import}>Import</Nav.Link>
-          <Nav.Link onClick={this.export}>Export</Nav.Link>
-        </>
-      );
+      return <Nav.Link onClick={this.logout}>Logout</Nav.Link>
     }
   }
 
@@ -132,7 +124,20 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
   }
 
   private logout() {
-    LoginManager.logout();
+    UserManager.logout();
+  }
+
+  private renderSettings() {
+    if (!this.state.userLoggedIn) {
+      return null;
+    } else {
+      return (
+        <NavDropdown title="Settings" id='settings_dropdown'>
+          <NavDropdown.Item onClick={this.updateStockApiKey}>Set AlphaVantage™ API Key</NavDropdown.Item>
+          <NavDropdown.Item disabled onClick={() => { }}>Reset Password</NavDropdown.Item>
+        </NavDropdown>
+      )
+    }
   }
 
   render() {
@@ -150,7 +155,13 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
                   <NavDropdown.Divider />
                   <NavDropdown.Item onClick={this.addGroup}>Group</NavDropdown.Item>
                 </NavDropdown>
-                {this.renderControls()}
+                {this.renderSettings()}
+                <NavDropdown title="Tools" id='tools_dropdown'>
+                  <NavDropdown.Item onClick={this.import}>Import</NavDropdown.Item>
+                  <NavDropdown.Item onClick={this.export}>Export</NavDropdown.Item>
+                  <NavDropdown.Item disabled={this.state.userLoggedIn} onClick={this.reset}>Reset</NavDropdown.Item>
+                </NavDropdown>
+                {this.renderLoginControl()}
               </Nav>
             </Navbar.Collapse>
             <Navbar.Collapse className={navStyles['right-collapse']}>

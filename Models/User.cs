@@ -7,6 +7,7 @@ namespace BudgetOracle.Models
     public string Username { get; set; }
     public string Password { get; set; }
     public string Salt { get; set; }
+    public string AlphaVantageKey { get; set; }
     public DateTimeOffset CreatedDate { get; set; }
     public BudgetData BudgetData { get; set; }
   }

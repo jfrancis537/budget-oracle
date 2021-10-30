@@ -1,7 +1,7 @@
 import React from "react";
 import { FormControl, InputGroup } from "react-bootstrap";
 import { Button, Modal } from "react-bootstrap";
-import { LoginManager } from "../../Processing/Managers/LoginManager";
+import { UserManager } from "../../Processing/Managers/UserManager";
 import { LinkButton } from "../LinkButton";
 
 import loginStyles from "../../styles/LoginPrompt.module.css";
@@ -76,7 +76,7 @@ export class LoginPrompt extends React.Component<ILoginPromptProps, ILoginPrompt
       isLoading: true
     });
     try {
-      await LoginManager.login(this.state.username, this.state.password);
+      await UserManager.login(this.state.username, this.state.password);
       this.close();
     } catch (err) {
       if (err instanceof Error) {
@@ -95,7 +95,7 @@ export class LoginPrompt extends React.Component<ILoginPromptProps, ILoginPrompt
       isLoading: true
     });
     try {
-      await LoginManager.register(this.state.username, this.state.password, this.state.confirmPassword);
+      await UserManager.register(this.state.username, this.state.password, this.state.confirmPassword);
       this.close();
     } catch (err) {
       if (err instanceof Error) {

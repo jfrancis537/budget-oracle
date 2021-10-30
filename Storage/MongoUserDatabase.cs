@@ -25,6 +25,11 @@ namespace BudgetOracle.Storage
       throw new System.NotImplementedException();
     }
 
+    public Task UpdateAlphaVantageKey(string username, string key)
+    {
+      throw new System.NotImplementedException();
+    }
+
     public Task UpdateGroups(string username, string data)
     {
       throw new System.NotImplementedException();

@@ -7,13 +7,15 @@ import { BillPrompt, IBillPromptProps } from "./BillPrompt";
 import { DebtPrompt, IDebtPromptProps } from "./DebtPrompt";
 import { GroupPrompt, IGroupPromptProps } from "./GroupPrompt";
 import { IIncomePromptProps, IncomePrompt } from "./IncomePrompt";
+import { StockAPIKeyPrompt } from "./StockAPIKeyPrompt";
 
 export enum PromptType {
   Group,
   Account,
   Bill,
   Debt,
-  IncomeSource
+  IncomeSource,
+  Stock
 }
 
 export type PromptProps = IGroupPromptProps | IAccountPromptProps | IIncomePromptProps;
@@ -39,6 +41,7 @@ export class Prompts extends React.Component<{}, PromptsState> {
     this.showDebtPrompt = this.showDebtPrompt.bind(this);
     this.showBillPrompt = this.showBillPrompt.bind(this);
     this.closePrompt = this.closePrompt.bind(this);
+    this.showStockAPIKeyPrompt = this.showStockAPIKeyPrompt.bind(this);
   }
 
   componentDidMount() {
@@ -48,6 +51,13 @@ export class Prompts extends React.Component<{}, PromptsState> {
     PromptManager.ondebtpromptrequested.addListener(this.showDebtPrompt);
     PromptManager.onbillpromptrequested.addListener(this.showBillPrompt);
     PromptManager.oncloserequested.addListener(this.closePrompt);
+    PromptManager.onstockapikeypromptrequested.addListener(this.showStockAPIKeyPrompt);
+  }
+
+  private showStockAPIKeyPrompt() {
+    this.setState({
+      activePrompt: PromptType.Stock
+    });
   }
 
   private showGroupPrompt(props: IGroupPromptProps) {
@@ -78,8 +88,7 @@ export class Prompts extends React.Component<{}, PromptsState> {
     });
   }
 
-  private showBillPrompt(props: IBillPromptProps)
-  {
+  private showBillPrompt(props: IBillPromptProps) {
     this.setState({
       activePrompt: PromptType.Bill,
       props: props
@@ -124,6 +133,11 @@ export class Prompts extends React.Component<{}, PromptsState> {
         const billProps = this.state.props as IBillPromptProps;
         result = (
           <BillPrompt {...billProps} />
+        );
+        break;
+      case PromptType.Stock:
+        result = (
+          <StockAPIKeyPrompt />
         );
         break;
       default:

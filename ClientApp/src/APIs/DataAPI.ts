@@ -57,4 +57,30 @@ export namespace DataAPI {
       throw new Error("Failed to update data!");
     }
   }
+
+  export async function updateStockAPIKey(key: string) {
+    let url = `${baseUrl}/setStockAPIKey`;
+    let response = await fetch(url, {
+      method: "PUT",
+      body: JSON.stringify({ key }),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update key!");
+    }
+  }
+
+  export async function getStockAPIKey(): Promise<string> {
+    let url = `${baseUrl}/getStockAPIKey`;
+    let response = await fetch(url, {
+      method: "GET"
+    });
+    if (response.ok) {
+      return await response.text();
+    } else {
+      throw new Error("Failed to get data.");
+    }
+  }
 }

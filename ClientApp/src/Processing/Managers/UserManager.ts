@@ -1,7 +1,8 @@
 import { AuthAPI } from "../../APIs/AuthAPI";
+import { DataAPI } from "../../APIs/DataAPI";
 import { Action } from "../../Utilities/Action";
 
-class LoginManager {
+class UserManager {
   public onuserloggedin: Action<void>;
   public onuserloggedout: Action<void>;
   private loggedIn: boolean;
@@ -43,10 +44,16 @@ class LoginManager {
     this.onuserloggedout.invoke();
   }
 
+  public async setStockAPIKey(key: string) {
+    if (this.isLoggedIn) {
+      await DataAPI.updateStockAPIKey(key);
+    }
+  }
+
   public async register(username: string, password: string, confirmPassword: string) {
     await AuthAPI.register(username, password, confirmPassword);
   }
 }
 
-const instance = new LoginManager();
-export { instance as LoginManager }
+const instance = new UserManager();
+export { instance as UserManager }

@@ -8,7 +8,7 @@ import { Bill, SerializedBill } from "../Models/Bill";
 import { Debt, SerializedDebt } from "../Models/Debt";
 import { IncomeSource, SerializedIncomeSource } from "../Models/IncomeSource";
 import { GroupManager, GroupType } from "./GroupManager";
-import { LoginManager } from "./LoginManager";
+import { UserManager } from "./UserManager";
 
 interface StateData {
   accounts: SerializedAccount[];
@@ -45,8 +45,8 @@ class AppStateManager {
     this.onbillsupdated = new Action();
 
     this.reload = this.reload.bind(this);
-    LoginManager.onuserloggedout.addListener(this.reload)
-    LoginManager.onuserloggedin.addListener(this.reload);
+    UserManager.onuserloggedout.addListener(this.reload)
+    UserManager.onuserloggedin.addListener(this.reload);
     this.loadLocal();
   }
 
@@ -251,7 +251,7 @@ class AppStateManager {
         income: [...this._incomeSources.values()]
       }
       let serialized = JSON.stringify(data);
-      if (LoginManager.isLoggedIn) {
+      if (UserManager.isLoggedIn) {
         await DataAPI.updateState(serialized);
       } else {
         localStorage.setItem(StateDataKey, serialized);
@@ -261,7 +261,7 @@ class AppStateManager {
 
   private async load() {
     let data;
-    if (LoginManager.isLoggedIn) {
+    if (UserManager.isLoggedIn) {
       try {
         data = await DataAPI.getStateData();
       } catch {
@@ -323,7 +323,7 @@ class AppStateManager {
 
   public async export() {
     let data: string | null;
-    if (LoginManager.isLoggedIn) {
+    if (UserManager.isLoggedIn) {
       data = await DataAPI.getStateData();
     } else {
       data = localStorage.getItem(StateDataKey);
@@ -332,7 +332,7 @@ class AppStateManager {
   }
 
   public async import(data: string) {
-    if (LoginManager.isLoggedIn) {
+    if (UserManager.isLoggedIn) {
       await DataAPI.updateState(data);
     } else {
       //Set storage

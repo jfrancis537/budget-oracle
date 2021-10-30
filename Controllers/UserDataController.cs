@@ -6,6 +6,7 @@ using System.Linq;
 using BudgetOracle.Storage;
 using BudgetOracle.Models;
 using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
 
 namespace BudgetOracle_.Controllers
 {
@@ -53,6 +54,44 @@ namespace BudgetOracle_.Controllers
       {
         return BadRequest();
       }
+    }
+
+    [HttpGet]
+    [Route("getStockAPIKey")]
+    [Authorize]
+    public async Task<IActionResult> GetAlphaVantageKey()
+    {
+      var usernameClaim = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name);
+      var username = usernameClaim.Value;
+      var user = await userDatabase.GetUser(username);
+      if (user != null)
+      {
+        return Content(user.AlphaVantageKey ?? "", "text/plain");
+      }
+      else
+      {
+        return BadRequest();
+      }
+    }
+
+    [HttpPut]
+    [Route("setStockAPIKey")]
+    [Authorize]
+    public async Task<IActionResult> SetAlphaVantageKey([FromBody] JObject requestData)
+    {
+      var usernameClaim = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name);
+      var username = usernameClaim.Value;
+      try
+      {
+        var key = requestData["key"].ToString();
+        await userDatabase.UpdateAlphaVantageKey(username, key);
+        return Ok();
+      }
+      catch
+      {
+        return BadRequest();
+      }
+
     }
 
     [HttpPut]
