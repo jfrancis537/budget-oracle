@@ -1,6 +1,7 @@
 import { Moment } from "moment";
 import { DataAPI } from "../../APIs/DataAPI";
 import { Action } from "../../Utilities/Action";
+import { AuthorizationError } from "../../Utilities/Errors/AuthorizationError";
 import { FrequencyType } from "../Enums/FrequencyType";
 import { IncomeFrequency } from "../Enums/IncomeFrequency";
 import { Account, SerializedAccount } from "../Models/Account";
@@ -308,7 +309,15 @@ class AppStateManager {
       }
       let serialized = JSON.stringify(data);
       if (UserManager.isLoggedIn) {
-        await DataAPI.updateState(serialized);
+        try {
+          await DataAPI.updateState(serialized);
+        } catch (err) {
+          if (err instanceof AuthorizationError) {
+            await UserManager.logout();
+            alert("Please login again");
+          }
+        }
+
       } else {
         localStorage.setItem(StateDataKey, serialized);
       }
@@ -348,7 +357,6 @@ class AppStateManager {
   }
 
   private loadLocal() {
-    console.log(this);
     const data = localStorage.getItem(StateDataKey);
     if (data) {
       let parsed: StateData = JSON.parse(data);
@@ -401,7 +409,14 @@ class AppStateManager {
 
   public async import(data: string) {
     if (UserManager.isLoggedIn) {
-      await DataAPI.updateState(data);
+      try {
+        await DataAPI.updateState(data);
+      } catch (err) {
+        if (err instanceof AuthorizationError) {
+          await UserManager.logout();
+          alert("Please login again");
+        }
+      }
     } else {
       //Set storage
       localStorage.setItem(StateDataKey, data);

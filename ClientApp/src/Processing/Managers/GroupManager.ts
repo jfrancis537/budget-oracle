@@ -1,5 +1,6 @@
 import { DataAPI } from "../../APIs/DataAPI";
 import { Action } from "../../Utilities/Action";
+import { AuthorizationError } from "../../Utilities/Errors/AuthorizationError";
 import { AppStateManager } from "./AppStateManager";
 import { UserManager } from "./UserManager";
 
@@ -148,7 +149,15 @@ class GroupManager {
     };
     let serialized = JSON.stringify(data);
     if (UserManager.isLoggedIn) {
-      await DataAPI.updateGroups(serialized);
+      try {
+        await DataAPI.updateGroups(serialized);
+      } catch (err) {
+        if (err instanceof AuthorizationError) {
+          await UserManager.logout();
+          alert("Please login again");
+        }
+      }
+
     } else {
       localStorage.setItem(GroupStateKey, serialized);
     }
@@ -213,7 +222,15 @@ class GroupManager {
 
   public async import(groups: string) {
     if (UserManager.isLoggedIn) {
-      await DataAPI.updateGroups(groups);
+      try {
+        await DataAPI.updateGroups(groups);
+      } catch (err) {
+        if (err instanceof AuthorizationError) {
+          await UserManager.logout();
+          alert("Please login again");
+        }
+      }
+
     } else {
       localStorage.setItem(GroupStateKey, groups);
     }

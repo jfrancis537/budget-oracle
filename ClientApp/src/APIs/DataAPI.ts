@@ -1,3 +1,5 @@
+import { AuthorizationError } from "../Utilities/Errors/AuthorizationError";
+
 export interface BudgetData {
   stateData: string,
   groupData: string
@@ -39,7 +41,12 @@ export namespace DataAPI {
         "Content-Type": "application/json"
       }
     });
-    if (!response.ok) {
+    if (response.status === 400) {
+      //Some weird error
+    } else if (response.status === 401) {
+      throw new AuthorizationError("You are probably not logged in anymore");
+    }
+    else if (!response.ok) {
       throw new Error("Failed to update data!");
     }
   }
@@ -53,7 +60,12 @@ export namespace DataAPI {
         "Content-Type": "application/json"
       }
     });
-    if (!response.ok) {
+    if (response.status === 400) {
+      //Some weird error
+    } else if (response.status === 401) {
+      throw new AuthorizationError("You are probably not logged in anymore");
+    }
+    else if (!response.ok) {
       throw new Error("Failed to update data!");
     }
   }
@@ -67,7 +79,12 @@ export namespace DataAPI {
         "Content-Type": "application/json"
       }
     });
-    if (!response.ok) {
+    if (response.status === 400) {
+      //Some weird error
+    } else if (response.status === 401) {
+      throw new AuthorizationError("You are probably not logged in anymore");
+    }
+    else if (!response.ok) {
       throw new Error("Failed to update key!");
     }
   }

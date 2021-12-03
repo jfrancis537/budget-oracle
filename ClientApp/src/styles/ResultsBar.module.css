@@ -1,6 +1,15 @@
-.bar {
+.container-row {
+  position: relative;
+  color: white;
+}
+
+.container-row .bar {
   flex: 1;
   user-select: none;
+  position: relative;
+  bottom: 0;
+  left: 0;
+  width: 100%;
 }
 
 .bar-item-area {
@@ -10,6 +19,27 @@
 }
 
 .bar .item {
-  color: white;
   margin: 0 5px;
+}
+
+.drawer.closed {
+  max-height: 0px;
+  opacity: 0;
+}
+
+.drawer.closed.transitioning {
+  transition: max-height .35s ease-out;
+  opacity: 1;
+  overflow: hidden;
+}
+
+.drawer.open {
+  max-height: 500px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.drawer.open.transitioning {
+  transition: max-height .35s ease-in;
+  overflow: hidden;
 }

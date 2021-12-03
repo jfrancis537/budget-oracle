@@ -9,8 +9,10 @@ import { Debt } from "../Models/Debt";
 import { IncomeSource } from "../Models/IncomeSource";
 import { AppStateManager } from "./AppStateManager";
 
+export type ResultPair<T> = [Map<T, number>, number];
+
 export interface CalculationResult {
-  billTotal: number;
+  billResults: ResultPair<Bill>;
   debtTotal: number;
   accountTotal: number;
   incomeTotal: number;
@@ -52,7 +54,7 @@ class CalculationsManager {
     let incomeValue = await this.calculateTotalIncome(start, end, AppStateManager.incomeSources);
 
     let results: CalculationResult = {
-      billTotal: billCost,
+      billResults: billCost,
       debtTotal: debtCost,
       accountTotal: accountValue,
       incomeTotal: incomeValue
@@ -335,20 +337,24 @@ class CalculationsManager {
     return payDay;
   }
 
-  public async calculateAllBillsCost(start: Moment, end: Moment, bills: Iterable<Bill>) {
+  public async calculateAllBillsCost(start: Moment, end: Moment, bills: Iterable<Bill>): Promise<ResultPair<Bill>> {
     let value = 0;
-    var promises: Promise<number>[] = [];
+    let promises: Promise<[Bill, number]>[] = [];
     for (let bill of bills) {
       promises.push(this.calculateCostForBill(bill, start, end));
     }
     let results = await Promise.all(promises);
-    for (let cost of results) {
+    let billMap = new Map<Bill, number>();
+    for (let [bill, cost] of results) {
+      if (cost > 0) {
+        billMap.set(bill, cost);
+      }
       value += cost;
     }
-    return value;
+    return [billMap, value];
   }
 
-  private async calculateCostForBill(bill: Bill, start: Moment, end: Moment) {
+  private async calculateCostForBill(bill: Bill, start: Moment, end: Moment): Promise<[Bill, number]> {
     let currentDate = start.clone();
     if (currentDate.isBefore(bill.initialDate)) {
       currentDate = bill.initialDate.clone();
@@ -446,7 +452,7 @@ class CalculationsManager {
         break;
 
     }
-    return value;
+    return [bill, value];
   }
 }
 
