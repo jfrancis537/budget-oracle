@@ -1,15 +1,15 @@
 import React from "react";
-import { Row, Navbar, Nav, Col } from "react-bootstrap";
+import { Row, Navbar, Nav } from "react-bootstrap";
 import { CalculationsManager, CalculationResult } from "../Processing/Managers/CalculationsManager";
 
 import barStyles from '../styles/ResultsBar.module.css';
 import mobileStyles from '../styles/MobileHelper.module.css';
 import { MobileHelper } from "../Utilities/MobileUtils";
 import { autobind } from "../Utilities/Decorators";
-import { Divider } from "./UIElements/Divider";
+import { DetailedResults } from "./DetailedResults";
 
 interface ResultsBarState {
-  calculations: CalculationResult | undefined
+  calculations?: CalculationResult
   drawerOpen: boolean;
   drawerTransitioning: boolean;
 }
@@ -47,11 +47,11 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
   private renderCalculations(): JSX.Element | JSX.Element[] {
     if (this.state.calculations) {
       const calcs = this.state.calculations;
-      const totals = calcs.accountTotal + calcs.incomeTotal - calcs.debtTotal - calcs.billResults[1];
+      const totals = calcs.accountTotal + calcs.incomeResults[1] - calcs.debtTotal - calcs.billResults[1];
       return (
         <>
           <div className={barStyles['item']}>Bills: ${this.state.calculations.billResults[1]}</div>
-          <div className={barStyles['item']}>Income: ${this.state.calculations.incomeTotal}</div>
+          <div className={barStyles['item']}>Income: ${this.state.calculations.incomeResults[1]}</div>
           <div className={barStyles['item']}>Total: ${totals}</div>
         </>
       )
@@ -60,46 +60,23 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
     }
   }
 
-  private renderBillResults() {
-    let resultMap = this.state.calculations!.billResults[0];
-    let components: JSX.Element[] = [];
-    for (let [bill, cost] of resultMap) {
-      components.push(
-        <div key={bill.id}>
-          <label>{bill.name}:&nbsp;</label>
-          <span>${cost}</span>
-        </div>
-      );
-    }
-    return components;
-  }
-
-  private renderAdditionalDetails(): JSX.Element | null {
-    if (this.state.calculations) {
-      return (
-        <>
-          <Row>
-            <Col>
-              <h3>Bills</h3>
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              {this.renderBillResults()}
-            </Col>
-          </Row>
-        </>
-      )
-    } else {
-      return null;
-    }
-
-  }
-
   @autobind
   private toggleDrawer(event: React.MouseEvent<HTMLDivElement>) {
     this.setState({
       drawerOpen: !this.state.drawerOpen,
+      drawerTransitioning: true
+    });
+    setTimeout(() => {
+      this.setState({
+        drawerTransitioning: false
+      });
+    }, 360);
+  }
+
+  @autobind
+  private handleDrawerPageChanged()
+  {
+    this.setState({
       drawerTransitioning: true
     });
     setTimeout(() => {
@@ -127,9 +104,8 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
               <div className={barStyles['bar-item-area']} onClick={this.toggleDrawer}>
                 {this.renderCalculations()}
               </div>
-              <Divider visible={this.state.drawerOpen && !this.state.drawerTransitioning} />
               <div className={`${barStyles["drawer"]} ${this.state.drawerOpen ? barStyles["open"] : barStyles["closed"]} ${this.state.drawerTransitioning ? barStyles["transitioning"] : ""}`} >
-                {this.renderAdditionalDetails()}
+                <DetailedResults calculations={this.state.calculations} onPageChanged={this.handleDrawerPageChanged}/>
               </div>
             </div>
           </Nav>

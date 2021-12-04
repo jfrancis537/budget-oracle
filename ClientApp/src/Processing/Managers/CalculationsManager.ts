@@ -15,7 +15,7 @@ export interface CalculationResult {
   billResults: ResultPair<Bill>;
   debtTotal: number;
   accountTotal: number;
-  incomeTotal: number;
+  incomeResults: ResultPair<IncomeSource>;
 }
 
 type QuarterNumber = 1 | 2 | 3 | 4;
@@ -57,7 +57,7 @@ class CalculationsManager {
       billResults: billCost,
       debtTotal: debtCost,
       accountTotal: accountValue,
-      incomeTotal: incomeValue
+      incomeResults: incomeValue
     }
     return results;
   }
@@ -83,20 +83,24 @@ class CalculationsManager {
     return result;
   }
 
-  public async calculateTotalIncome(start: Moment, end: Moment, incomeSources: Iterable<IncomeSource>) {
+  public async calculateTotalIncome(start: Moment, end: Moment, incomeSources: Iterable<IncomeSource>): Promise<ResultPair<IncomeSource>> {
     let result = 0;
-    var promises: Promise<number>[] = [];
+    var promises: Promise<[IncomeSource, number]>[] = [];
     for (let source of incomeSources) {
       promises.push(this.calculateTotalForIncomeSource(source, start, end));
     }
+    let incomeMap = new Map<IncomeSource, number>();
     let results = await Promise.all(promises);
-    for (let value of results) {
+    for (let [source, value] of results) {
+      if (value > 0) {
+        incomeMap.set(source, value);
+      }
       result += value;
     }
-    return result;
+    return [incomeMap, result];
   }
 
-  private async calculateTotalForIncomeSource(source: IncomeSource, start: Moment, end: Moment) {
+  private async calculateTotalForIncomeSource(source: IncomeSource, start: Moment, end: Moment): Promise<[IncomeSource, number]> {
     let currentDate = start.clone();
     let value = 0;
     switch (source.frequencyType) {
@@ -267,7 +271,7 @@ class CalculationsManager {
       case IncomeFrequency.Anually:
         break;
     }
-    return value;
+    return [source, value];
   }
 
   private getCurrentQuarter(date: Moment): QuarterNumber {
