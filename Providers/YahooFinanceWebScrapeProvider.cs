@@ -1,21 +1,17 @@
 ﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Edge;
+using OpenQA.Selenium.PhantomJS;
 using OpenQA.Selenium.Support.UI;
 using System;
-using System.Threading.Tasks;
 
 namespace BudgetOracle_.Providers
 {
   public class YahooFinanceWebScrapeProvider : IStockDataProvider
   {
     private static readonly string yahooUrl = "https://finance.yahoo.com/quote/";
-    private EdgeDriver driver;
+    private PhantomJSDriver driver;
     public YahooFinanceWebScrapeProvider()
     {
-      EdgeOptions edgeOptions = new EdgeOptions();
-      edgeOptions.AddArgument("headless");
-      edgeOptions.AddArgument("disable-gpu");
-      driver = new EdgeDriver(edgeOptions);
+      driver = new PhantomJSDriver();
     }
     public double GetStockPriceNow(string symbol)
     {
