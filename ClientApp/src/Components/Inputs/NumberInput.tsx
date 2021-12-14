@@ -6,6 +6,7 @@ interface INumberInputProps {
   onChange?: (newVal: number, oldVal: number) => void;
   onInvalidStateChanged?: (invalid: boolean) => void;
   ariaLabel?: string;
+  defaultValue?: number;
 }
 
 interface INumberInputState {
@@ -20,9 +21,9 @@ export class NumberInput extends React.Component<INumberInputProps, INumberInput
     super(props);
 
     this.state = {
-      value: 0,
+      value: this.props.defaultValue ?? 0,
       invalid: false,
-      strValue: "0"
+      strValue: this.props.defaultValue?.toString() ?? "0"
     }
   }
 

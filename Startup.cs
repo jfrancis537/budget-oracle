@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using BudgetOracle.Auth;
 using BudgetOracle.Middleware;
+using BudgetOracle_.Providers;
 
 namespace BudgetOracle
 {
@@ -39,6 +40,7 @@ namespace BudgetOracle
         services.AddSingleton<IUserDatabase, InMemoryUserDatabase>();
       }
       services.AddSingleton<IAuthFactory, AuthFactory>();
+      services.AddSingleton<IStockDataProvider, YahooFinanceWebScrapeProvider>();
       services.AddAntiforgery();
       services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
       {

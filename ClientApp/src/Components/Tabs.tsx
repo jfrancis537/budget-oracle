@@ -22,7 +22,7 @@ export class Tabs<T extends string> extends React.Component<ITabsProps<T>> {
   private renderOption(kvp: [T, string]) {
     const [key, name] = kvp;
     return (
-      <Nav.Item>
+      <Nav.Item key={key}>
         <Nav.Link
           onClick={() => this.handleChange(key)}
           eventKey={key}

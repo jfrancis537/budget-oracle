@@ -47,11 +47,12 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
   private renderCalculations(): JSX.Element | JSX.Element[] {
     if (this.state.calculations) {
       const calcs = this.state.calculations;
-      const totals = calcs.accountTotal + calcs.incomeResults[1] - calcs.debtTotal - calcs.billResults[1];
+      const totals = calcs.accountTotal + calcs.incomeResults[1] - calcs.debtTotal - calcs.billResults[1] + Math.floor(this.state.calculations.investmentResults);
       return (
         <>
           <div className={barStyles['item']}>Bills: ${this.state.calculations.billResults[1]}</div>
           <div className={barStyles['item']}>Income: ${this.state.calculations.incomeResults[1]}</div>
+          <div className={barStyles['item']}>Investments: ${Math.floor(this.state.calculations.investmentResults)}</div>
           <div className={barStyles['item']}>Total: ${totals}</div>
         </>
       )

@@ -48,7 +48,7 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
       };
     }
   }
-  
+
   @autobind
   private handleNameChanged(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
@@ -143,16 +143,18 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
               <InputGroup.Text># of Shares</InputGroup.Text>
             </InputGroup.Prepend>
             <NumberInput
+              defaultValue={this.state.shares}
               ariaLabel="Number of shares"
               onChange={this.handleSharesChanged}
             />
           </InputGroup>
           <InputGroup className="mb-3">
             <InputGroup.Prepend>
-              <InputGroup.Text>$ per Share</InputGroup.Text>
+              <InputGroup.Text>$ basis per Share</InputGroup.Text>
             </InputGroup.Prepend>
             <NumberInput
               ariaLabel="Cost basis per share"
+              defaultValue={this.state.costBasisPerShare}
               onChange={this.handleCostBasisChanged}
             />
           </InputGroup>

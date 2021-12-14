@@ -1,3 +1,4 @@
+import { GetStockPriceNow } from "../../APIs/StockAPI";
 import { Action } from "../../Utilities/Action";
 import { autobind } from "../../Utilities/Decorators";
 import { Investment } from "../Models/Investment";
@@ -14,6 +15,7 @@ class InvestmentCalculationManager {
     this.didInitalCalculations = false;
 
     AppStateManager.oninvestmentsupdated.addListener(this.handleInvestmentsUpdated)
+    AppStateManager.onspecificinvestmentupdated.addListener(this.refreshSymbol);
   }
 
   @autobind
@@ -26,12 +28,19 @@ class InvestmentCalculationManager {
     }
   }
 
+  @autobind
   public getExistingCalculation(id: string) {
     return this.calculations.get(id);
   }
 
+  @autobind
+  public async refreshSymbol(investment: Investment) {
+    await this.calculateInvestment(investment);
+  }
+
   private async calculateInvestment(investment: Investment) {
-    let calculation = investment.costBasisPerShare * investment.shares;
+    let price = await GetStockPriceNow(investment.symbol);
+    let calculation = (price ?? investment.costBasisPerShare) * investment.shares;
     this.calculations.set(investment.id, calculation);
     this.oninvestmentvaluecalculated.invoke({ id: investment.id, value: calculation });
   }

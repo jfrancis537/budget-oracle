@@ -25,7 +25,7 @@ export class BottomTabs extends React.Component<IBottomTabProps> {
               onClick={() => this.handleChange(ContentTab.Costs)}
               eventKey={ContentTab.Costs}
             >
-              Bills / Debts
+              <span style={{color: '#f66c6c'}}>-$$$$</span>
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
@@ -33,7 +33,7 @@ export class BottomTabs extends React.Component<IBottomTabProps> {
               onClick={() => this.handleChange(ContentTab.Reserves)}
               eventKey={ContentTab.Reserves}
             >
-              Income / Accounts
+              <span style={{color: '#71fe75'}}>+$$$$</span>
             </Nav.Link>
           </Nav.Item>
         </Nav>

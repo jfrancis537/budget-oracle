@@ -53,6 +53,15 @@ export class InvestmentItem extends React.Component<IInvestmentItemProps, IInves
     await AppStateManager.deleteItem(this.props.item.id);
   }
 
+  @autobind
+  private async refresh()
+  {
+    this.setState({
+      value: undefined
+    });
+    await InvestmentCalculationManager.refreshSymbol(this.props.item);
+  }
+
   public render() {
     return (
       <div className={itemStyles['item-body']}>
@@ -63,8 +72,11 @@ export class InvestmentItem extends React.Component<IInvestmentItemProps, IInves
           <Button onClick={this.remove} variant='secondary'>
             <i className="bi bi-trash"></i>
           </Button>
+          <Button onClick={this.refresh} variant='secondary'>
+            <i className="bi bi-arrow-clockwise"></i>
+          </Button>
         </ButtonGroup>
-        <div>{this.props.item.symbol} : {this.state.value ?? "..."}</div>
+        <div>{this.props.item.symbol} : {this.state.value?.toFixed(2) ?? "..."}</div>
       </div>
     );
   }
