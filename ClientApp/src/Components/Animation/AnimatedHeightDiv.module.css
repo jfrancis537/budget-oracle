@@ -1,0 +1,10 @@
+
+.collapsible {
+  overflow: hidden;
+  transition: ease-in-out .35s height;
+  height: auto;
+}
+
+.collapsed {
+  height: 0px;
+}

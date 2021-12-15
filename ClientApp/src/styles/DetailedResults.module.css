@@ -6,3 +6,9 @@
 .nav {
   width: 100%;
 }
+
+.content {
+  overflow: hidden;
+  transition: ease-in-out .35s height;
+  height: auto;
+}

@@ -7,6 +7,7 @@ import mobileStyles from '../styles/MobileHelper.module.css';
 import { MobileHelper } from "../Utilities/MobileUtils";
 import { autobind } from "../Utilities/Decorators";
 import { DetailedResults } from "./DetailedResults";
+import { AnimatedHeightDiv } from "./Animation/AnimatedHeightDiv";
 
 interface ResultsBarState {
   calculations?: CalculationResult
@@ -75,8 +76,7 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
   }
 
   @autobind
-  private handleDrawerPageChanged()
-  {
+  private handleDrawerPageChanged() {
     this.setState({
       drawerTransitioning: true
     });
@@ -105,9 +105,9 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
               <div className={barStyles['bar-item-area']} onClick={this.toggleDrawer}>
                 {this.renderCalculations()}
               </div>
-              <div className={`${barStyles["drawer"]} ${this.state.drawerOpen ? barStyles["open"] : barStyles["closed"]} ${this.state.drawerTransitioning ? barStyles["transitioning"] : ""}`} >
-                <DetailedResults calculations={this.state.calculations} onPageChanged={this.handleDrawerPageChanged}/>
-              </div>
+              <AnimatedHeightDiv open={this.state.drawerOpen}>
+                <DetailedResults calculations={this.state.calculations} onPageChanged={this.handleDrawerPageChanged} />
+              </AnimatedHeightDiv>
             </div>
           </Nav>
         </Navbar>

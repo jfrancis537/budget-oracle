@@ -21,11 +21,43 @@ interface IDetailedResultsState {
 }
 
 export class DetailedResults extends React.Component<IDetailedResultsProps, IDetailedResultsState> {
+
+  private contentDivRef: React.RefObject<HTMLDivElement>;
+
   constructor(props: IDetailedResultsProps) {
     super(props);
-
+    this.contentDivRef = React.createRef();
     this.state = {
       page: DetailedResultsPage.Bills
+    }
+  }
+
+  componentDidMount() {
+    if (this.contentDivRef.current) {
+      let div = this.contentDivRef.current;
+      div.style.height = window.getComputedStyle(div).height;;
+    }
+  }
+
+  componentDidUpdate(oldProps: IDetailedResultsProps, oldState: IDetailedResultsState) {
+    if (this.state.page !== oldState.page) {
+      if (this.contentDivRef.current) {
+        let div = this.contentDivRef.current;
+        let startHeight = div.style.height;
+        div.style.height = "";
+        div.style.transition = "none";
+        let endHeight = window.getComputedStyle(div).height;
+        div.style.height = startHeight;
+        console.log(startHeight);
+        requestAnimationFrame(() => {
+          div!.style.transition = '';
+          console.log("Clearing transition");
+          requestAnimationFrame(() => {
+            console.log(endHeight);
+            div!.style.height = endHeight;
+          });
+        });
+      }
     }
   }
 
@@ -109,7 +141,9 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
           <Tabs currentTab={this.state.page} onChange={this.handlePageChange} options={options} className={styles["nav"]} />
         </Row>
         <Row>
-          {this.renderContent()}
+          <div ref={this.contentDivRef} className={styles.content}>
+            {this.renderContent()}
+          </div>
         </Row>
       </>
     );
