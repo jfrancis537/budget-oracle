@@ -10,6 +10,9 @@ using Microsoft.IdentityModel.Tokens;
 using BudgetOracle.Auth;
 using BudgetOracle.Middleware;
 using BudgetOracle_.Providers;
+using Microsoft.AspNetCore.Http;
+using System;
+using Microsoft.Net.Http.Headers;
 
 namespace BudgetOracle
 {
@@ -100,7 +103,21 @@ namespace BudgetOracle
       app.UseSpa(spa =>
       {
         spa.Options.SourcePath = "ClientApp";
-
+        spa.Options.DefaultPageStaticFileOptions = new StaticFileOptions()
+        {
+          OnPrepareResponse = config =>
+          {
+            var ctx = config.Context;
+            var headers = ctx.Response.GetTypedHeaders();
+            headers.CacheControl = new CacheControlHeaderValue
+            {
+              NoCache = true,
+              NoStore = true,
+              MustRevalidate = true,
+              MaxAge = TimeSpan.Zero
+            };
+          }
+        };
         if (env.IsDevelopment())
         {
           spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
