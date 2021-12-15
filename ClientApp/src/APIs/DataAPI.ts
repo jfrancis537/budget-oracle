@@ -69,37 +69,4 @@ export namespace DataAPI {
       throw new Error("Failed to update data!");
     }
   }
-
-  export async function updateStockAPIKey(key: string) {
-    let url = `${baseUrl}/setStockAPIKey`;
-    let response = await fetch(url, {
-      method: "PUT",
-      body: JSON.stringify({ key }),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    });
-    if (response.status === 400) {
-      //Some weird error
-    } else if (response.status === 401) {
-      throw new AuthorizationError("You are probably not logged in anymore");
-    }
-    else if (!response.ok) {
-      throw new Error("Failed to update key!");
-    }
-  }
-
-  export async function getStockAPIKey(): Promise<string | undefined> {
-    let url = `${baseUrl}/getStockAPIKey`;
-    let response = await fetch(url, {
-      method: "GET"
-    });
-    if (response.ok) {
-      return await response.text();
-    } else if (response.status === 401 || response.status === 400) {
-      return undefined;
-    } else {
-      throw new Error("Failed to get data.");
-    }
-  }
 }

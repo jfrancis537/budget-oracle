@@ -9,7 +9,6 @@ import { DebtPrompt, IDebtPromptProps } from "./DebtPrompt";
 import { GroupPrompt, IGroupPromptProps } from "./GroupPrompt";
 import { IIncomePromptProps, IncomePrompt } from "./IncomePrompt";
 import { IInvestmentPromptProps, InvestmentPrompt } from "./InvestmentPrompt";
-import { StockAPIKeyPrompt } from "./StockAPIKeyPrompt";
 
 export enum PromptType {
   Group,
@@ -17,7 +16,6 @@ export enum PromptType {
   Bill,
   Debt,
   IncomeSource,
-  APIKey,
   Investment
 }
 
@@ -46,15 +44,7 @@ export class Prompts extends React.Component<{}, PromptsState> {
     PromptManager.ondebtpromptrequested.addListener(this.showDebtPrompt);
     PromptManager.onbillpromptrequested.addListener(this.showBillPrompt);
     PromptManager.oncloserequested.addListener(this.closePrompt);
-    PromptManager.onstockapikeypromptrequested.addListener(this.showStockAPIKeyPrompt);
     PromptManager.oninvestmentpromptrequested.addListener(this.showInvestmentPrompt);
-  }
-
-  @autobind
-  private showStockAPIKeyPrompt() {
-    this.setState({
-      activePrompt: PromptType.APIKey
-    });
   }
 
   @autobind
@@ -150,11 +140,6 @@ export class Prompts extends React.Component<{}, PromptsState> {
         const investmentProps = this.state.props as IInvestmentPromptProps;
         result = (
           <InvestmentPrompt {...investmentProps} />
-        );
-        break;
-      case PromptType.APIKey:
-        result = (
-          <StockAPIKeyPrompt />
         );
         break;
       default:

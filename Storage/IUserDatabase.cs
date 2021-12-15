@@ -9,7 +9,6 @@ namespace BudgetOracle.Storage
     Task<User> CreateUser(User user);
     Task UpdateState(string username, string data);
     Task UpdateGroups(string username, string data);
-    Task UpdateAlphaVantageKey(string username, string key);
     Task SetPassword(string username, string password);
     Task<bool> ContainsUser(string username);
   }

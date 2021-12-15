@@ -14,7 +14,6 @@ import { autobind } from "../Utilities/Decorators";
 interface IUIHeaderState {
   loginPromptVisible: boolean;
   userLoggedIn: boolean;
-  stockApiKey: string;
 }
 
 export class UIHeader extends React.Component<{}, IUIHeaderState> {
@@ -24,8 +23,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
 
     this.state = {
       loginPromptVisible: false,
-      userLoggedIn: false,
-      stockApiKey: UserManager.stockApiKey
+      userLoggedIn: false
     }
 
   }
@@ -33,7 +31,6 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
   componentDidMount() {
     UserManager.onuserloggedin.addListener(() => this.setState({ userLoggedIn: true }));
     UserManager.onuserloggedout.addListener(() => this.setState({ userLoggedIn: false }));
-    UserManager.onstockapikeychanged.addListener((key) => this.setState({stockApiKey: key}));
   }
 
   @autobind
@@ -41,11 +38,6 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
     PromptManager.requestGroupPrompt({
       editing: false,
     });
-  }
-
-  @autobind
-  private updateStockApiKey() {
-    PromptManager.requestStockAPIKeyPrompt();
   }
 
   @autobind
@@ -144,7 +136,6 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
     } else {
       return (
         <NavDropdown title="Settings" id='settings_dropdown'>
-          <NavDropdown.Item onClick={this.updateStockApiKey}>Set AlphaVantage™ API Key</NavDropdown.Item>
           <NavDropdown.Item disabled onClick={() => { }}>Reset Password</NavDropdown.Item>
         </NavDropdown>
       )
@@ -163,7 +154,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
                 <NavDropdown title="Add" id='add_dropdown'>
                   <NavDropdown.Item onClick={this.addAccount}>Account</NavDropdown.Item>
                   <NavDropdown.Item onClick={this.addIncomeSource}>Income</NavDropdown.Item>
-                  <NavDropdown.Item disabled={!UserManager.hasStockApiKey} onClick={this.addInvestment}>Investment</NavDropdown.Item>
+                  <NavDropdown.Item disabled={!UserManager.isLoggedIn} onClick={this.addInvestment}>Investment</NavDropdown.Item>
                   <NavDropdown.Divider />
                   <NavDropdown.Item onClick={this.addGroup}>Group</NavDropdown.Item>
                 </NavDropdown>

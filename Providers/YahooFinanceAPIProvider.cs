@@ -26,19 +26,25 @@ namespace BudgetOracle_.Providers
       var url = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol;
       using var client = httpClientFactory.CreateClient();
       var response = await client.GetAsync(url);
-      if(response.IsSuccessStatusCode)
+      if (response.IsSuccessStatusCode)
       {
         var responseData = await response.Content.ReadAsStringAsync();
         var data = JObject.Parse(responseData);
         try
         {
-          var result = data["chart"]["result"][0]["meta"]["regularMarketPrice"].Value<double>();
-          return result;
-        } catch
+          var result = data["chart"]["result"];
+          if (result == null)
+          {
+            return -1;
+          }
+          return result[0]["meta"]["regularMarketPrice"].Value<double>();
+        }
+        catch
         {
           throw new Exception("Failed to get value");
         }
-      } else
+      }
+      else
       {
         return -1;
       }

@@ -1,6 +1,7 @@
 ﻿using BudgetOracle_.Providers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace BudgetOracle_.Controllers
 {
@@ -17,11 +18,11 @@ namespace BudgetOracle_.Controllers
     [HttpGet]
     [Route("price/{symbol}")]
     [AllowAnonymous]
-    public IActionResult GetStockPriceNow(string symbol)
+    public async Task<IActionResult> GetStockPriceNowAsync(string symbol)
     {
       try
       {
-        var price = stockDataProvider.GetStockPriceNow(symbol);
+        var price = await stockDataProvider.GetStockPriceNowAsync(symbol);
         if (price > 0)
         {
           return Ok(price);
@@ -33,7 +34,7 @@ namespace BudgetOracle_.Controllers
       }
       catch
       {
-        return BadRequest("Invalid symbol");
+        return BadRequest("Invalid stock symbol");
       }
     }
   }
