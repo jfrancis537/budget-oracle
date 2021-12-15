@@ -135,7 +135,7 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
               aria-label="Ticker Symbol"
               onChange={this.handleSymbolChanged}
               value={this.state.symbol}
-              maxLength={4}
+              maxLength={5}
             />
           </InputGroup>
           <InputGroup className="mb-3">

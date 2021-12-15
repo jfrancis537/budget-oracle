@@ -48,12 +48,10 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
         div.style.transition = "none";
         let endHeight = window.getComputedStyle(div).height;
         div.style.height = startHeight;
-        console.log(startHeight);
+
         requestAnimationFrame(() => {
           div!.style.transition = '';
-          console.log("Clearing transition");
           requestAnimationFrame(() => {
-            console.log(endHeight);
             div!.style.height = endHeight;
           });
         });
