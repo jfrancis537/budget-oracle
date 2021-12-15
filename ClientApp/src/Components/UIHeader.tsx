@@ -162,6 +162,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
                 <NavDropdown title="Tools" id='tools_dropdown'>
                   <NavDropdown.Item onClick={this.import}>Import</NavDropdown.Item>
                   <NavDropdown.Item onClick={this.export}>Export</NavDropdown.Item>
+                  <NavDropdown.Item onClick={() => window.location.reload()}>Refresh</NavDropdown.Item>
                   <NavDropdown.Item disabled={this.state.userLoggedIn} onClick={this.reset}>Reset</NavDropdown.Item>
                 </NavDropdown>
                 {this.renderLoginControl()}
