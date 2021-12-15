@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
-using OpenQA.Selenium.PhantomJS;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Support.UI;
 using System;
 
@@ -8,10 +9,22 @@ namespace BudgetOracle_.Providers
   public class YahooFinanceWebScrapeProvider : IStockDataProvider
   {
     private static readonly string yahooUrl = "https://finance.yahoo.com/quote/";
-    private PhantomJSDriver driver;
+    private WebDriver driver;
     public YahooFinanceWebScrapeProvider()
     {
-      driver = new PhantomJSDriver();
+      if(Environment.OSVersion.Platform == PlatformID.Win32NT)
+      {
+        var opts = new EdgeOptions();
+        opts.AddArgument("headless");
+        opts.AddArgument("disable-gpu");
+        driver = new EdgeDriver();
+      } else
+      {
+        var opts = new ChromeOptions();
+        opts.AddArgument("--headless");
+        opts.AddArgument("--disable-gpu");
+        driver = new ChromeDriver();
+      }
     }
     public double GetStockPriceNow(string symbol)
     {
