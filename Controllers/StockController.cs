@@ -16,7 +16,7 @@ namespace BudgetOracle_.Controllers
 
     [HttpGet]
     [Route("price/{symbol}")]
-    [Authorize]
+    [AllowAnonymous]
     public IActionResult GetStockPriceNow(string symbol)
     {
       try

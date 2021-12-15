@@ -3,6 +3,7 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Threading.Tasks;
 
 namespace BudgetOracle_.Providers
 {
@@ -12,13 +13,14 @@ namespace BudgetOracle_.Providers
     private WebDriver driver;
     public YahooFinanceWebScrapeProvider()
     {
-      if(Environment.OSVersion.Platform == PlatformID.Win32NT)
+      if (Environment.OSVersion.Platform == PlatformID.Win32NT)
       {
         var opts = new EdgeOptions();
         opts.AddArgument("headless");
         opts.AddArgument("disable-gpu");
         driver = new EdgeDriver();
-      } else
+      }
+      else
       {
         var opts = new ChromeOptions();
         opts.AddArgument("--headless");
@@ -60,6 +62,11 @@ namespace BudgetOracle_.Providers
         }
       }
 
+    }
+
+    public Task<double> GetStockPriceNowAsync(string symbol)
+    {
+      return Task.FromResult(GetStockPriceNow(symbol));
     }
   }
 }

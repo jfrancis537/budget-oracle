@@ -39,8 +39,9 @@ namespace BudgetOracle
         //services.AddSingleton<IUserDatabase, MongoUserDatabase>();
         services.AddSingleton<IUserDatabase, InMemoryUserDatabase>();
       }
+      services.AddHttpClient();
       services.AddSingleton<IAuthFactory, AuthFactory>();
-      services.AddSingleton<IStockDataProvider, YahooFinanceWebScrapeProvider>();
+      services.AddSingleton<IStockDataProvider, YahooFinanceAPIProvider>();
       services.AddAntiforgery();
       services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
       {
