@@ -56,7 +56,7 @@ class CalculationsManager {
     let accountValue = this.calculateAccountValue(AppStateManager.accounts);
     let billCost = await this.calculateAllBillsCost(start, end, AppStateManager.bills);
     let incomeValue = await this.calculateTotalIncome(start, end, AppStateManager.incomeSources);
-    let investmentValue = await this.calculateTotalInvestmentValue(AppStateManager.investments);
+    let investmentValue = await this.calculateTotalInvestmentValue(start, end, AppStateManager.investments);
 
     let results: CalculationResult = {
       billResults: billCost,
@@ -81,12 +81,13 @@ class CalculationsManager {
     return result;
   }
 
-  private calculateTotalInvestmentValue(investments: Iterable<Investment>): { value: number, interest: number } {
+  private calculateTotalInvestmentValue(start: Moment, end: Moment, investments: Iterable<Investment>): { value: number, interest: number } {
     let result = 0;
     let marginInterest = 0;
+    const daysBetween = start.add(1, 'day').diff(end.startOf('day'), 'days');
     for (let investment of investments) {
       result += InvestmentCalculationManager.getExistingCalculation(investment.id) ?? 0;
-      marginInterest += ((investment.marginInterestRate * investment.marginDebt) / 360)
+      marginInterest += (((investment.marginInterestRate * investment.marginDebt) / 360) * daysBetween)
     }
     return {
       value: result,
