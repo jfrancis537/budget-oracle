@@ -18,7 +18,7 @@ export interface CalculationResult {
   debtTotal: number;
   accountTotal: number;
   incomeResults: ResultPair<IncomeSource>;
-  investmentResults: number;
+  investmentResults: { value: number, interest: number };
 }
 
 type QuarterNumber = 1 | 2 | 3 | 4;
@@ -81,12 +81,17 @@ class CalculationsManager {
     return result;
   }
 
-  private calculateTotalInvestmentValue(investments: Iterable<Investment>) {
+  private calculateTotalInvestmentValue(investments: Iterable<Investment>): { value: number, interest: number } {
     let result = 0;
+    let marginInterest = 0;
     for (let investment of investments) {
       result += InvestmentCalculationManager.getExistingCalculation(investment.id) ?? 0;
+      marginInterest += ((investment.marginInterestRate * investment.marginDebt) / 360)
     }
-    return result;
+    return {
+      value: result,
+      interest: marginInterest
+    };
   }
 
   private calculateAccountValue(accounts: Iterable<Account>) {

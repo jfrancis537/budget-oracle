@@ -81,6 +81,12 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
           </div>
         );
       }
+      components.push(
+        <div key='Investment Margin Interest'>
+        <label>{"Margin Interest"}:&nbsp;</label>
+        <span>${this.props.calculations.investmentResults.interest.toFixed(2)}</span>
+      </div>
+      );
       return (
         <Col>
           {components}

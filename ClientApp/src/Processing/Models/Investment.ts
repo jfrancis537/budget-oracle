@@ -12,6 +12,8 @@ interface InvestmentOptions extends IdentifiableOptions {
   shares: number;
   symbol: string;
   costBasisPerShare: number;
+  marginDebt: number;
+  marginInterestRate: number;
 }
 
 export interface SerializedInvestment extends SerializedIdentifiable {
@@ -19,6 +21,8 @@ export interface SerializedInvestment extends SerializedIdentifiable {
   shares: number;
   symbol: string;
   costBasisPerShare: number;
+  marginDebt: number;
+  marginInterestRate: number;
 }
 
 export class Investment extends Identifiable {
@@ -27,14 +31,17 @@ export class Investment extends Identifiable {
   readonly shares: number;
   readonly symbol: string;
   readonly costBasisPerShare: number;
+  readonly marginDebt: number;
+  readonly marginInterestRate: number;
 
-  constructor(options: InvestmentOptions)
-  {
+  constructor(options: InvestmentOptions) {
     super(options);
     this.name = options.name;
     this.shares = options.shares;
     this.symbol = options.symbol?.toUpperCase();
     this.costBasisPerShare = options.costBasisPerShare;
+    this.marginDebt = options.marginDebt;
+    this.marginInterestRate = options.marginInterestRate;
   }
 
   static deserialize(source: SerializedInvestment): Investment {

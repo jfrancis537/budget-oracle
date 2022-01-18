@@ -251,22 +251,28 @@ class AppStateManager {
     name: string,
     shares: number,
     symbol: string,
-    costBasisPerShare: number) {
-    await this.updateInvestment(undefined, name, shares, symbol, costBasisPerShare);
+    costBasisPerShare: number,
+    marginDebt: number,
+    marginInterestRate: number) {
+    await this.updateInvestment(undefined, name, shares, symbol, costBasisPerShare, marginDebt, marginInterestRate);
   }
 
   public async updateInvestment(id: string | undefined,
     name: string,
     shares: number,
     symbol: string,
-    costBasisPerShare: number
+    costBasisPerShare: number,
+    marginDebt: number,
+    marginInterestRate: number,
   ) {
     const investment = new Investment({
-      id: id,
-      name: name,
+      id,
+      name,
       shares,
       symbol,
-      costBasisPerShare
+      costBasisPerShare,
+      marginDebt,
+      marginInterestRate
     });
 
     this._investments.set(investment.id, investment);

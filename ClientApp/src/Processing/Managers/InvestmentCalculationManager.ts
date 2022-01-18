@@ -41,6 +41,7 @@ class InvestmentCalculationManager {
   private async calculateInvestment(investment: Investment) {
     let price = await GetStockPriceNow(investment.symbol);
     let calculation = (price ?? investment.costBasisPerShare) * investment.shares;
+    calculation -= investment.marginDebt;
     this.calculations.set(investment.id, calculation);
     this.oninvestmentvaluecalculated.invoke({ id: investment.id, value: calculation });
   }

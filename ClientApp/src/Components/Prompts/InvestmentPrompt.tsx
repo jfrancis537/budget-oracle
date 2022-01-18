@@ -16,6 +16,8 @@ interface IInvestmentPromptState {
   shares: number;
   symbol: string;
   costBasisPerShare: number;
+  marginDebt: number;
+  marginInterestRate: number;
   isSaving: boolean;
 }
 
@@ -33,6 +35,8 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
           shares: investment.shares,
           symbol: investment.symbol,
           costBasisPerShare: investment.costBasisPerShare,
+          marginDebt: investment.marginDebt,
+          marginInterestRate: investment.marginInterestRate,
           isSaving: false
         }
       } else {
@@ -44,7 +48,9 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
         shares: 0,
         symbol: "",
         costBasisPerShare: 0,
-        isSaving: false
+        isSaving: false,
+        marginDebt: 0,
+        marginInterestRate: 0
       };
     }
   }
@@ -78,6 +84,21 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
   }
 
   @autobind
+  private handleMarginDebtChanged(newValue: number) {
+    this.setState({
+      marginDebt: newValue
+    });
+  }
+
+  @autobind
+  private handleMarginInterestChanged(newValue: number) {
+    this.setState({
+      marginInterestRate: newValue
+    });
+  }
+
+
+  @autobind
   private async accept() {
     this.setState({
       isSaving: true
@@ -88,14 +109,18 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
         this.state.name,
         this.state.shares,
         this.state.symbol,
-        this.state.costBasisPerShare
+        this.state.costBasisPerShare,
+        this.state.marginDebt,
+        this.state.marginInterestRate
       );
     } else {
       await AppStateManager.addInvestment(
         this.state.name,
         this.state.shares,
         this.state.symbol,
-        this.state.costBasisPerShare
+        this.state.costBasisPerShare,
+        this.state.marginDebt,
+        this.state.marginInterestRate
       );
     }
     this.setState({
@@ -156,6 +181,26 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
               ariaLabel="Cost basis per share"
               defaultValue={this.state.costBasisPerShare}
               onChange={this.handleCostBasisChanged}
+            />
+          </InputGroup>
+          <InputGroup className="mb-3">
+            <InputGroup.Prepend>
+              <InputGroup.Text>Margin Debt</InputGroup.Text>
+            </InputGroup.Prepend>
+            <NumberInput
+              ariaLabel="Margin Debt"
+              defaultValue={this.state.marginDebt}
+              onChange={this.handleMarginDebtChanged}
+            />
+          </InputGroup>
+          <InputGroup className="mb-3">
+            <InputGroup.Prepend>
+              <InputGroup.Text>$ basis per Share</InputGroup.Text>
+            </InputGroup.Prepend>
+            <NumberInput
+              ariaLabel="Cost basis per share"
+              defaultValue={this.state.marginInterestRate}
+              onChange={this.handleMarginInterestChanged}
             />
           </InputGroup>
           {/* <InputGroup className="mb-3"> //TODO investment type
