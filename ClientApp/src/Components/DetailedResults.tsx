@@ -5,10 +5,12 @@ import { autobind } from "../Utilities/Decorators";
 import { Tabs } from "./Tabs";
 
 import styles from "../styles/DetailedResults.module.css";
+import { AppStateManager } from "../Processing/Managers/AppStateManager";
 
 enum DetailedResultsPage {
-  Bills = "bills",
-  Income = "income"
+  Expenses = "expenses",
+  Income = "income",
+  Statistics = "stats"
 }
 
 interface IDetailedResultsProps {
@@ -28,19 +30,21 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
     super(props);
     this.contentDivRef = React.createRef();
     this.state = {
-      page: DetailedResultsPage.Bills
+      page: DetailedResultsPage.Expenses
     }
   }
 
   componentDidMount() {
     if (this.contentDivRef.current) {
       let div = this.contentDivRef.current;
-      div.style.height = window.getComputedStyle(div).height;;
+      setTimeout(() => {
+        div.style.height = window.getComputedStyle(div).height;
+      }, 100);
     }
   }
 
   componentDidUpdate(oldProps: IDetailedResultsProps, oldState: IDetailedResultsState) {
-    if (this.state.page !== oldState.page) {
+    if (this.state.page !== oldState.page || this.props.calculations !== oldProps.calculations) {
       if (this.contentDivRef.current) {
         let div = this.contentDivRef.current;
         let startHeight = div.style.height;
@@ -69,7 +73,7 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
     }
   }
 
-  private renderBillResults() {
+  private renderExpenseResults() {
     if (this.props.calculations) {
       let resultMap = this.props.calculations.billResults[0];
       let components: JSX.Element[] = [];
@@ -83,9 +87,9 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
       }
       components.push(
         <div key='Investment Margin Interest'>
-        <label>{"Margin Interest"}:&nbsp;</label>
-        <span>${this.props.calculations.investmentResults.interest.toFixed(2)}</span>
-      </div>
+          <label>{"Margin Interest"}:&nbsp;</label>
+          <span>${this.props.calculations.investmentResults.totalInterestOwed.toFixed(2)}</span>
+        </div>
       );
       return (
         <Col>
@@ -119,14 +123,32 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
     }
   }
 
+  private renderStats() {
+    return (
+      <Col>
+        <div>
+          <label>Investments Value:&nbsp;</label>
+          <span>${this.props.calculations?.investmentResults.totalValue.toFixed(2)}</span>
+        </div>
+        <div>
+          <label>Investments Cost Basis:&nbsp;</label>
+          <span>${this.props.calculations?.investmentResults.totalCostBasis.toFixed(2)}</span>
+        </div>
+      </Col>
+    );
+  }
+
   private renderContent() {
     let result: JSX.Element | JSX.Element[] | null;
     switch (this.state.page) {
-      case DetailedResultsPage.Bills:
-        result = this.renderBillResults();
+      case DetailedResultsPage.Expenses:
+        result = this.renderExpenseResults();
         break;
       case DetailedResultsPage.Income:
         result = this.renderIncomeResults();
+        break;
+      case DetailedResultsPage.Statistics:
+        result = this.renderStats();
         break;
     }
     return result;
@@ -135,8 +157,9 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
   public render() {
 
     let options: Map<DetailedResultsPage, string> = new Map([
-      [DetailedResultsPage.Bills, "Bills"],
-      [DetailedResultsPage.Income, "Income"]
+      [DetailedResultsPage.Expenses, "Expenses"],
+      [DetailedResultsPage.Income, "Income"],
+      [DetailedResultsPage.Statistics, "Statistics"]
     ]);
 
     return (

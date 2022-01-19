@@ -40,8 +40,8 @@ export class Investment extends Identifiable {
     this.shares = options.shares;
     this.symbol = options.symbol?.toUpperCase();
     this.costBasisPerShare = options.costBasisPerShare;
-    this.marginDebt = options.marginDebt;
-    this.marginInterestRate = options.marginInterestRate;
+    this.marginDebt = options.marginDebt ?? 0;
+    this.marginInterestRate = options.marginInterestRate ?? 0;
   }
 
   static deserialize(source: SerializedInvestment): Investment {

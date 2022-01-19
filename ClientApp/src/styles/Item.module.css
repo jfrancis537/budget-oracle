@@ -5,3 +5,7 @@
   user-select: none;
   margin-bottom: 10px;
 }
+
+.clickable {
+  cursor: pointer;
+}

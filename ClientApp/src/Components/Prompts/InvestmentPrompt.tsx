@@ -1,8 +1,9 @@
 import React from "react"
-import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
+import { Button, FormControl, FormGroup, InputGroup, Modal } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { autobind } from "../../Utilities/Decorators";
+import { CurrencyInput } from "../Inputs/CurrencyInput";
 import { NumberInput } from "../Inputs/NumberInput";
 import { LoadingButton } from "./LoadingButton";
 
@@ -143,9 +144,10 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
         keyboard={false}
       >
         <Modal.Header closeButton>
-          <Modal.Title>{this.props.editing ? "Update" : "Add"} Income Source</Modal.Title>
+          <Modal.Title>{this.props.editing ? "Update" : "Add"} Investment</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          <label>General</label>
           <InputGroup className="mb-3">
             <FormControl
               placeholder="Name"
@@ -163,45 +165,50 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
               maxLength={5}
             />
           </InputGroup>
+          <label>Cost Basis</label>
           <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text># of Shares</InputGroup.Text>
-            </InputGroup.Prepend>
             <NumberInput
               defaultValue={this.state.shares}
               ariaLabel="Number of shares"
               onChange={this.handleSharesChanged}
             />
+            <InputGroup.Append>
+              <InputGroup.Text>Shares</InputGroup.Text>
+            </InputGroup.Append>
           </InputGroup>
           <InputGroup className="mb-3">
             <InputGroup.Prepend>
-              <InputGroup.Text>$ basis per Share</InputGroup.Text>
+              <InputGroup.Text>@</InputGroup.Text>
             </InputGroup.Prepend>
-            <NumberInput
+            <CurrencyInput
               ariaLabel="Cost basis per share"
               defaultValue={this.state.costBasisPerShare}
               onChange={this.handleCostBasisChanged}
             />
+            <InputGroup.Append>
+              <InputGroup.Text>Per Share</InputGroup.Text>
+            </InputGroup.Append>
           </InputGroup>
+          <label>Margin</label>
           <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>Margin Debt</InputGroup.Text>
-            </InputGroup.Prepend>
-            <NumberInput
+            <CurrencyInput
               ariaLabel="Margin Debt"
               defaultValue={this.state.marginDebt}
               onChange={this.handleMarginDebtChanged}
             />
+            <InputGroup.Append>
+              <InputGroup.Text>Margin Debt</InputGroup.Text>
+            </InputGroup.Append>
           </InputGroup>
           <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>$ basis per Share</InputGroup.Text>
-            </InputGroup.Prepend>
             <NumberInput
-              ariaLabel="Cost basis per share"
+              ariaLabel="Margin Interest Rate"
               defaultValue={this.state.marginInterestRate}
               onChange={this.handleMarginInterestChanged}
             />
+            <InputGroup.Append>
+              <InputGroup.Text>%</InputGroup.Text>
+            </InputGroup.Append>
           </InputGroup>
           {/* <InputGroup className="mb-3"> //TODO investment type
             <InputGroup.Prepend>

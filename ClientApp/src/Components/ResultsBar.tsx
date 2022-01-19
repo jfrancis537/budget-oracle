@@ -53,13 +53,13 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
         calcs.incomeResults[1] -
         calcs.debtTotal -
         calcs.billResults[1] +
-        Math.floor(calcs.investmentResults.value) -
-        Math.floor(calcs.investmentResults.interest);
+        Math.floor(calcs.investmentResults.totalValue) -
+        Math.floor(calcs.investmentResults.totalInterestOwed);
       return (
         <>
-          <div className={barStyles['item']}>Bills: ${this.state.calculations.billResults[1]}</div>
-          <div className={barStyles['item']}>Income: ${this.state.calculations.incomeResults[1]}</div>
-          <div className={barStyles['item']}>Investments: ${Math.floor(this.state.calculations.investmentResults.value)}</div>
+          <div className={barStyles['item']}>Expenses: ${(calcs.billResults[1] + calcs.investmentResults.totalInterestOwed).toFixed(2)}</div>
+          <div className={barStyles['item']}>Income: ${calcs.incomeResults[1]}</div>
+          <div className={barStyles['item']}>Existing: ${(calcs.accountTotal + calcs.investmentResults.totalValue).toFixed(2)}</div>
           <div className={barStyles['item']}>Total: ${totals}</div>
         </>
       )

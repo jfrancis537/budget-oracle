@@ -99,7 +99,6 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
 
   @autobind
   private handleInvestmentsUpdated(investments: Iterable<Investment>) {
-    console.log(investments)
     this.setState({
       investments: [...investments]
     });

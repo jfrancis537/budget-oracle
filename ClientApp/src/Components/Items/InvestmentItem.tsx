@@ -13,6 +13,7 @@ interface IInvestmentItemProps {
 
 interface IInvestmentItemState {
   value?: number;
+  mode: "gain" | "total"
 }
 
 export class InvestmentItem extends React.Component<IInvestmentItemProps, IInvestmentItemState>{
@@ -20,7 +21,8 @@ export class InvestmentItem extends React.Component<IInvestmentItemProps, IInves
   constructor(props: IInvestmentItemProps) {
     super(props);
     this.state = {
-      value: InvestmentCalculationManager.getExistingCalculation(props.item.id)
+      value: InvestmentCalculationManager.getExistingCalculation(props.item.id),
+      mode: "total"
     }
   }
 
@@ -54,15 +56,47 @@ export class InvestmentItem extends React.Component<IInvestmentItemProps, IInves
   }
 
   @autobind
-  private async refresh()
-  {
+  private async refresh() {
     this.setState({
       value: undefined
     });
     await InvestmentCalculationManager.refreshSymbol(this.props.item);
   }
 
+  private get costBasis() {
+    return ((this.props.item.costBasisPerShare * this.props.item.shares) - this.props.item.marginDebt);
+  }
+
+  private get gainState(): -1 | 0 | 1 {
+    let result: 0 | 1 | -1 = 0;
+    if (this.state.value) {
+      if (this.state.value > this.costBasis) {
+        result = 1;
+      } else if (this.state.value < this.costBasis) {
+        result = -1;
+      }
+    }
+    return result;
+  }
+
+  private get gainValue(): number | undefined {
+    if (this.state.value) {
+      return this.state.value - this.costBasis;
+    } else {
+      return undefined;
+    }
+  }
+
+  @autobind
+  private toggleViewMode() {
+    this.setState({
+      mode: this.state.mode === "total" ? "gain" : "total"
+    });
+  }
+
   public render() {
+    const colors = ['#e76d6d', 'unset', 'lime'];
+    const color = colors[this.gainState + 1];
     return (
       <div className={itemStyles['item-body']}>
         <ButtonGroup className="mr-2" size='sm'>
@@ -76,7 +110,11 @@ export class InvestmentItem extends React.Component<IInvestmentItemProps, IInves
             <i className="bi bi-arrow-clockwise"></i>
           </Button>
         </ButtonGroup>
-        <div>{this.props.item.symbol} : {this.state.value?.toFixed(2) ?? "..."}</div>
+        <div>
+          <span className={itemStyles.clickable} onClick={this.toggleViewMode}>{this.props.item.symbol} : &nbsp;</span>
+          {this.state.mode === "total" && <span style={{ color: color }}>{this.state.value?.toFixed(2) ?? "..."}</span>}
+          {this.state.mode === "gain" && <span style={{ color: color }}>{this.gainValue?.toFixed(2) ?? "..."}</span>}
+        </div>
       </div>
     );
   }

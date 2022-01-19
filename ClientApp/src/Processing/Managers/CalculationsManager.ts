@@ -13,12 +13,18 @@ import { InvestmentCalculationManager } from "./InvestmentCalculationManager";
 
 export type ResultPair<T> = [Map<T, number>, number];
 
+export interface InvestmentCalculation {
+  totalValue: number;
+  totalInterestOwed: number;
+  totalCostBasis: number;
+}
+
 export interface CalculationResult {
   billResults: ResultPair<Bill>;
   debtTotal: number;
   accountTotal: number;
   incomeResults: ResultPair<IncomeSource>;
-  investmentResults: { value: number, interest: number };
+  investmentResults: InvestmentCalculation;
 }
 
 type QuarterNumber = 1 | 2 | 3 | 4;
@@ -41,7 +47,7 @@ class CalculationsManager {
   }
 
   get endDate() {
-    return this._endDate;
+    return this._endDate.clone();
   }
 
   set endDate(date: Moment) {
@@ -51,12 +57,11 @@ class CalculationsManager {
 
   public async requestCalculations(): Promise<CalculationResult> {
     const start = moment().startOf('day');
-    const end = this.endDate.clone();
     let debtCost = this.calculateDebts(AppStateManager.debts);
     let accountValue = this.calculateAccountValue(AppStateManager.accounts);
-    let billCost = await this.calculateAllBillsCost(start, end, AppStateManager.bills);
-    let incomeValue = await this.calculateTotalIncome(start, end, AppStateManager.incomeSources);
-    let investmentValue = await this.calculateTotalInvestmentValue(start, end, AppStateManager.investments);
+    let billCost = await this.calculateAllBillsCost(start, this.endDate, AppStateManager.bills);
+    let incomeValue = await this.calculateTotalIncome(start, this.endDate, AppStateManager.incomeSources);
+    let investmentValue = this.calculateTotalInvestmentValue(start, this.endDate, AppStateManager.investments);
 
     let results: CalculationResult = {
       billResults: billCost,
@@ -81,18 +86,24 @@ class CalculationsManager {
     return result;
   }
 
-  private calculateTotalInvestmentValue(start: Moment, end: Moment, investments: Iterable<Investment>): { value: number, interest: number } {
-    let result = 0;
+  private calculateTotalInvestmentValue(start: Moment, end: Moment, investments: Iterable<Investment>): InvestmentCalculation {
+    let value = 0;
     let marginInterest = 0;
-    const daysBetween = start.add(1, 'day').diff(end.startOf('day'), 'days');
+    let costBasis = 0;
+    // console.log(start, end);
+    const daysBetween = Math.abs(start.diff(end, 'day'));
     for (let investment of investments) {
-      result += InvestmentCalculationManager.getExistingCalculation(investment.id) ?? 0;
-      marginInterest += (((investment.marginInterestRate * investment.marginDebt) / 360) * daysBetween)
+      value += InvestmentCalculationManager.getExistingCalculation(investment.id) ?? 0;
+      const margin = ((((investment.marginInterestRate / 100) * investment.marginDebt) / 360) * daysBetween);
+      marginInterest += margin;
+      costBasis += ((investment.costBasisPerShare * investment.shares) - investment.marginDebt);
     }
-    return {
-      value: result,
-      interest: marginInterest
+    const result: InvestmentCalculation = {
+      totalValue: value,
+      totalInterestOwed: marginInterest,
+      totalCostBasis: costBasis
     };
+    return result;
   }
 
   private calculateAccountValue(accounts: Iterable<Account>) {
