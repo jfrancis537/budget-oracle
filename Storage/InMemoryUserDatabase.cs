@@ -68,9 +68,7 @@ namespace BudgetOracle.Storage
       var user = await GetUser(username);
       if (user != null)
       {
-        var data = user.BudgetData;
-        data.StateData = state;
-        user.BudgetData = data;
+        user.StateData = state;
         database[username] = user;
       }
       else
@@ -84,9 +82,7 @@ namespace BudgetOracle.Storage
       var user = await GetUser(username);
       if (user != null)
       {
-        var data = user.BudgetData;
-        data.GroupData = groups;
-        user.BudgetData = data;
+        user.GroupData = groups;
         database[username] = user;
       }
       else

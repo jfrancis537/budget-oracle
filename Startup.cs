@@ -32,7 +32,7 @@ namespace BudgetOracle
     {
 
       services.AddControllers().AddNewtonsoftJson();
-
+      services.AddDbContext<PostgresUserDbContext>();
       if (Environment.IsDevelopment())
       {
         services.AddSingleton<IUserDatabase, InMemoryUserDatabase>();
@@ -40,7 +40,7 @@ namespace BudgetOracle
       else
       {
         //services.AddSingleton<IUserDatabase, MongoUserDatabase>();
-        services.AddSingleton<IUserDatabase, InMemoryUserDatabase>();
+        services.AddSingleton<IUserDatabase, PostgresUserDatabase>();
       }
       services.AddHttpClient();
       services.AddSingleton<IAuthFactory, AuthFactory>();

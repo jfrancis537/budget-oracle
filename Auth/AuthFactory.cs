@@ -59,11 +59,8 @@ namespace BudgetOracle.Auth
         Password = hashedPassword,
         Salt = salt,
         CreatedDate = DateTimeOffset.UtcNow,
-        BudgetData = new BudgetData
-        {
-          StateData = "",
-          GroupData = ""
-        }
+        StateData ="",
+        GroupData = ""
       });
 
       return user;

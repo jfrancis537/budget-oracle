@@ -28,7 +28,7 @@ namespace BudgetOracle_.Controllers
       var user = await userDatabase.GetUser(username);
       if (user != null)
       {
-        return Ok(user.BudgetData.StateData);
+        return Ok(user.StateData);
       }
       else
       {
@@ -46,7 +46,7 @@ namespace BudgetOracle_.Controllers
       var user = await userDatabase.GetUser(username);
       if (user != null)
       {
-        return Ok(user.BudgetData.GroupData);
+        return Ok(user.GroupData);
       }
       else
       {
