@@ -1,6 +1,4 @@
 ﻿using BudgetOracle.Models;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace BudgetOracle.Storage
@@ -8,8 +6,8 @@ namespace BudgetOracle.Storage
 
   public class PostgresUserDatabase : IUserDatabase
   {
-    private DbContext dbContext;
-    public PostgresUserDatabase(DbContext dbContext)
+    private PostgresUserDbContext dbContext;
+    public PostgresUserDatabase(PostgresUserDbContext dbContext)
     {
       this.dbContext = dbContext;
     }

@@ -5,7 +5,6 @@ import { autobind } from "../Utilities/Decorators";
 import { Tabs } from "./Tabs";
 
 import styles from "../styles/DetailedResults.module.css";
-import { AppStateManager } from "../Processing/Managers/AppStateManager";
 
 enum DetailedResultsPage {
   Expenses = "expenses",
