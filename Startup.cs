@@ -35,7 +35,7 @@ namespace BudgetOracle
       services.AddControllers().AddNewtonsoftJson();
       services.AddDbContext<PostgresUserDbContext>(options =>
       {
-       
+
         options
         .UseNpgsql($"Host=localhost;Database=budget_oracle;Username=www-data;Password={password}")
         .UseSnakeCaseNamingConvention();
