@@ -1,10 +1,12 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BudgetOracle.Models
 {
   public class User
   {
+    [Key]
     [Column("username")]
     public string Username { get; set; }
     [Column("password")]
