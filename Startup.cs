@@ -13,6 +13,7 @@ using BudgetOracle_.Providers;
 using Microsoft.AspNetCore.Http;
 using System;
 using Microsoft.Net.Http.Headers;
+using Microsoft.EntityFrameworkCore;
 
 namespace BudgetOracle
 {
@@ -30,9 +31,15 @@ namespace BudgetOracle
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-
+      var password = Configuration.GetSection("Credentials:PostgresPassword").Get<string>();
       services.AddControllers().AddNewtonsoftJson();
-      services.AddDbContext<PostgresUserDbContext>();
+      services.AddDbContext<PostgresUserDbContext>(options =>
+      {
+       
+        options
+        .UseNpgsql($"Host=localhost;Database=budget_oracle;Username=www-data;Password={password}")
+        .UseSnakeCaseNamingConvention();
+      });
       if (Environment.IsDevelopment())
       {
         services.AddSingleton<IUserDatabase, InMemoryUserDatabase>();

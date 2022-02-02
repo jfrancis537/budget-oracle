@@ -5,12 +5,10 @@ namespace BudgetOracle.Storage
 {
   public class PostgresUserDbContext : DbContext
   {
-    public DbSet<User> Users { get; set; }
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public PostgresUserDbContext(DbContextOptions<PostgresUserDbContext> options) : base(options)
     {
-      optionsBuilder
-        .UseNpgsql("Host=localhost;Database=budget_oracle;Username=www-data")
-        .UseSnakeCaseNamingConvention();
+
     }
+    public DbSet<User> Users { get; set; }
   }
 }
