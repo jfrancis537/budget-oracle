@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using System;
 
 namespace BudgetOracle.Storage
 {
@@ -9,8 +10,16 @@ namespace BudgetOracle.Storage
   {
     public PostgresUserDbContext(DbContextOptions<PostgresUserDbContext> options) : base(options)
     {
-      var dbCreator = Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
-      dbCreator.CreateTables();
+      try
+      {
+        var dbCreator = Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
+        dbCreator.CreateTables();
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine(ex.GetType().FullName);
+      }
+
     }
     public DbSet<User> Users { get; set; }
   }
