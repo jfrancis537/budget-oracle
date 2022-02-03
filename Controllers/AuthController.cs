@@ -1,7 +1,9 @@
 ﻿using BudgetOracle.Auth;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
 
 namespace BudgetOracle.Controllers
@@ -11,11 +13,22 @@ namespace BudgetOracle.Controllers
   [Authorize]
   public class AuthController : ControllerBase
   {
-
+    private static bool createdDefaultUser = false;
     private readonly IAuthFactory authFactory;
-    public AuthController(IAuthFactory authFactory)
+    public AuthController(IAuthFactory authFactory, IWebHostEnvironment env)
     {
       this.authFactory = authFactory;
+      if (env.IsDevelopment() && !createdDefaultUser)
+      {
+        Register(new RegistrationRequest()
+        {
+          Username = "user",
+          Password = "password1234",
+          ConfirmPassword = "password1234"
+        }).Wait();
+        createdDefaultUser = true;
+      }
+
     }
 
     [HttpGet]

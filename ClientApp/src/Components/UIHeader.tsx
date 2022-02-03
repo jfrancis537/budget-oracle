@@ -10,27 +10,46 @@ import { download, FileLoader } from "../Utilities/FileUtils";
 import { UserManager } from "../Processing/Managers/UserManager";
 import { LoginPrompt } from "./Prompts/LoginPrompt";
 import { autobind } from "../Utilities/Decorators";
+import { PushNotificationWorker } from "../Workers/ServiceWorkerLoader";
 
 interface IUIHeaderState {
   loginPromptVisible: boolean;
   userLoggedIn: boolean;
+  isSubscribed?: boolean;
 }
 
 export class UIHeader extends React.Component<{}, IUIHeaderState> {
 
+  private notificationWorker?: PushNotificationWorker;
+
   constructor(props: {}) {
     super(props);
-
     this.state = {
       loginPromptVisible: false,
       userLoggedIn: false
     }
-
   }
 
   componentDidMount() {
-    UserManager.onuserloggedin.addListener(() => this.setState({ userLoggedIn: true }));
-    UserManager.onuserloggedout.addListener(() => this.setState({ userLoggedIn: false }));
+    UserManager.onuserloggedin.addListener(this.handleUserLoggedIn);
+    UserManager.onuserloggedout.addListener(this.handleUserLoggedOut);
+  }
+
+  @autobind
+  private async handleUserLoggedIn() {
+    this.setState({ userLoggedIn: true });
+    this.notificationWorker = new PushNotificationWorker("/workers/PushNotificationWorker.js");
+    await this.notificationWorker.isReady;
+
+    this.setState({
+      isSubscribed: await this.notificationWorker.isSubscribed
+    });
+  }
+
+  @autobind
+  private handleUserLoggedOut() {
+    this.setState({ userLoggedIn: false });
+    this.notificationWorker = undefined;
   }
 
   @autobind
@@ -130,12 +149,34 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
     UserManager.logout();
   }
 
+  @autobind
+  private async handleToggleSubscription() {
+    if (this.state.isSubscribed) {
+      let result = !!(await this.notificationWorker?.unsubscribe());
+      if (result) {
+        this.setState({
+          isSubscribed: false
+        });
+      }
+    } else {
+      let result = !!(await this.notificationWorker?.subscribe());
+      if (result) {
+        this.setState({
+          isSubscribed: true
+        });
+      }
+    }
+  }
+
   private renderSettings() {
     if (!this.state.userLoggedIn) {
       return null;
     } else {
       return (
         <NavDropdown title="Settings" id='settings_dropdown'>
+          <NavDropdown.Header>Notifications</NavDropdown.Header>
+          <NavDropdown.Item disabled={this.state.isSubscribed === undefined} onClick={this.handleToggleSubscription}>{this.state.isSubscribed ? "Unsubscribe" : "Subscribe"}</NavDropdown.Item>
+          <NavDropdown.Divider />
           <NavDropdown.Item disabled onClick={() => { }}>Reset Password</NavDropdown.Item>
         </NavDropdown>
       )

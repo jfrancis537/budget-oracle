@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Http;
 using System;
 using Microsoft.Net.Http.Headers;
 using Microsoft.EntityFrameworkCore;
+using BudgetOracle.Configuration;
+using BudgetOracle.Services;
 
 namespace BudgetOracle
 {
@@ -31,6 +33,8 @@ namespace BudgetOracle
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
+      services.Configure<PushNotificationConfiguration>(Configuration.GetSection("Credentials"));
+
       var password = Configuration.GetSection("Credentials:PostgresPassword").Get<string>();
       services.AddControllers().AddNewtonsoftJson();
       services.AddDbContext<PostgresUserDbContext>(options =>
@@ -53,6 +57,7 @@ namespace BudgetOracle
       services.AddSingleton<IAuthFactory, AuthFactory>();
       services.AddSingleton<IStockDataProvider, YahooFinanceAPIProvider>();
       services.AddAntiforgery();
+      services.AddSingleton<PushNotificationService>();
       services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
       {
         options.TokenValidationParameters = new TokenValidationParameters
