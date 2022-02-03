@@ -83,6 +83,10 @@ export class LoginPrompt extends React.Component<ILoginPromptProps, ILoginPrompt
         this.setState({
           errorMessage: err.message
         });
+      } else {
+        this.setState({
+          errorMessage: "An unknown error has occured..."
+        });
       }
     }
     this.setState({
@@ -101,6 +105,10 @@ export class LoginPrompt extends React.Component<ILoginPromptProps, ILoginPrompt
       if (err instanceof Error) {
         this.setState({
           errorMessage: err.message
+        });
+      } else {
+        this.setState({
+          errorMessage: "An unknown error has occured..."
         });
       }
     }

@@ -1,15 +1,7 @@
-﻿using BudgetOracle.Extensions.Http;
-using BudgetOracle.Services;
+﻿using BudgetOracle.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Concurrent;
-using System.Net;
-using System.Net.Http;
-using System.Security.Cryptography;
-using System.Text;
 using WebPush;
 
 namespace BudgetOracle_.Controllers

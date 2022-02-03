@@ -1,5 +1,6 @@
 import { AuthAPI } from "../../APIs/AuthAPI";
 import { Action } from "../../Utilities/Action";
+import { AuthorizationError } from "../../Utilities/Errors/AuthorizationError";
 
 class UserManager {
   public readonly onuserloggedin: Action<void>;
@@ -40,8 +41,18 @@ class UserManager {
   }
 
   public async logout() {
-    await AuthAPI.logout();
-    this.onuserloggedout.invoke();
+    try {
+      await AuthAPI.logout();
+    } catch (err) {
+      if (err instanceof AuthorizationError) {
+        //TODO
+      } else {
+        //TODO
+      }
+    } finally {
+      this._username = undefined;
+      this.onuserloggedout.invoke();
+    }
   }
 
   public async register(username: string, password: string, confirmPassword: string) {

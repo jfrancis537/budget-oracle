@@ -1,3 +1,5 @@
+import {AuthorizationError} from '../Utilities/Errors/AuthorizationError';
+
 export namespace AuthAPI {
   export async function getUsername() {
     let url = "/api/auth/username";
@@ -51,7 +53,12 @@ export namespace AuthAPI {
     let response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error("Unknown server error.");
+      if(response.status === 401 || response.status === 403)
+      {
+        throw new AuthorizationError("Not logged in");
+      } else {
+        throw new Error("Unknown server error.");
+      }
     }
   }
 }

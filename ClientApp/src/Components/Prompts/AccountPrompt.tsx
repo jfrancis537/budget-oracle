@@ -12,7 +12,8 @@ export interface IAccountPromptProps {
 interface AccountPromptState {
   name: string,
   value: number,
-  isSaving: boolean
+  isSaving: boolean,
+  error?: string
 }
 
 export class AccountPrompt extends React.Component<IAccountPromptProps, AccountPromptState> {
@@ -62,12 +63,20 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
   }
 
   private async accept() {
-    if (this.props.editing) {
-      await AppStateManager.updateAccount(this.props.accountToEdit, this.state.name, this.state.value);
-    } else {
-      await AppStateManager.addAccount(this.state.name, this.state.value);
+    try {
+      if (this.props.editing) {
+        await AppStateManager.updateAccount(this.props.accountToEdit, this.state.name, this.state.value);
+      } else {
+        await AppStateManager.addAccount(this.state.name, this.state.value);
+      }
+      PromptManager.requestClosePrompt();
+    } catch (err)
+    {
+      console.log(err);
+      this.setState({
+        error: "Failed to update"
+      });
     }
-    PromptManager.requestClosePrompt();
   }
 
   private cancel() {
@@ -109,7 +118,7 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
           <Button variant="secondary" onClick={this.cancel}>
             Cancel
           </Button>
-          <LoadingButton isLoading={this.state.isSaving} loadingText="Saving..." variant="primary" onClick={this.accept} disabled={!this.state.name || this.state.isSaving}>
+          <LoadingButton isLoading={this.state.isSaving} loadingText="Saving..." variant={this.state.error ? "danger" : "primary"} onClick={this.accept} disabled={!this.state.name || this.state.isSaving}>
             {this.props.editing ? "Update" : "Add"}
           </LoadingButton>
         </Modal.Footer>

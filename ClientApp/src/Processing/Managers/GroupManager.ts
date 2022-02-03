@@ -154,7 +154,6 @@ class GroupManager {
       } catch (err) {
         if (err instanceof AuthorizationError) {
           await UserManager.logout();
-          alert("Please login again");
         }
       }
 
@@ -227,7 +226,6 @@ class GroupManager {
       } catch (err) {
         if (err instanceof AuthorizationError) {
           await UserManager.logout();
-          alert("Please login again");
         }
       }
 
