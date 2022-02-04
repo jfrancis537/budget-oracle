@@ -7,7 +7,7 @@
     <IsPackable>false</IsPackable>
     <SpaRoot>ClientApp\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
-    <RootNamespace>BudgetOracle_</RootNamespace>
+    <RootNamespace>BudgetOracle</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

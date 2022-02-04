@@ -123,18 +123,30 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
   }
 
   private renderStats() {
-    return (
-      <Col>
-        <div>
-          <label>Investments Value:&nbsp;</label>
-          <span>${this.props.calculations?.investmentResults.totalValue.toFixed(2)}</span>
-        </div>
-        <div>
-          <label>Investments Cost Basis:&nbsp;</label>
-          <span>${this.props.calculations?.investmentResults.totalCostBasis.toFixed(2)}</span>
-        </div>
-      </Col>
-    );
+    if (this.props.calculations) {
+      const totalValue = this.props.calculations?.investmentResults.totalValue;
+      const totalCost = this.props.calculations?.investmentResults.totalCostBasis;
+      const totalGain = totalValue - totalCost;
+      return (
+        <Col>
+          <h3>Investments</h3>
+          <div>
+            <label>Total Value:&nbsp;</label>
+            <span>${totalValue.toFixed(2)}</span>
+          </div>
+          <div>
+            <label>Total Cost Basis:&nbsp;</label>
+            <span>${totalCost}</span>
+          </div>
+          <div>
+            <label>{"Total Gain: "}</label>
+            <span>${totalGain.toFixed(2)}</span>
+          </div>
+        </Col>
+      );
+    } else {
+      return null;
+    }
   }
 
   private renderContent() {
