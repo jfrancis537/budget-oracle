@@ -13,6 +13,7 @@ interface ResultsBarState {
   calculations?: CalculationResult
   drawerOpen: boolean;
   drawerTransitioning: boolean;
+  displayUnrealized: boolean;
 }
 
 export class ResultsBar extends React.Component<{}, ResultsBarState> {
@@ -22,7 +23,8 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
     this.state = {
       calculations: undefined,
       drawerOpen: false,
-      drawerTransitioning: false
+      drawerTransitioning: false,
+      displayUnrealized: false
     }
   }
 
@@ -53,19 +55,29 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
         calcs.incomeResults[1] -
         calcs.debtTotal -
         calcs.billResults[1] +
-        Math.floor(calcs.investmentResults.totalValue) -
-        Math.floor(calcs.investmentResults.totalInterestOwed);
+        (this.state.displayUnrealized ? calcs.investmentResults.totalValue : calcs.investmentResults.totalCostBasis) -
+        calcs.investmentResults.totalInterestOwed
+
+      const hasGain = calcs.investmentResults.totalValue > calcs.investmentResults.totalCostBasis;
+      const color = this.state.displayUnrealized ? (hasGain ? "lime" : "red") : undefined;
       return (
         <>
           <div className={barStyles['item']}>Expenses: ${(calcs.billResults[1] + calcs.investmentResults.totalInterestOwed).toFixed(2)}</div>
           <div className={barStyles['item']}>Income: ${calcs.incomeResults[1]}</div>
-          <div className={barStyles['item']}>Existing: ${(calcs.accountTotal + calcs.investmentResults.totalValue).toFixed(2)}</div>
-          <div className={barStyles['item']}>Total: ${totals}</div>
+          <div onClick={this.toggleDisplayUnrealized} className={`${barStyles['item']}`} style={{ color: color, cursor: "pointer" }} >Total: ${totals.toFixed(2)}</div>
         </>
       )
     } else {
       return <div className={barStyles['item']}>Results</div>
     }
+  }
+
+  @autobind
+  private toggleDisplayUnrealized(event: React.MouseEvent<HTMLDivElement>) {
+    event.stopPropagation();
+    this.setState({
+      displayUnrealized: !this.state.displayUnrealized
+    });
   }
 
   @autobind

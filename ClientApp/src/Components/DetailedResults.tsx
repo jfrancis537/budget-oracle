@@ -139,8 +139,12 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
             <span>${totalCost}</span>
           </div>
           <div>
-            <label>{"Total Gain: "}</label>
+            <label>Total Gain:&nbsp;</label>
             <span>${totalGain.toFixed(2)}</span>
+          </div>
+          <div>
+            <label>Total Gain (After LT Taxes):&nbsp;</label>
+            <span>${(totalGain * .85).toFixed(2)}</span>
           </div>
         </Col>
       );
