@@ -136,7 +136,7 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
           </div>
           <div>
             <label>Total Cost Basis:&nbsp;</label>
-            <span>${totalCost}</span>
+            <span>${totalCost.toFixed(2)}</span>
           </div>
           <div>
             <label>Total Gain:&nbsp;</label>
