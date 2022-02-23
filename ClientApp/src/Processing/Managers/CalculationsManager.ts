@@ -17,6 +17,7 @@ export interface InvestmentCalculation {
   totalValue: number;
   totalInterestOwed: number;
   totalCostBasis: number;
+  totalUnrealizedLosses: number;
 }
 
 export interface CalculationResult {
@@ -90,18 +91,25 @@ class CalculationsManager {
     let value = 0;
     let marginInterest = 0;
     let costBasis = 0;
+    let totalUnrealizedLosses = 0;
     // console.log(start, end);
     const daysBetween = Math.abs(start.diff(end, 'day'));
     for (let investment of investments) {
-      value += InvestmentCalculationManager.getExistingCalculation(investment.id) ?? 0;
+      const investmentValue = InvestmentCalculationManager.getExistingCalculation(investment.id) ?? 0;
+      value += investmentValue
       const margin = ((((investment.marginInterestRate / 100) * investment.marginDebt) / 360) * daysBetween);
       marginInterest += margin;
-      costBasis += ((investment.costBasisPerShare * investment.shares) - investment.marginDebt);
+      const investmentCostBasis = (investment.costBasisPerShare * investment.shares) - investment.marginDebt;
+      costBasis += investmentCostBasis;
+      if ((investmentValue - investmentCostBasis) < 0) {
+        totalUnrealizedLosses += (investmentValue - investmentCostBasis);
+      }
     }
     const result: InvestmentCalculation = {
       totalValue: value,
       totalInterestOwed: marginInterest,
-      totalCostBasis: costBasis
+      totalCostBasis: costBasis,
+      totalUnrealizedLosses: totalUnrealizedLosses
     };
     return result;
   }
