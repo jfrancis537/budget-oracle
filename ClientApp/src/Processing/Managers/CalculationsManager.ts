@@ -109,7 +109,7 @@ class CalculationsManager {
       totalValue: value,
       totalInterestOwed: marginInterest,
       totalCostBasis: costBasis,
-      totalUnrealizedLosses: totalUnrealizedLosses
+      totalUnrealizedLosses: Math.abs(totalUnrealizedLosses)
     };
     return result;
   }
