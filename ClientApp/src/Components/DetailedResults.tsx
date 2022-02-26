@@ -75,25 +75,43 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
   private renderExpenseResults() {
     if (this.props.calculations) {
       let resultMap = this.props.calculations.billResults.allBills[0];
-      let components: JSX.Element[] = [];
+      let avoidable: JSX.Element[] = [];
+      let unavoidable: JSX.Element[] = [];
       for (let [bill, cost] of resultMap) {
-        components.push(
-          <div key={bill.id}>
-            <label>{bill.name}:&nbsp;</label>
-            <span>${cost}</span>
-          </div>
-        );
+        if (bill.unavoidable) {
+          unavoidable.push(
+            <div key={bill.id}>
+              <label>{bill.name}:&nbsp;</label>
+              <span>${cost}</span>
+            </div>
+          );
+        } else {
+          avoidable.push(
+            <div key={bill.id}>
+              <label>{bill.name}:&nbsp;</label>
+              <span>${cost}</span>
+            </div>
+          );
+        }
+
       }
-      components.push(
+      unavoidable.push(
         <div key='Investment Margin Interest'>
           <label>{"Margin Interest"}:&nbsp;</label>
           <span>${this.props.calculations.investmentResults.totalInterestOwed.toFixed(2)}</span>
         </div>
       );
       return (
-        <Col>
-          {components}
-        </Col>
+        <>
+          <Col>
+            <h4>Avoidable</h4>
+            {avoidable}
+          </Col>
+          <Col>
+            <h4>Unavoidable</h4>
+            {unavoidable}
+          </Col>
+        </>
       );
     } else {
       return null;
@@ -134,7 +152,7 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
       return (
         <>
           <Col>
-            <h3>Investments</h3>
+            <h4>Investments</h4>
             <div>
               <label>Total Value:&nbsp;</label>
               <span>${totalInvestmentValue.toFixed(2)}</span>
@@ -153,7 +171,7 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
             </div>
           </Col>
           <Col>
-            <h3>Bills</h3>
+            <h4>Bills</h4>
             <div>
               <label>Unavoidable Costs</label>
               <span>${unavoidableCosts.toFixed(2)}</span>
