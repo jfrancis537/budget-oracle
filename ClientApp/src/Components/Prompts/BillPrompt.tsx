@@ -1,10 +1,12 @@
 import moment, { Moment } from "moment";
 import React from "react"
+import { Form } from "react-bootstrap";
 import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
 import { FrequencyType } from "../../Processing/Enums/FrequencyType";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { GroupManager, GroupType } from "../../Processing/Managers/GroupManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
+import { autobind } from "../../Utilities/Decorators";
 import { LoadingButton } from "./LoadingButton";
 
 export interface IBillPromptProps {
@@ -19,6 +21,7 @@ interface BillPromptState {
   frequency: number,
   frequencyType: FrequencyType,
   initalDate: Moment,
+  unavoidable: boolean,
   isSaving: boolean
 }
 
@@ -37,6 +40,7 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
           frequencyType: bill.frequencyType,
           frequency: bill.frequency,
           initalDate: bill.initialDate,
+          unavoidable: bill.unavoidable,
           isSaving: false
         }
       } else {
@@ -49,25 +53,27 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
         initalDate: moment(),
         frequency: 1,
         frequencyType: FrequencyType.Monthly,
-        isSaving: false
+        isSaving: false,
+        unavoidable: false
       };
     }
-
-    this.accept = this.accept.bind(this);
-    this.cancel = this.cancel.bind(this);
-    this.handleNameChanged = this.handleNameChanged.bind(this);
-    this.handleValueChanged = this.handleValueChanged.bind(this);
-    this.handleDateChanged = this.handleDateChanged.bind(this);
-    this.handleFrequencyTypeChanged = this.handleFrequencyTypeChanged.bind(this);
-    this.handleFrequencyChanged = this.handleFrequencyChanged.bind(this);
   }
 
+  @autobind
   private handleNameChanged(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
       name: event.target.value
     });
   }
 
+  @autobind
+  private handleUnavoidableChanged(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({
+      unavoidable: event.target.checked
+    });
+  }
+
+  @autobind
   private handleValueChanged(event: React.ChangeEvent<HTMLInputElement>) {
     const newValue = Number(event.target.value);
     if (!isNaN(newValue)) {
@@ -77,6 +83,7 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
     }
   }
 
+  @autobind
   private handleDateChanged(event: React.ChangeEvent<HTMLInputElement>) {
     const value = moment(event.target.value);
     if (value.isValid()) {
@@ -86,6 +93,7 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
     }
   }
 
+  @autobind
   private handleFrequencyTypeChanged(event: React.ChangeEvent<HTMLInputElement>) {
     const newValue = Number(event.target.value);
     if (!isNaN(newValue)) {
@@ -95,6 +103,7 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
     }
   }
 
+  @autobind
   private handleFrequencyChanged(event: React.ChangeEvent<HTMLInputElement>) {
     const newValue = Number(event.target.value);
     if (!isNaN(newValue)) {
@@ -104,6 +113,7 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
     }
   }
 
+  @autobind
   private async accept() {
     this.setState({
       isSaving: true
@@ -115,7 +125,8 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
         this.state.value,
         this.state.frequency,
         this.state.frequencyType,
-        this.state.initalDate
+        this.state.initalDate,
+        this.state.unavoidable
       );
     } else {
       let billId = await AppStateManager.addBill(
@@ -123,7 +134,8 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
         this.state.value,
         this.state.frequency,
         this.state.frequencyType,
-        this.state.initalDate
+        this.state.initalDate,
+        this.state.unavoidable
       );
       await GroupManager.addItemToGroup(billId, GroupType.Bill, this.props.groupName);
     }
@@ -133,6 +145,7 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
     PromptManager.requestClosePrompt();
   }
 
+  @autobind
   private cancel() {
     PromptManager.requestClosePrompt();
   }
@@ -202,6 +215,17 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
               onChange={this.handleDateChanged}
               value={this.state.initalDate.format("YYYY-MM-DD")}
             />
+          </InputGroup>
+          <InputGroup>
+            <Form.Group>
+              <Form.Check
+                label="Unavoidable"
+                type="checkbox"
+                aria-label="unavoiadable bill"
+                onChange={this.handleUnavoidableChanged}
+                checked={this.state.unavoidable}
+              />
+            </Form.Group>
           </InputGroup>
         </Modal.Body>
         <Modal.Footer>

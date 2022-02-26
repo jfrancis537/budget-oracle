@@ -9,6 +9,7 @@ interface BillOptions extends IdentifiableOptions{
   frequencyType: FrequencyType;
   initialDate: Moment;
   name: string;
+  unavoidable: boolean;
 }
 
 export interface SerializedBill extends SerializedIdentifiable{
@@ -17,6 +18,7 @@ export interface SerializedBill extends SerializedIdentifiable{
   frequencyType: number;
   initialDate: string;
   name: string;
+  unavoidable: boolean;
 }
 
 export class Bill extends Identifiable implements IValued {
@@ -26,6 +28,7 @@ export class Bill extends Identifiable implements IValued {
   readonly frequencyType: FrequencyType;
   readonly initialDate: Moment;
   readonly name: string;
+  readonly unavoidable: boolean;
 
   constructor(options: BillOptions) {
     super(options);
@@ -34,6 +37,7 @@ export class Bill extends Identifiable implements IValued {
     this.frequencyType = options.frequencyType;
     this.initialDate = options.initialDate;
     this.name = options.name;
+    this.unavoidable = options.unavoidable;
   }
 
   static deserialize(data: SerializedBill): Bill {
@@ -43,7 +47,8 @@ export class Bill extends Identifiable implements IValued {
       id: data.id,
       initialDate: moment(data.initialDate),
       amount: data.amount,
-      frequencyType: data.frequencyType
+      frequencyType: data.frequencyType,
+      unavoidable: !!data.unavoidable
     });
   }
 

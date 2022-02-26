@@ -20,8 +20,13 @@ export interface InvestmentCalculation {
   totalUnrealizedLosses: number;
 }
 
+export interface BillCalculation {
+  allBills: ResultPair<Bill>;
+  unavoidableBills: ResultPair<Bill>;
+}
+
 export interface CalculationResult {
-  billResults: ResultPair<Bill>;
+  billResults: BillCalculation;
   debtTotal: number;
   accountTotal: number;
   incomeResults: ResultPair<IncomeSource>;
@@ -60,12 +65,16 @@ class CalculationsManager {
     const start = moment().startOf('day');
     let debtCost = this.calculateDebts(AppStateManager.debts);
     let accountValue = this.calculateAccountValue(AppStateManager.accounts);
-    let billCost = await this.calculateAllBillsCost(start, this.endDate, AppStateManager.bills);
+    let allBillCost = await this.calculateAllBillsCost(start, this.endDate, AppStateManager.bills);
+    let unavoidableBillCost = await this.calculateAllBillsCost(start, this.endDate, [...AppStateManager.bills].filter(bill => bill.unavoidable));
     let incomeValue = await this.calculateTotalIncome(start, this.endDate, AppStateManager.incomeSources);
     let investmentValue = this.calculateTotalInvestmentValue(start, this.endDate, AppStateManager.investments);
 
     let results: CalculationResult = {
-      billResults: billCost,
+      billResults: {
+        allBills: allBillCost,
+        unavoidableBills: unavoidableBillCost
+      },
       debtTotal: debtCost,
       accountTotal: accountValue,
       incomeResults: incomeValue,

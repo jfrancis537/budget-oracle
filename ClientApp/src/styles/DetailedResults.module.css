@@ -7,8 +7,14 @@
   width: 100%;
 }
 
+.content-row {
+  overflow-y: scroll;
+}
+
 .content {
   overflow: hidden;
   transition: ease-in-out .35s height;
   height: auto;
+  flex: 1;
+  display: flex;
 }

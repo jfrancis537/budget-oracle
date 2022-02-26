@@ -74,7 +74,7 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
 
   private renderExpenseResults() {
     if (this.props.calculations) {
-      let resultMap = this.props.calculations.billResults[0];
+      let resultMap = this.props.calculations.billResults.allBills[0];
       let components: JSX.Element[] = [];
       for (let [bill, cost] of resultMap) {
         components.push(
@@ -124,29 +124,46 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
 
   private renderStats() {
     if (this.props.calculations) {
-      const totalValue = this.props.calculations?.investmentResults.totalValue;
-      const totalCost = this.props.calculations?.investmentResults.totalCostBasis;
-      const totalGain = totalValue - totalCost;
+      const totalInvestmentValue = this.props.calculations?.investmentResults.totalValue;
+      const totalInvestmentCost = this.props.calculations?.investmentResults.totalCostBasis;
+      const totalInvestmentGain = totalInvestmentValue - totalInvestmentCost;
+
+      const billCalcs = this.props.calculations.billResults;
+      const unavoidableCosts = billCalcs.unavoidableBills[1];
+      const avoidableCosts = billCalcs.allBills[1] - unavoidableCosts;
       return (
-        <Col>
-          <h3>Investments</h3>
-          <div>
-            <label>Total Value:&nbsp;</label>
-            <span>${totalValue.toFixed(2)}</span>
-          </div>
-          <div>
-            <label>Total Cost Basis:&nbsp;</label>
-            <span>${totalCost.toFixed(2)}</span>
-          </div>
-          <div>
-            <label>Total Gain:&nbsp;</label>
-            <span>${totalGain.toFixed(2)}</span>
-          </div>
-          <div>
-            <label>Total Gain (After LT Taxes):&nbsp;</label>
-            <span>${(totalGain * .85).toFixed(2)}</span>
-          </div>
-        </Col>
+        <>
+          <Col>
+            <h3>Investments</h3>
+            <div>
+              <label>Total Value:&nbsp;</label>
+              <span>${totalInvestmentValue.toFixed(2)}</span>
+            </div>
+            <div>
+              <label>Total Cost Basis:&nbsp;</label>
+              <span>${totalInvestmentCost.toFixed(2)}</span>
+            </div>
+            <div>
+              <label>Total Gain:&nbsp;</label>
+              <span>${totalInvestmentGain.toFixed(2)}</span>
+            </div>
+            <div>
+              <label>Total Gain (After LT Taxes):&nbsp;</label>
+              <span>${(totalInvestmentGain * .85).toFixed(2)}</span>
+            </div>
+          </Col>
+          <Col>
+            <h3>Bills</h3>
+            <div>
+              <label>Unavoidable Costs</label>
+              <span>${unavoidableCosts.toFixed(2)}</span>
+            </div>
+            <div>
+              <label>Avoidable Costs</label>
+              <span>${avoidableCosts.toFixed(2)}</span>
+            </div>
+          </Col>
+        </>
       );
     } else {
       return null;
@@ -177,12 +194,14 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
       [DetailedResultsPage.Statistics, "Statistics"]
     ]);
 
+    const windowHeight = Math.floor(window.document.body.clientHeight * .7);
     return (
+
       <>
         <Row className={styles["nav-container-row"]}>
           <Tabs currentTab={this.state.page} onChange={this.handlePageChange} options={options} className={styles["nav"]} />
         </Row>
-        <Row>
+        <Row className={styles["content-row"]} style={{ maxHeight: `${windowHeight}px` }}>
           <div ref={this.contentDivRef} className={styles.content}>
             {this.renderContent()}
           </div>

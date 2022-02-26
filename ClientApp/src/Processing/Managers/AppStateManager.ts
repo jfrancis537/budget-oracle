@@ -189,7 +189,8 @@ class AppStateManager {
     amount: number,
     frequency: number,
     frequencyType: FrequencyType,
-    initialDate: Moment
+    initialDate: Moment,
+    unavoidable: boolean
   ) {
     const bill = new Bill({
       name: name,
@@ -197,7 +198,8 @@ class AppStateManager {
       frequencyType: frequencyType,
       frequency: frequency,
       initialDate: initialDate,
-      id: id
+      id: id,
+      unavoidable: unavoidable
     });
     this._bills.set(bill.id, bill);
     this.onbillsupdated.invoke(this.bills);
@@ -209,9 +211,10 @@ class AppStateManager {
     amount: number,
     frequency: number,
     frequencyType: FrequencyType,
-    initialDate: Moment
+    initialDate: Moment,
+    unavoidable: boolean
   ) {
-    return await this.updateBill(undefined, name, amount, frequency, frequencyType, initialDate);
+    return await this.updateBill(undefined, name, amount, frequency, frequencyType, initialDate, unavoidable);
   }
 
   //INCOME SOURCES

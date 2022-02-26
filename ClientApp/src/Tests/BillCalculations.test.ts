@@ -10,7 +10,8 @@ describe('Bill calc weekly - simple', () => {
     frequency: 1,
     frequencyType: FrequencyType.Weekly,
     initialDate: moment('2021-09-01'),
-    name: 'SampleBill'
+    name: 'SampleBill',
+    unavoidable: false
   });
   var bills = new Set([
     bill
@@ -43,7 +44,8 @@ describe('Bill calc daily', () => {
     frequency: 1,
     frequencyType: FrequencyType.Daily,
     initialDate: moment('2021-09-01'),
-    name: 'SampleBill'
+    name: 'SampleBill',
+    unavoidable: false
   }
   var bills = new Set<Bill>();
   test('Start after bill date', async () => {
@@ -101,7 +103,8 @@ describe('Bill calc weekly - intervals', () => {
     frequency: 2,
     frequencyType: FrequencyType.Weekly,
     initialDate: moment('2021-09-01'),
-    name: 'SampleBill'
+    name: 'SampleBill',
+    unavoidable: false
   };
   var bills = new Set<Bill>();
   test('Bi-weekly', async () => {
@@ -174,7 +177,8 @@ describe('Bill calc monthly - Simple', () => {
     frequency: 1,
     frequencyType: FrequencyType.Monthly,
     initialDate: moment('2021-09-02'),
-    name: 'SampleBill'
+    name: 'SampleBill',
+    unavoidable: false
   };
   var bills = new Set<Bill>();
   test('Start Before, End Before', async () => {
@@ -209,7 +213,8 @@ describe('Bill calc monthly - Intervals', () => {
     frequency: 1,
     frequencyType: FrequencyType.Monthly,
     initialDate: moment('2021-09-02'),
-    name: 'SampleBill'
+    name: 'SampleBill',
+    unavoidable: false
   };
   var bills = new Set<Bill>();
   test('Bi-Monthly, End Before', async () => {
@@ -254,7 +259,8 @@ describe('Bill calc Anually - Simple', () => {
     frequency: 1,
     frequencyType: FrequencyType.Anually,
     initialDate: moment('2020-03-02'),
-    name: 'SampleBill'
+    name: 'SampleBill',
+    unavoidable: false
   };
   var bills = new Set<Bill>();
   test('Start Before, End Before', async () => {
@@ -289,7 +295,8 @@ describe('Bill calc Anually - Intervals', () => {
     frequency: 1,
     frequencyType: FrequencyType.Anually,
     initialDate: moment('2018-05-20'),
-    name: 'SampleBill'
+    name: 'SampleBill',
+    unavoidable: false
   };
   var bills = new Set<Bill>();
   test('Bi-Anually, Start After, End Before', async () => {

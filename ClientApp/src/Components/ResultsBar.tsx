@@ -54,7 +54,7 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
         calcs.accountTotal +
         calcs.incomeResults[1] -
         calcs.debtTotal -
-        calcs.billResults[1] +
+        calcs.billResults.allBills[1] +
         (this.state.displayUnrealized ? calcs.investmentResults.totalValue : calcs.investmentResults.totalCostBasis) -
         calcs.investmentResults.totalInterestOwed - calcs.investmentResults.totalUnrealizedLosses;
 
@@ -62,7 +62,7 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
       const color = this.state.displayUnrealized ? (hasGain ? "lime" : "red") : undefined;
       return (
         <>
-          <div className={barStyles['item']}>Expenses: ${(calcs.billResults[1] + calcs.investmentResults.totalInterestOwed).toFixed(2)}</div>
+          <div className={barStyles['item']}>Expenses: ${(calcs.billResults.allBills[1] + calcs.investmentResults.totalInterestOwed).toFixed(2)}</div>
           <div className={barStyles['item']}>Income: ${calcs.incomeResults[1]}</div>
           <div onClick={this.toggleDisplayUnrealized} className={`${barStyles['item']}`} style={{ color: color, cursor: "pointer" }} >Total: ${totals.toFixed(2)}</div>
         </>
