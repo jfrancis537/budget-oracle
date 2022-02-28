@@ -20,7 +20,7 @@ describe('Income Calc Weekly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-09-25"), sources.values()
     );
-    expect(result).toEqual(40);
+    expect(result[1]).toEqual(40);
   });
 
   test('Start much Before, End Just After', async () => {
@@ -29,7 +29,7 @@ describe('Income Calc Weekly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-08-28"), moment("2021-09-25"), sources.values()
     );
-    expect(result).toEqual(40);
+    expect(result[1]).toEqual(40);
   });
 
 
@@ -39,7 +39,7 @@ describe('Income Calc Weekly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-04"), moment("2021-09-25"), sources.values()
     );
-    expect(result).toEqual(30);
+    expect(result[1]).toEqual(30);
   });
 
   test('Start Just After, End Just Before', async () => {
@@ -48,7 +48,7 @@ describe('Income Calc Weekly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-08-28"), moment("2021-09-23"), sources.values()
     );
-    expect(result).toEqual(30);
+    expect(result[1]).toEqual(30);
   });
   test('Start Just After, End Much Before', async () => {
     sources.clear();
@@ -56,7 +56,7 @@ describe('Income Calc Weekly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-08-28"), moment("2021-09-20"), sources.values()
     );
-    expect(result).toEqual(30);
+    expect(result[1]).toEqual(30);
   });
 
   test('Paid Today', async () => {
@@ -65,7 +65,7 @@ describe('Income Calc Weekly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-10-29"), moment("2021-11-02"), sources.values()
     );
-    expect(result).toEqual(0);
+    expect(result[1]).toEqual(0);
   });
 });
 
@@ -88,7 +88,7 @@ describe('Income Calc Bi-Weekly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-09-02"), sources.values()
     );
-    expect(result).toEqual(0);
+    expect(result[1]).toEqual(0);
   });
 
   test('Even w/ start in pay week', async () => {
@@ -99,7 +99,7 @@ describe('Income Calc Bi-Weekly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-10-02"), sources.values()
     );
-    expect(result).toEqual(30);
+    expect(result[1]).toEqual(30);
   });
 
   test('odd w/ Start in pay week', async () => {
@@ -108,7 +108,7 @@ describe('Income Calc Bi-Weekly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-08"), moment("2021-10-09"), sources.values()
     );
-    expect(result).toEqual(30);
+    expect(result[1]).toEqual(30);
   });
 
   test('Even w/ start not in pay week', async () => {
@@ -119,7 +119,7 @@ describe('Income Calc Bi-Weekly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-08"), moment("2021-10-09"), sources.values()
     );
-    expect(result).toEqual(20);
+    expect(result[1]).toEqual(20);
   });
 
   test('odd w/ Start not in pay week', async () => {
@@ -128,7 +128,7 @@ describe('Income Calc Bi-Weekly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-10-02"), sources.values()
     );
-    expect(result).toEqual(20);
+    expect(result[1]).toEqual(20);
   });
 
   test('Paid Today', async () => {
@@ -137,7 +137,7 @@ describe('Income Calc Bi-Weekly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-10-29"), moment("2021-11-02"), sources.values()
     );
-    expect(result).toEqual(0);
+    expect(result[1]).toEqual(0);
   });
 });
 
@@ -160,7 +160,7 @@ describe('Income Calc Semi-Monthly', () => {
       moment("2021-10-29"), moment("2021-10-29"), sources.values()
     );
     TestLogger.setLogsEnabled(false);
-    expect(result).toEqual(0);
+    expect(result[1]).toEqual(0);
   });
 
   test('Paid Today, end next day, Middle of month', async () => {
@@ -171,7 +171,7 @@ describe('Income Calc Semi-Monthly', () => {
       moment("2021-10-29"), moment("2021-10-29"), sources.values()
     );
     TestLogger.setLogsEnabled(false);
-    expect(result).toEqual(0);
+    expect(result[1]).toEqual(0);
   });
 
   test('Middle of Month, 1st of start last of end', async () => {
@@ -181,7 +181,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-12-31"), sources.values()
     );
-    expect(result).toEqual(80);
+    expect(result[1]).toEqual(80);
   });
 
   test('Middle of Month, Miss First Check', async () => {
@@ -191,7 +191,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-16"), moment("2021-12-31"), sources.values()
     );
-    expect(result).toEqual(70);
+    expect(result[1]).toEqual(70);
   });
 
   test('Middle of Month, Miss Last Check', async () => {
@@ -201,7 +201,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-12-30"), sources.values()
     );
-    expect(result).toEqual(70);
+    expect(result[1]).toEqual(70);
   });
 
   test('Middle of Month, Miss 1 Check each side', async () => {
@@ -211,7 +211,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-16"), moment("2021-12-30"), sources.values()
     );
-    expect(result).toEqual(60);
+    expect(result[1]).toEqual(60);
   });
 
   test('Start of Month, 1st of start last of end', async () => {
@@ -222,7 +222,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-08-31"), moment("2021-12-31"), sources.values()
     );
-    expect(result).toEqual(80);
+    expect(result[1]).toEqual(80);
   });
 
   test('Start of Month, Miss First Check', async () => {
@@ -233,7 +233,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-02"), moment("2021-12-31"), sources.values()
     );
-    expect(result).toEqual(70);
+    expect(result[1]).toEqual(70);
   });
 
   test('Start of Month, Miss Last Check', async () => {
@@ -244,7 +244,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-08-31"), moment("2021-12-13"), sources.values()
     );
-    expect(result).toEqual(70);
+    expect(result[1]).toEqual(70);
   });
 
   test('Start of Month, Miss 1 check each side', async () => {
@@ -255,7 +255,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-02"), moment("2021-12-13"), sources.values()
     );
-    expect(result).toEqual(60);
+    expect(result[1]).toEqual(60);
   });
 
   test('Weekend pushes before start', async () => {
@@ -265,7 +265,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2022-01-15"), moment("2022-03-31"), sources.values()
     );
-    expect(result).toEqual(50);
+    expect(result[1]).toEqual(50);
   });
 
   test('Weekend pushes before start, pays on weekends', async () => {
@@ -276,7 +276,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2022-01-01"), moment("2022-03-31"), sources.values()
     );
-    expect(result).toEqual(60);
+    expect(result[1]).toEqual(60);
   });
 
   test('Weekend pushes to end', async () => {
@@ -286,7 +286,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-04-13"), moment("2021-08-13"), sources.values()
     );
-    expect(result).toEqual(90);
+    expect(result[1]).toEqual(90);
   });
 
   test('Weekend pushes to end, but pays on weekends', async () => {
@@ -297,7 +297,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-04-13"), moment("2021-08-13"), sources.values()
     );
-    expect(result).toEqual(80);
+    expect(result[1]).toEqual(80);
   });
 
   test('Super Close Dates', async () => {
@@ -307,7 +307,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-03"), moment("2021-09-04"), sources.values()
     );
-    expect(result).toEqual(0);
+    expect(result[1]).toEqual(0);
   });
 
   test('Dates in same month', async () => {
@@ -317,7 +317,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-03"), moment("2021-09-17"), sources.values()
     );
-    expect(result).toEqual(10);
+    expect(result[1]).toEqual(10);
   });
 
   test('Paid Today', async () => {
@@ -326,7 +326,7 @@ describe('Income Calc Semi-Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-10-29"), moment("2021-11-02"), sources.values()
     );
-    expect(result).toEqual(0);
+    expect(result[1]).toEqual(0);
   });
 });
 
@@ -347,7 +347,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-01-16"), moment("2021-08-16"), sources.values()
     );
-    expect(result).toEqual(70);
+    expect(result[1]).toEqual(70);
   });
 
   test('Current Date before paycheck, end date after', async () => {
@@ -357,7 +357,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-01-14"), moment("2021-08-16"), sources.values()
     );
-    expect(result).toEqual(80);
+    expect(result[1]).toEqual(80);
   });
 
   test('Current Date on paycheck, end date after', async () => {
@@ -367,7 +367,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-01-15"), moment("2021-08-16"), sources.values()
     );
-    expect(result).toEqual(70);
+    expect(result[1]).toEqual(70);
   });
 
   test('Current Date before paycheck, end date before', async () => {
@@ -377,7 +377,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-01-14"), moment("2021-08-14"), sources.values()
     );
-    expect(result).toEqual(70);
+    expect(result[1]).toEqual(70);
   });
 
   test('Current Date after paycheck, end date before', async () => {
@@ -387,7 +387,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-01-16"), moment("2021-08-14"), sources.values()
     );
-    expect(result).toEqual(60);
+    expect(result[1]).toEqual(60);
   });
 
   test('Current Date on paycheck, end date before', async () => {
@@ -397,7 +397,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-01-15"), moment("2021-08-14"), sources.values()
     );
-    expect(result).toEqual(60);
+    expect(result[1]).toEqual(60);
   });
 
 
@@ -408,7 +408,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-01-14"), moment("2021-08-15"), sources.values()
     );
-    expect(result).toEqual(80);
+    expect(result[1]).toEqual(80);
   });
 
   test('Current Date on paycheck, end date on', async () => {
@@ -418,7 +418,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-01-15"), moment("2021-08-15"), sources.values()
     );
-    expect(result).toEqual(70);
+    expect(result[1]).toEqual(70);
   });
 
   test('Current Date after paycheck, end date on', async () => {
@@ -428,7 +428,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-01-16"), moment("2021-08-15"), sources.values()
     );
-    expect(result).toEqual(70);
+    expect(result[1]).toEqual(70);
   });
 
   test('In Same Month, start after', async () => {
@@ -439,7 +439,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-10-20"), moment("2021-10-21"), sources.values()
     );
-    expect(result).toEqual(0);
+    expect(result[1]).toEqual(0);
   });
 
   test('End before date next Month', async () => {
@@ -449,7 +449,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-10-14"), moment("2021-11-14"), sources.values()
     );
-    expect(result).toEqual(10);
+    expect(result[1]).toEqual(10);
   });
 
   test('start after End before date next Month', async () => {
@@ -459,7 +459,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-10-16"), moment("2021-11-14"), sources.values()
     );
-    expect(result).toEqual(0);
+    expect(result[1]).toEqual(0);
   });
 
   test('start after End after date next Month', async () => {
@@ -469,7 +469,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-10-16"), moment("2021-11-16"), sources.values()
     );
-    expect(result).toEqual(10);
+    expect(result[1]).toEqual(10);
   });
 
   test('start before End after date next Month', async () => {
@@ -479,7 +479,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-10-14"), moment("2021-11-16"), sources.values()
     );
-    expect(result).toEqual(20);
+    expect(result[1]).toEqual(20);
   });
 
   test('Paid Today', async () => {
@@ -488,7 +488,7 @@ describe('Income Calc Monthly', () => {
     var result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-10-15"), moment("2021-11-02"), sources.values()
     );
-    expect(result).toEqual(0);
+    expect(result[1]).toEqual(0);
   });
 
 });

@@ -63,10 +63,12 @@ class CalculationsManager {
 
   public async requestCalculations(): Promise<CalculationResult> {
     const start = moment().startOf('day');
+    //skip today for bills.
+    const billStart = start.clone().add(1,'day');
     let debtCost = this.calculateDebts(AppStateManager.debts);
     let accountValue = this.calculateAccountValue(AppStateManager.accounts);
-    let allBillCost = await this.calculateAllBillsCost(start, this.endDate, AppStateManager.bills);
-    let unavoidableBillCost = await this.calculateAllBillsCost(start, this.endDate, [...AppStateManager.bills].filter(bill => bill.unavoidable));
+    let allBillCost = await this.calculateAllBillsCost(billStart, this.endDate, AppStateManager.bills);
+    let unavoidableBillCost = await this.calculateAllBillsCost(billStart, this.endDate, [...AppStateManager.bills].filter(bill => bill.unavoidable));
     let incomeValue = await this.calculateTotalIncome(start, this.endDate, AppStateManager.incomeSources);
     let investmentValue = this.calculateTotalInvestmentValue(start, this.endDate, AppStateManager.investments);
 
