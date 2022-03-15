@@ -58,16 +58,16 @@ export class Group extends React.Component<IGroupProps> {
   }
 
   private async delete() {
-    await GroupManager.deleteGroup(this.props.name, this.props.type);
+    let yes = confirm("Are you sure you want to delete " + this.props.name + "?");
+    if (yes) {
+      await GroupManager.deleteGroup(this.props.name, this.props.type);
+    }
   }
 
-  private get title()
-  {
-    if(this.props.type === GroupType.Debt)
-    {
+  private get title() {
+    if (this.props.type === GroupType.Debt) {
       let sum = 0;
-      for(let id of this.props.items)
-      {
+      for (let id of this.props.items) {
         let item = AppStateManager.getDebt(id);
         sum += item?.amount ?? 0;
       }
