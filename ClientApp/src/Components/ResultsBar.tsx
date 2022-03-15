@@ -55,8 +55,8 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
         calcs.incomeResults[1] -
         calcs.debtTotal -
         calcs.billResults.allBills[1] +
-        (this.state.displayUnrealized ? calcs.investmentResults.totalValue : calcs.investmentResults.totalCostBasis) -
-        calcs.investmentResults.totalInterestOwed - calcs.investmentResults.totalUnrealizedLosses;
+        (this.state.displayUnrealized ? calcs.investmentResults.totalValue : (calcs.investmentResults.totalCostBasis - calcs.investmentResults.totalUnrealizedLosses)) -
+        calcs.investmentResults.totalInterestOwed;
 
       const hasGain = calcs.investmentResults.totalValue > calcs.investmentResults.totalCostBasis;
       const color = this.state.displayUnrealized ? (hasGain ? "lime" : "red") : undefined;

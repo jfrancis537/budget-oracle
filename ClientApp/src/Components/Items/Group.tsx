@@ -61,11 +61,27 @@ export class Group extends React.Component<IGroupProps> {
     await GroupManager.deleteGroup(this.props.name, this.props.type);
   }
 
+  private get title()
+  {
+    if(this.props.type === GroupType.Debt)
+    {
+      let sum = 0;
+      for(let id of this.props.items)
+      {
+        let item = AppStateManager.getDebt(id);
+        sum += item?.amount ?? 0;
+      }
+      return `${this.props.name} : ${sum}`
+    } else {
+      return this.props.name;
+    }
+  }
+
   render() {
     return (
       <Card className={groupStyles['card']} bg='dark' text='light'>
         <Card.Header className={groupStyles['header']}>
-          <div className={groupStyles['group-title']}>{this.props.name}</div>
+          <div className={groupStyles['group-title']}>{this.title}</div>
           <div className={groupStyles['button-group']}>
             <ButtonGroup className="mr-2" size='sm'>
               <Button onClick={this.add}>
