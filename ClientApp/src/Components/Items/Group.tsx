@@ -58,7 +58,7 @@ export class Group extends React.Component<IGroupProps> {
   }
 
   private async delete() {
-    let yes = confirm("Are you sure you want to delete " + this.props.name + "?");
+    let yes = window.confirm("Are you sure you want to delete " + this.props.name + "?");
     if (yes) {
       await GroupManager.deleteGroup(this.props.name, this.props.type);
     }
