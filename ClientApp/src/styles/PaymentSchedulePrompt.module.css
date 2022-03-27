@@ -1,0 +1,37 @@
+.csv-group {
+  flex-flow: column;
+}
+
+.error {
+  color: rgb(245, 131, 131);
+
+}
+
+.no-payments-message {
+  display: flex;
+  justify-content: center;
+}
+
+.payment {
+  margin: 0.5rem 0px;
+  display: flex;
+  justify-content: center;
+  background-color: #32992b;
+  border-radius: 4px;
+  color: white;
+  padding: 3px;
+}
+
+.payment-controls {
+  margin-left: 1rem;
+}
+
+.table-container {
+  max-height: 45vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.table-container th {
+  text-align: center;
+}

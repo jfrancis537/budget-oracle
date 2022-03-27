@@ -4,11 +4,13 @@ import { IDebtPromptProps } from "../../Components/Prompts/DebtPrompt";
 import { IGroupPromptProps } from "../../Components/Prompts/GroupPrompt";
 import { IIncomePromptProps } from "../../Components/Prompts/IncomePrompt";
 import { IInvestmentPromptProps } from "../../Components/Prompts/InvestmentPrompt";
+import { IPaymentSchedulePromptProps } from "../../Components/Prompts/PaymentSchedulePrompt";
 import { Action } from "../../Utilities/Action";
 import { Account } from "../Models/Account";
 import { Bill } from "../Models/Bill";
 import { Debt } from "../Models/Debt";
 import { IncomeSource } from "../Models/IncomeSource";
+import { PaymentSchedule } from "../Models/ScheduledPayment";
 import { IValued } from "../Models/Valued";
 
 class PromptManager {
@@ -19,6 +21,7 @@ class PromptManager {
   readonly ondebtpromptrequested: Action<IDebtPromptProps>;
   readonly onbillpromptrequested: Action<IBillPromptProps>;
   readonly oninvestmentpromptrequested: Action<IInvestmentPromptProps>;
+  readonly onpaymentschedulepromptrequested: Action<IPaymentSchedulePromptProps>;
   readonly oncloserequested: Action<void>;
 
   private promptActive: boolean;
@@ -32,6 +35,7 @@ class PromptManager {
     this.ondebtpromptrequested = new Action();
     this.onbillpromptrequested = new Action();
     this.oninvestmentpromptrequested = new Action();
+    this.onpaymentschedulepromptrequested = new Action();
 
     this.promptActive = false;
   }
@@ -63,6 +67,14 @@ class PromptManager {
     }
   }
 
+  public requestPaymentSchedulePrompt(props: IPaymentSchedulePromptProps) {
+    if (!this.promptActive) {
+      this.onpaymentschedulepromptrequested.invoke(props);
+      this.promptActive = true;
+    } else {
+      throw new Error("You can't open two prompts at once");
+    }
+  }
 
   public requestIncomePrompt(props: IIncomePromptProps) {
     if (!this.promptActive) {
@@ -114,7 +126,21 @@ class PromptManager {
         sourceToEdit: item.id,
         editing: true
       });
+    } else if (item instanceof PaymentSchedule) {
+      this.requestPaymentSchedulePrompt({
+        editing: true,
+        scheduleToEdit: item.id,
+        viewOnly: false
+      });
     }
+  }
+
+  public requestPaymentScheduleView(item: PaymentSchedule) {
+    this.requestPaymentSchedulePrompt({
+      editing: true,
+      scheduleToEdit: item.id,
+      viewOnly: true
+    });
   }
 
   public requestClosePrompt() {

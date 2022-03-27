@@ -15,10 +15,13 @@ import { Divider } from "./UIElements/Divider";
 import { Investment } from "../Processing/Models/Investment";
 import { autobind } from "../Utilities/Decorators";
 import { InvestmentItem } from "./Items/InvestmentItem";
+import { PaymentSchedule } from "../Processing/Models/ScheduledPayment";
+import { ScheduledItem } from "./Items/ScheduledItem";
 
 export enum ContentTab {
   Costs = "costs",
-  Reserves = "reserves"
+  Reserves = "reserves",
+  Schedules = "schedules"
 }
 
 interface ContentAreaState {
@@ -28,6 +31,7 @@ interface ContentAreaState {
   debts?: Debt[];
   bills?: Bill[];
   investments?: Investment[];
+  paymentSchedules?: PaymentSchedule[];
   tab: ContentTab;
 }
 
@@ -40,6 +44,8 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
       groups: GroupManager.groups,
       accounts: [...AppStateManager.accounts],
       incomeSources: [...AppStateManager.incomeSources],
+      investments: [...AppStateManager.investments],
+      paymentSchedules: [...AppStateManager.paymentSchedules],
       tab: ContentTab.Costs
     }
   }
@@ -51,6 +57,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     AppStateManager.ondebtsupdated.addListener(this.handleDebtsUpdated);
     AppStateManager.onbillsupdated.addListener(this.handleBillsUpdated);
     AppStateManager.oninvestmentsupdated.addListener(this.handleInvestmentsUpdated);
+    AppStateManager.onpaymentschedulesupdated.addListener(this.handlePaymentSchedulesUpdated);
   }
 
   componentWillUnmount() {
@@ -60,12 +67,20 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     AppStateManager.ondebtsupdated.removeListener(this.handleDebtsUpdated);
     AppStateManager.onbillsupdated.removeListener(this.handleBillsUpdated);
     AppStateManager.oninvestmentsupdated.removeListener(this.handleInvestmentsUpdated);
+    AppStateManager.onpaymentschedulesupdated.removeListener(this.handlePaymentSchedulesUpdated);
   }
 
   @autobind
   private handleGroupsUpdated(data: GroupsData) {
     this.setState({
       groups: data
+    });
+  }
+
+  @autobind
+  private handlePaymentSchedulesUpdated(data: Iterable<PaymentSchedule>) {
+    this.setState({
+      paymentSchedules: [...data]
     });
   }
 
@@ -216,6 +231,21 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     return components;
   }
 
+  @autobind
+  private renderSchedule(schedule: PaymentSchedule) {
+    return <ScheduledItem paymentSchedule={schedule} />
+  }
+
+  private renderSchedules() {
+    return (
+      <>
+        <div className={contentStyles['ungrouped-section']}>
+          {this.state.paymentSchedules?.map(this.renderSchedule)}
+        </div>
+      </>
+    )
+  }
+
   render() {
     return (
       <>
@@ -231,7 +261,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
               >
                 {this.renderGroups()}
               </Col>
-              <Col xs sm={3}
+              <Col xs sm={2}
                 className={[
                   contentStyles['content-col'],
                   contentStyles['ungrouped'],
@@ -239,6 +269,15 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
                 ].join(" ")
                 }>
                 {this.renderUngroupedArea()}
+              </Col>
+              <Col xs sm={2}
+                className={[
+                  contentStyles['content-col'],
+                  contentStyles['ungrouped'],
+                  this.state.tab === ContentTab.Schedules ? '' : mobileStyles["desktop-only"]
+                ].join(" ")
+                }>
+                {this.renderSchedules()}
               </Col>
             </Row>
           </Container>

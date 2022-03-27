@@ -8,6 +8,7 @@ import { Bill } from "../Models/Bill";
 import { Debt } from "../Models/Debt";
 import { IncomeSource } from "../Models/IncomeSource";
 import { Investment } from "../Models/Investment";
+import { PaymentSchedule } from "../Models/ScheduledPayment";
 import { AppStateManager } from "./AppStateManager";
 import { InvestmentCalculationManager } from "./InvestmentCalculationManager";
 
@@ -49,6 +50,7 @@ class CalculationsManager {
     AppStateManager.onaccountsupdated.addListener(this.handleUpdate);
     AppStateManager.ondebtsupdated.addListener(this.handleUpdate);
     AppStateManager.onincomesourcesupdated.addListener(this.handleUpdate);
+    AppStateManager.onpaymentschedulesupdated.addListener(this.handleUpdate);
     InvestmentCalculationManager.oninvestmentvaluecalculated.addListener(this.handleUpdate);
   }
 
@@ -64,13 +66,14 @@ class CalculationsManager {
   public async requestCalculations(): Promise<CalculationResult> {
     const start = moment().startOf('day');
     //skip today for bills.
-    const billStart = start.clone().add(1,'day');
+    const billStart = start.clone().add(1, 'day');
     let debtCost = this.calculateDebts(AppStateManager.debts);
     let accountValue = this.calculateAccountValue(AppStateManager.accounts);
     let allBillCost = await this.calculateAllBillsCost(billStart, this.endDate, AppStateManager.bills);
     let unavoidableBillCost = await this.calculateAllBillsCost(billStart, this.endDate, [...AppStateManager.bills].filter(bill => bill.unavoidable));
     let incomeValue = await this.calculateTotalIncome(start, this.endDate, AppStateManager.incomeSources);
     let investmentValue = this.calculateTotalInvestmentValue(start, this.endDate, AppStateManager.investments);
+    let scheduledpaymentsvalue = this.calculateTotalForScheduledPayments(start, this.endDate, AppStateManager.paymentSchedules);
 
     let results: CalculationResult = {
       billResults: {
@@ -96,6 +99,18 @@ class CalculationsManager {
       result += debt.amount;
     }
     return result;
+  }
+
+  private calculateTotalForScheduledPayments(start: Moment, end: Moment, schedules: Iterable<PaymentSchedule>): number {
+    let sum = 0;
+    for (let schedule of schedules) {
+      for (let payment of schedule.payments) {
+        if (payment.date.isBetween(start, end)) {
+          sum += payment.amount;
+        }
+      }
+    }
+    return sum;
   }
 
   private calculateTotalInvestmentValue(start: Moment, end: Moment, investments: Iterable<Investment>): InvestmentCalculation {

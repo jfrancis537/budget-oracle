@@ -9,6 +9,7 @@ import { DebtPrompt, IDebtPromptProps } from "./DebtPrompt";
 import { GroupPrompt, IGroupPromptProps } from "./GroupPrompt";
 import { IIncomePromptProps, IncomePrompt } from "./IncomePrompt";
 import { IInvestmentPromptProps, InvestmentPrompt } from "./InvestmentPrompt";
+import { IPaymentSchedulePromptProps, PaymentSchedulePrompt } from "./PaymentSchedulePrompt";
 
 export enum PromptType {
   Group,
@@ -16,7 +17,8 @@ export enum PromptType {
   Bill,
   Debt,
   IncomeSource,
-  Investment
+  Investment,
+  PaymentSchedule
 }
 
 export type PromptProps = IGroupPromptProps | IAccountPromptProps | IIncomePromptProps | IInvestmentPromptProps;
@@ -45,12 +47,21 @@ export class Prompts extends React.Component<{}, PromptsState> {
     PromptManager.onbillpromptrequested.addListener(this.showBillPrompt);
     PromptManager.oncloserequested.addListener(this.closePrompt);
     PromptManager.oninvestmentpromptrequested.addListener(this.showInvestmentPrompt);
+    PromptManager.onpaymentschedulepromptrequested.addListener(this.showPaymentSchedulePrompt)
   }
 
   @autobind
   private showGroupPrompt(props: IGroupPromptProps) {
     this.setState({
       activePrompt: PromptType.Group,
+      props: props
+    });
+  }
+
+  @autobind
+  private showPaymentSchedulePrompt(props: IPaymentSchedulePromptProps) {
+    this.setState({
+      activePrompt: PromptType.PaymentSchedule,
       props: props
     });
   }
@@ -140,6 +151,12 @@ export class Prompts extends React.Component<{}, PromptsState> {
         const investmentProps = this.state.props as IInvestmentPromptProps;
         result = (
           <InvestmentPrompt {...investmentProps} />
+        );
+        break;
+      case PromptType.PaymentSchedule:
+        const paymentScheduleProps = this.state.props as IPaymentSchedulePromptProps;
+        result = (
+          <PaymentSchedulePrompt {...paymentScheduleProps} />
         );
         break;
       default:
