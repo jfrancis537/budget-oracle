@@ -28,10 +28,12 @@ export class InvestmentItem extends React.Component<IInvestmentItemProps, IInves
 
   componentDidMount() {
     InvestmentCalculationManager.oninvestmentvaluecalculated.addListener(this.onInvestmentCalculated);
+    InvestmentCalculationManager.onsymbolvaluecalculated.addListener(this.handleSymbolPriceUpdated);
   }
 
   componentWillUnmount() {
     InvestmentCalculationManager.oninvestmentvaluecalculated.removeListener(this.onInvestmentCalculated);
+    InvestmentCalculationManager.onsymbolvaluecalculated.removeListener(this.handleSymbolPriceUpdated);
   }
 
   @autobind
@@ -56,11 +58,21 @@ export class InvestmentItem extends React.Component<IInvestmentItemProps, IInves
   }
 
   @autobind
+  private async handleSymbolPriceUpdated(data: { symbol: string, value: number }) {
+    if (this.props.item.symbol.toLowerCase() === data.symbol.toLowerCase()) {
+      this.setState({
+        value: undefined
+      });
+      await InvestmentCalculationManager.refreshSymbol(this.props.item, false);
+    }
+  }
+
+  @autobind
   private async refresh() {
     this.setState({
       value: undefined
     });
-    await InvestmentCalculationManager.refreshSymbol(this.props.item);
+    await InvestmentCalculationManager.refreshSymbol(this.props.item, true);
   }
 
   private get costBasis() {

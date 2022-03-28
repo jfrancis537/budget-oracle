@@ -1,7 +1,6 @@
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { ButtonGroup, Button } from "react-bootstrap";
-import { GetStockPriceNow } from "../../APIs/StockAPI";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { CalculationsManager } from "../../Processing/Managers/CalculationsManager";
 import { InvestmentCalculationManager } from "../../Processing/Managers/InvestmentCalculationManager";
@@ -22,7 +21,7 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
 
   useEffect(() => {
     InvestmentCalculationManager.onsymbolvaluecalculated.addListener(onSymbolValueUpdated);
-    getSymbolValues()
+    getSymbolValues(true)
       .then(values => {
         setSymbolValues(values)
       })
@@ -53,17 +52,20 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
     return result;
   }
 
-  async function getSymbolValues() {
+  async function getSymbolValues(refresh = false) {
     const result = new Map<string, number>();
     for (let item of props.schedule.vests) {
       const symbolKey = item.symbol.toLowerCase();
-      const price = await InvestmentCalculationManager.getStockPriceForSymbol(symbolKey, true);
-      if (price) {
-        result.set(symbolKey, price);
+      if (!result.has(symbolKey)) {
+        const price = await InvestmentCalculationManager.getStockPriceForSymbol(symbolKey, refresh);
+        if (price) {
+          result.set(symbolKey, price);
+        }
       }
     }
     return result;
   }
+
 
   function calculateTotalPotentialValue() {
     let sum = 0;
@@ -127,6 +129,11 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
     });
   }
 
+  async function refresh() {
+    const values = await getSymbolValues(true);
+    setSymbolValues(values);
+  }
+
   async function remove() {
     await AppStateManager.deleteItem(props.schedule.id);
   }
@@ -140,6 +147,9 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
           </Button>
           <Button onClick={remove} variant='secondary'>
             <i className="bi bi-trash"></i>
+          </Button>
+          <Button onClick={refresh} variant='secondary'>
+            <i className="bi bi-arrow-clockwise"></i>
           </Button>
         </ButtonGroup>
         <div>

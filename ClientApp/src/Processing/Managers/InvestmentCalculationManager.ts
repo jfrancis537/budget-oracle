@@ -38,13 +38,13 @@ class InvestmentCalculationManager {
   }
 
   @autobind
-  public async refreshSymbol(investment: Investment) {
-    await this.calculateInvestment(investment, true);
+  public async refreshSymbol(investment: Investment, force = false) {
+    await this.calculateInvestment(investment, force);
   }
 
   public async getStockPriceForSymbol(symbol: string, refresh = false) {
     const symbolKey = symbol.toLowerCase();
-    if (this.symbolPrices.has(symbolKey) || refresh) {
+    if (!this.symbolPrices.has(symbolKey) || refresh) {
       const price = await GetStockPriceNow(symbol);
       if (price !== undefined) {
         this.onsymbolvaluecalculated.invoke({
