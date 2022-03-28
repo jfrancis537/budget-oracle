@@ -52,7 +52,6 @@ export class PaymentSchedule extends Identifiable {
   }
 }
 
-
 interface ScheduledPaymentOptions extends IdentifiableOptions {
   name: string;
   amount: number;
@@ -86,5 +85,4 @@ export class ScheduledPayment extends Identifiable implements IValued {
       amount: data.amount
     });
   }
-
 }

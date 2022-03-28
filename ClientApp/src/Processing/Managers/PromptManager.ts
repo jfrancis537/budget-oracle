@@ -5,6 +5,7 @@ import { IGroupPromptProps } from "../../Components/Prompts/GroupPrompt";
 import { IIncomePromptProps } from "../../Components/Prompts/IncomePrompt";
 import { IInvestmentPromptProps } from "../../Components/Prompts/InvestmentPrompt";
 import { IPaymentSchedulePromptProps } from "../../Components/Prompts/PaymentSchedulePrompt";
+import { IVestSchedulePromptProps } from "../../Components/Prompts/VestSchedulePrompt";
 import { Action } from "../../Utilities/Action";
 import { Account } from "../Models/Account";
 import { Bill } from "../Models/Bill";
@@ -22,6 +23,7 @@ class PromptManager {
   readonly onbillpromptrequested: Action<IBillPromptProps>;
   readonly oninvestmentpromptrequested: Action<IInvestmentPromptProps>;
   readonly onpaymentschedulepromptrequested: Action<IPaymentSchedulePromptProps>;
+  readonly onvestschedulepromptrequested: Action<IVestSchedulePromptProps>;
   readonly oncloserequested: Action<void>;
 
   private promptActive: boolean;
@@ -29,6 +31,7 @@ class PromptManager {
 
   constructor() {
     this.ongrouppromptrequested = new Action();
+    this.onvestschedulepromptrequested = new Action();
     this.onaccountpromptrequested = new Action();
     this.oncloserequested = new Action();
     this.onincomepromptrequested = new Action();
@@ -70,6 +73,15 @@ class PromptManager {
   public requestPaymentSchedulePrompt(props: IPaymentSchedulePromptProps) {
     if (!this.promptActive) {
       this.onpaymentschedulepromptrequested.invoke(props);
+      this.promptActive = true;
+    } else {
+      throw new Error("You can't open two prompts at once");
+    }
+  }
+
+  public requestVestSchedulePrompt(props: IVestSchedulePromptProps) {
+    if (!this.promptActive) {
+      this.onvestschedulepromptrequested.invoke(props);
       this.promptActive = true;
     } else {
       throw new Error("You can't open two prompts at once");

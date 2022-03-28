@@ -10,6 +10,7 @@ import { Debt, SerializedDebt } from "../Models/Debt";
 import { IncomeSource, SerializedIncomeSource } from "../Models/IncomeSource";
 import { Investment, SerializedInvestment } from "../Models/Investment";
 import { PaymentSchedule, SerializedPaymentSchedule } from "../Models/ScheduledPayment";
+import { SerializedVestSchedule, VestSchedule } from "../Models/VestSchedule";
 import { GroupManager, GroupType } from "./GroupManager";
 import { UserManager } from "./UserManager";
 
@@ -20,6 +21,7 @@ interface StateData {
   income: SerializedIncomeSource[];
   investments: SerializedInvestment[];
   paymentSchedules: SerializedPaymentSchedule[];
+  vestSchedules: SerializedVestSchedule[];
 }
 
 const StateDataKey = "app_state_data";
@@ -32,6 +34,7 @@ class AppStateManager {
   private _paymentSchedules: Map<string, PaymentSchedule>;
   private _incomeSources: Map<string, IncomeSource>;
   private _investments: Map<string, Investment>;
+  private _vestSchedules: Map<string, VestSchedule>;
   private blockSave: boolean;
 
   public onaccountsupdated: Action<Account[]>;
@@ -41,6 +44,7 @@ class AppStateManager {
   public oninvestmentsupdated: Action<Investment[]>;
   public onspecificinvestmentupdated: Action<Investment>;
   public onpaymentschedulesupdated: Action<PaymentSchedule[]>;
+  public onvestschedulesupdated: Action<VestSchedule[]>;
 
   constructor() {
     this._accounts = new Map();
@@ -49,6 +53,7 @@ class AppStateManager {
     this._incomeSources = new Map();
     this._investments = new Map();
     this._paymentSchedules = new Map();
+    this._vestSchedules = new Map();
     this.blockSave = false;
 
     this.onaccountsupdated = new Action();
@@ -58,6 +63,7 @@ class AppStateManager {
     this.oninvestmentsupdated = new Action();
     this.onspecificinvestmentupdated = new Action();
     this.onpaymentschedulesupdated = new Action();
+    this.onvestschedulesupdated = new Action();
 
     this.reload = this.reload.bind(this);
     UserManager.onuserloggedout.addListener(this.reload)
@@ -89,6 +95,10 @@ class AppStateManager {
     return [...this._paymentSchedules.values()];
   }
 
+  get vestSchedules() {
+    return [...this._vestSchedules.values()];
+  }
+
   public async deleteItems(ids: Set<string>) {
     if (ids.size > 0) {
       //Block stuff
@@ -98,7 +108,8 @@ class AppStateManager {
       let debtBlock = this.ondebtsupdated.setBlocked(true);
       let billBlock = this.onbillsupdated.setBlocked(true);
       let investmentBlock = this.oninvestmentsupdated.setBlocked(true);
-      let scheduleBlock = this.onpaymentschedulesupdated.setBlocked(true);
+      let pmntScheduleBlock = this.onpaymentschedulesupdated.setBlocked(true);
+      let vestScheduleBlock = this.onvestschedulesupdated.setBlocked(true);
       for (let id of ids) {
         await this.deleteItem(id);
       }
@@ -108,7 +119,8 @@ class AppStateManager {
       this.ondebtsupdated.setBlocked(debtBlock);
       this.onbillsupdated.setBlocked(billBlock);
       this.oninvestmentsupdated.setBlocked(investmentBlock);
-      this.onpaymentschedulesupdated.setBlocked(scheduleBlock);
+      this.onpaymentschedulesupdated.setBlocked(pmntScheduleBlock);
+      this.onvestschedulesupdated.setBlocked(vestScheduleBlock);
       this.blockSave = false;
       //send updates
       this.onincomesourcesupdated.invoke(this.incomeSources);
@@ -117,6 +129,7 @@ class AppStateManager {
       this.onbillsupdated.invoke(this.bills);
       this.oninvestmentsupdated.invoke(this.investments);
       this.onpaymentschedulesupdated.invoke(this.paymentSchedules);
+      this.onvestschedulesupdated.invoke(this.vestSchedules);
       //save
       await this.save();
     }
@@ -148,6 +161,10 @@ class AppStateManager {
     } else if (this._paymentSchedules.has(id)) {
       this._paymentSchedules.delete(id);
       this.onpaymentschedulesupdated.invoke(this.paymentSchedules);
+      await this.save();
+    } else if (this._vestSchedules.has(id)) {
+      this._vestSchedules.delete(id);
+      this.onvestschedulesupdated.invoke(this.vestSchedules);
       await this.save();
     }
   }
@@ -250,6 +267,22 @@ class AppStateManager {
     await this.save();
   }
 
+  //VEST SCHEDULES
+
+  public hasVestSchedule(id: string) {
+    return this._vestSchedules.has(id);
+  }
+
+  public getVestSchedule(id: string) {
+    return this._vestSchedules.get(id);
+  }
+
+  public async addVestSchedule(schedule: VestSchedule) {
+    this._vestSchedules.set(schedule.id, schedule);
+    this.onvestschedulesupdated.invoke(this.vestSchedules);
+    await this.save();
+  }
+
   //INCOME SOURCES
 
   public async addIncomeSource(name: string, amount: number, frequency: IncomeFrequency, paysOnWeekends: boolean, dayOfMonth: number) {
@@ -348,7 +381,8 @@ class AppStateManager {
         bills: [...this._bills.values()],
         income: [...this._incomeSources.values()],
         investments: [...this._investments.values()],
-        paymentSchedules: [...this._paymentSchedules.values()]
+        paymentSchedules: [...this._paymentSchedules.values()],
+        vestSchedules: [...this._vestSchedules.values()]
       }
       let serialized = JSON.stringify(data);
       if (UserManager.isLoggedIn) {
@@ -398,6 +432,9 @@ class AppStateManager {
       for (let schedule of parsed.paymentSchedules ?? []) {
         this._paymentSchedules.set(schedule.id, PaymentSchedule.deserialize(schedule));
       }
+      for (let schedule of parsed.vestSchedules ?? []) {
+        this._vestSchedules.set(schedule.id, VestSchedule.deserialize(schedule));
+      }
     }
   }
 
@@ -423,6 +460,9 @@ class AppStateManager {
       for (let schedule of parsed.paymentSchedules ?? []) {
         this._paymentSchedules.set(schedule.id, PaymentSchedule.deserialize(schedule));
       }
+      for (let schedule of parsed.vestSchedules ?? []) {
+        this._vestSchedules.set(schedule.id, VestSchedule.deserialize(schedule));
+      }
     }
   }
 
@@ -436,6 +476,7 @@ class AppStateManager {
     this._incomeSources.clear();
     this._investments.clear();
     this._paymentSchedules.clear();
+    this._vestSchedules.clear();
     //Load the new data
     await this.load();
     //Update the UI
@@ -445,6 +486,7 @@ class AppStateManager {
     this.onbillsupdated.invoke(this.bills);
     this.oninvestmentsupdated.invoke(this.investments);
     this.onpaymentschedulesupdated.invoke(this.paymentSchedules);
+    this.onvestschedulesupdated.invoke(this.vestSchedules);
   }
 
   public async export() {

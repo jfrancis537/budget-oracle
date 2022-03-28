@@ -9,6 +9,7 @@ import { Debt } from "../Models/Debt";
 import { IncomeSource } from "../Models/IncomeSource";
 import { Investment } from "../Models/Investment";
 import { PaymentSchedule } from "../Models/ScheduledPayment";
+import { VestSchedule } from "../Models/VestSchedule";
 import { AppStateManager } from "./AppStateManager";
 import { InvestmentCalculationManager } from "./InvestmentCalculationManager";
 
@@ -32,6 +33,8 @@ export interface CalculationResult {
   accountTotal: number;
   incomeResults: ResultPair<IncomeSource>;
   investmentResults: InvestmentCalculation;
+  scheduledPaymentsTotal: number;
+  scheduledVestsTotal: number;
 }
 
 type QuarterNumber = 1 | 2 | 3 | 4;
@@ -74,6 +77,7 @@ class CalculationsManager {
     let incomeValue = await this.calculateTotalIncome(start, this.endDate, AppStateManager.incomeSources);
     let investmentValue = this.calculateTotalInvestmentValue(start, this.endDate, AppStateManager.investments);
     let scheduledpaymentsvalue = this.calculateTotalForScheduledPayments(start, this.endDate, AppStateManager.paymentSchedules);
+    let stockScheduleValue = await this.calculateTotalForScheduledStockVests(start, this.endDate, AppStateManager.vestSchedules);
 
     let results: CalculationResult = {
       billResults: {
@@ -83,7 +87,9 @@ class CalculationsManager {
       debtTotal: debtCost,
       accountTotal: accountValue,
       incomeResults: incomeValue,
-      investmentResults: investmentValue
+      investmentResults: investmentValue,
+      scheduledPaymentsTotal: scheduledpaymentsvalue,
+      scheduledVestsTotal: stockScheduleValue
     }
     return results;
   }
@@ -107,6 +113,20 @@ class CalculationsManager {
       for (let payment of schedule.payments) {
         if (payment.date.isBetween(start, end)) {
           sum += payment.amount;
+        }
+      }
+    }
+    return sum;
+  }
+
+  private async calculateTotalForScheduledStockVests(start: Moment, end: Moment, schedules: Iterable<VestSchedule>) {
+    let sum = 0;
+    for (let schedule of schedules) {
+      for (let vest of schedule.vests) {
+
+        if (vest.date.isBetween(start, end)) {
+          const symbolValue = (await InvestmentCalculationManager.getStockPriceForSymbol(vest.symbol)) ?? 0;
+          sum += (vest.shares * symbolValue * (1 - vest.taxPercentage));
         }
       }
     }

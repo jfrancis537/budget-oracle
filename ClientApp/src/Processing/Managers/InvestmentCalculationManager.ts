@@ -6,12 +6,16 @@ import { AppStateManager } from "./AppStateManager";
 
 class InvestmentCalculationManager {
   public readonly oninvestmentvaluecalculated: Action<{ id: string, value: number }>
+  public readonly onsymbolvaluecalculated: Action<{ symbol: string, value: number }>
   private readonly calculations: Map<string, number>;
+  private readonly symbolPrices: Map<string, number>;
   private didInitalCalculations: boolean;
 
   constructor() {
     this.oninvestmentvaluecalculated = new Action();
+    this.onsymbolvaluecalculated = new Action();
     this.calculations = new Map();
+    this.symbolPrices = new Map();
     this.didInitalCalculations = false;
 
     AppStateManager.oninvestmentsupdated.addListener(this.handleInvestmentsUpdated)
@@ -35,11 +39,28 @@ class InvestmentCalculationManager {
 
   @autobind
   public async refreshSymbol(investment: Investment) {
-    await this.calculateInvestment(investment);
+    await this.calculateInvestment(investment, true);
   }
 
-  private async calculateInvestment(investment: Investment) {
-    let price = await GetStockPriceNow(investment.symbol);
+  public async getStockPriceForSymbol(symbol: string, refresh = false) {
+    const symbolKey = symbol.toLowerCase();
+    if (this.symbolPrices.has(symbolKey) || refresh) {
+      const price = await GetStockPriceNow(symbol);
+      if (price !== undefined) {
+        this.onsymbolvaluecalculated.invoke({
+          symbol: symbolKey,
+          value: price
+        });
+        this.symbolPrices.set(symbolKey, price);
+      }
+      return price;
+    } else {
+      return this.symbolPrices.get(symbolKey)!;
+    }
+  }
+
+  private async calculateInvestment(investment: Investment, refresh = false) {
+    let price = await this.getStockPriceForSymbol(investment.symbol, refresh);
     let calculation = (price ?? investment.costBasisPerShare) * investment.shares;
     calculation -= investment.marginDebt;
     this.calculations.set(investment.id, calculation);

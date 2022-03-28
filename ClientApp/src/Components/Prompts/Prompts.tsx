@@ -10,6 +10,7 @@ import { GroupPrompt, IGroupPromptProps } from "./GroupPrompt";
 import { IIncomePromptProps, IncomePrompt } from "./IncomePrompt";
 import { IInvestmentPromptProps, InvestmentPrompt } from "./InvestmentPrompt";
 import { IPaymentSchedulePromptProps, PaymentSchedulePrompt } from "./PaymentSchedulePrompt";
+import { IVestSchedulePromptProps, VestSchedulePrompt } from "./VestSchedulePrompt";
 
 export enum PromptType {
   Group,
@@ -18,7 +19,8 @@ export enum PromptType {
   Debt,
   IncomeSource,
   Investment,
-  PaymentSchedule
+  PaymentSchedule,
+  VestSchedule
 }
 
 export type PromptProps = IGroupPromptProps | IAccountPromptProps | IIncomePromptProps | IInvestmentPromptProps;
@@ -48,6 +50,7 @@ export class Prompts extends React.Component<{}, PromptsState> {
     PromptManager.oncloserequested.addListener(this.closePrompt);
     PromptManager.oninvestmentpromptrequested.addListener(this.showInvestmentPrompt);
     PromptManager.onpaymentschedulepromptrequested.addListener(this.showPaymentSchedulePrompt)
+    PromptManager.onvestschedulepromptrequested.addListener(this.showVestSchedulePrompt);
   }
 
   @autobind
@@ -62,6 +65,14 @@ export class Prompts extends React.Component<{}, PromptsState> {
   private showPaymentSchedulePrompt(props: IPaymentSchedulePromptProps) {
     this.setState({
       activePrompt: PromptType.PaymentSchedule,
+      props: props
+    });
+  }
+
+  @autobind
+  private showVestSchedulePrompt(props: IVestSchedulePromptProps) {
+    this.setState({
+      activePrompt: PromptType.VestSchedule,
       props: props
     });
   }
@@ -157,6 +168,12 @@ export class Prompts extends React.Component<{}, PromptsState> {
         const paymentScheduleProps = this.state.props as IPaymentSchedulePromptProps;
         result = (
           <PaymentSchedulePrompt {...paymentScheduleProps} />
+        );
+        break;
+      case PromptType.VestSchedule:
+        const vestScheduleProps = this.state.props as IVestSchedulePromptProps;
+        result = (
+          <VestSchedulePrompt {...vestScheduleProps} />
         );
         break;
       default:

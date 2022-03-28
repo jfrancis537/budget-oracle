@@ -16,7 +16,9 @@ import { Investment } from "../Processing/Models/Investment";
 import { autobind } from "../Utilities/Decorators";
 import { InvestmentItem } from "./Items/InvestmentItem";
 import { PaymentSchedule } from "../Processing/Models/ScheduledPayment";
-import { ScheduledItem } from "./Items/ScheduledItem";
+import { ScheduledPaymentItem } from "./Items/ScheduledPaymentItem";
+import { VestSchedule } from "../Processing/Models/VestSchedule";
+import { ScheduledVestItem } from "./Items/ScheduledVestItem";
 
 export enum ContentTab {
   Costs = "costs",
@@ -32,6 +34,7 @@ interface ContentAreaState {
   bills?: Bill[];
   investments?: Investment[];
   paymentSchedules?: PaymentSchedule[];
+  vestSchedules?: VestSchedule[];
   tab: ContentTab;
 }
 
@@ -46,6 +49,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
       incomeSources: [...AppStateManager.incomeSources],
       investments: [...AppStateManager.investments],
       paymentSchedules: [...AppStateManager.paymentSchedules],
+      vestSchedules: [...AppStateManager.vestSchedules],
       tab: ContentTab.Costs
     }
   }
@@ -58,6 +62,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     AppStateManager.onbillsupdated.addListener(this.handleBillsUpdated);
     AppStateManager.oninvestmentsupdated.addListener(this.handleInvestmentsUpdated);
     AppStateManager.onpaymentschedulesupdated.addListener(this.handlePaymentSchedulesUpdated);
+    AppStateManager.onvestschedulesupdated.addListener(this.handleVestSchedulesUpdated);
   }
 
   componentWillUnmount() {
@@ -68,6 +73,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     AppStateManager.onbillsupdated.removeListener(this.handleBillsUpdated);
     AppStateManager.oninvestmentsupdated.removeListener(this.handleInvestmentsUpdated);
     AppStateManager.onpaymentschedulesupdated.removeListener(this.handlePaymentSchedulesUpdated);
+    AppStateManager.onvestschedulesupdated.removeListener(this.handleVestSchedulesUpdated);
   }
 
   @autobind
@@ -75,6 +81,13 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     this.setState({
       groups: data
     });
+  }
+
+  @autobind
+  private handleVestSchedulesUpdated(data: Iterable<VestSchedule>) {
+    this.setState({
+      vestSchedules: [...data]
+    })
   }
 
   @autobind
@@ -232,15 +245,22 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
   }
 
   @autobind
-  private renderSchedule(schedule: PaymentSchedule) {
-    return <ScheduledItem paymentSchedule={schedule} />
+  private renderPaymentSchedule(schedule: PaymentSchedule) {
+    return <ScheduledPaymentItem paymentSchedule={schedule} key={schedule.id} />
+  }
+
+  @autobind renderVestSchedule(schedule: VestSchedule) {
+    return <ScheduledVestItem schedule={schedule} key={schedule.id} />
   }
 
   private renderSchedules() {
     return (
       <>
         <div className={contentStyles['ungrouped-section']}>
-          {this.state.paymentSchedules?.map(this.renderSchedule)}
+          {this.state.paymentSchedules?.map(this.renderPaymentSchedule)}
+        </div>
+        <div className={contentStyles['ungrouped-section']}>
+          {this.state.vestSchedules?.map(this.renderVestSchedule)}
         </div>
       </>
     )

@@ -89,6 +89,14 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
   }
 
   @autobind
+  private addStockVestSchedule() {
+    PromptManager.requestVestSchedulePrompt({
+      editing: false,
+      viewOnly: false
+    });
+  }
+
+  @autobind
   private async export() {
     let promises = [
       AppStateManager.export(),
@@ -208,6 +216,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
                   <NavDropdown.Item onClick={this.addGroup}>Group</NavDropdown.Item>
                   <NavDropdown.Divider />
                   <NavDropdown.Item onClick={this.addPaymentSchedule}>Payment Schedule</NavDropdown.Item>
+                  <NavDropdown.Item onClick={this.addStockVestSchedule}>Stock Vest Schedule</NavDropdown.Item>
                 </NavDropdown>
                 {this.renderSettings()}
                 <NavDropdown title="Tools" id='tools_dropdown'>

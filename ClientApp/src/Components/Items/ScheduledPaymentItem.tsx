@@ -13,7 +13,7 @@ interface IScheduledItemProps {
 }
 
 
-export const ScheduledItem: React.FC<IScheduledItemProps> = (props) => {
+export const ScheduledPaymentItem: React.FC<IScheduledItemProps> = (props) => {
 
   const [showBreakdown, setShowBreakdown] = useState(true);
 

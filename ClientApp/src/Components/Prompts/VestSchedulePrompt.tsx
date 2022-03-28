@@ -2,46 +2,46 @@ import React from "react"
 import { Button, ButtonGroup, FormControl, InputGroup, Modal, Table } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
-import { PaymentSchedule, ScheduledPayment } from "../../Processing/Models/ScheduledPayment";
 import { autobind } from "../../Utilities/Decorators";
 import { FileLoader } from "../../Utilities/FileUtils";
 import { LoadingButton } from "./LoadingButton";
 
 import styles from "../../styles/PaymentSchedulePrompt.module.css";
+import { ScheduledStockVest, VestSchedule } from "../../Processing/Models/VestSchedule";
 
-export interface IPaymentSchedulePromptProps {
+export interface IVestSchedulePromptProps {
   editing: boolean;
   viewOnly: boolean;
   scheduleToEdit?: string;
 }
 
-interface IPaymentSchedulePromptState {
+interface IVestSchedulePromptState {
   name: string,
-  payments: ScheduledPayment[],
+  vests: ScheduledStockVest[],
   isSaving: boolean,
-  createMode: PaymentScheduleCreateMode,
+  createMode: VestScheduleCreateMode,
   errorMessage?: string
 }
 
-enum PaymentScheduleCreateMode {
+enum VestScheduleCreateMode {
   csv = "csv",
   manual = "mannual"
 }
 
-export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromptProps, IPaymentSchedulePromptState> {
+export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps, IVestSchedulePromptState> {
 
-  constructor(props: IPaymentSchedulePromptProps) {
+  constructor(props: IVestSchedulePromptProps) {
     super(props);
 
     if (this.props.editing) {
       const scheduleId = this.props.scheduleToEdit;
-      if (scheduleId && AppStateManager.hasPaymentSchedule(scheduleId)) {
-        const schedule = AppStateManager.getPaymentSchedule(scheduleId)!;
+      if (scheduleId && AppStateManager.hasVestSchedule(scheduleId)) {
+        const schedule = AppStateManager.getVestSchedule(scheduleId)!;
         this.state = {
           name: schedule.name,
-          payments: schedule.payments,
+          vests: schedule.vests,
           isSaving: false,
-          createMode: PaymentScheduleCreateMode.csv
+          createMode: VestScheduleCreateMode.csv
         }
       } else {
         throw new Error('A Bill to edit must be provided if editing flag is true');
@@ -49,9 +49,9 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
     } else {
       this.state = {
         name: '',
-        payments: [],
+        vests: [],
         isSaving: false,
-        createMode: PaymentScheduleCreateMode.csv
+        createMode: VestScheduleCreateMode.csv
       };
     }
   }
@@ -65,7 +65,7 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
 
   @autobind
   private handleCreateModeChanged(event: React.ChangeEvent<HTMLInputElement>) {
-    let value = event.target.value as PaymentScheduleCreateMode;
+    let value = event.target.value as VestScheduleCreateMode;
     this.setState({
       createMode: value
     });
@@ -87,10 +87,10 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
       //   this.state.unavoidable
       // );
     } else {
-      await AppStateManager.addPaymentSchedule(
-        new PaymentSchedule({
+      await AppStateManager.addVestSchedule(
+        new VestSchedule({
           name: this.state.name,
-          payments: this.state.payments
+          vests: this.state.vests
         })
       );
     }
@@ -108,20 +108,20 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
   private renderControlsForMode() {
     let result: JSX.Element
     switch (this.state.createMode) {
-      case PaymentScheduleCreateMode.csv:
+      case VestScheduleCreateMode.csv:
         result = (
           <>
             <InputGroup className={styles["csv-group"]}>
               <Button onClick={this.uploadCSV}>Upload CSV</Button>
               <label className={styles["error"]}>{this.state.errorMessage ?? ""}</label>
             </InputGroup>
-            <PaymentSchedulePreview payments={this.state.payments} />
+            <VestSchedulePreview vests={this.state.vests} />
           </>
         );
         break;
-      case PaymentScheduleCreateMode.manual:
+      case VestScheduleCreateMode.manual:
         result = (
-          <PaymentSchedulePreview payments={this.state.payments} editable />
+          <VestSchedulePreview vests={this.state.vests} editable />
         )
         break;
     }
@@ -135,9 +135,9 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
       try {
         let file = await FileLoader.openWithDialog();
         let csvText = await FileLoader.readAsText(file);
-        let schedule = PaymentSchedule.fromCSV(this.state.name, csvText);
+        let schedule = VestSchedule.fromCSV(this.state.name, csvText);
         this.setState({
-          payments: schedule.payments
+          vests: schedule.vests
         });
       } catch {
         this.setState({
@@ -148,7 +148,7 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
   }
 
   private renderViewOnly() {
-    const schedule = AppStateManager.getPaymentSchedule(this.props.scheduleToEdit!);
+    const schedule = AppStateManager.getVestSchedule(this.props.scheduleToEdit!);
     if (schedule) {
       return (
         <Modal
@@ -161,7 +161,7 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
             <Modal.Title>{schedule.name}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <PaymentSchedulePreview payments={schedule.payments} />
+            <VestSchedulePreview vests={schedule.vests} />
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.cancel}>
@@ -182,7 +182,7 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
         keyboard={false}
       >
         <Modal.Header closeButton>
-          <Modal.Title>{this.props.editing ? "Update" : "Add"} Payment Schedule</Modal.Title>
+          <Modal.Title>{this.props.editing ? "Update" : "Add"} Stock Vest Schedule</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <InputGroup className="mb-3">
@@ -200,8 +200,8 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
               value={this.state.createMode}
               disabled={this.props.editing}
             >
-              <option value={PaymentScheduleCreateMode.csv}>CSV</option>
-              <option value={PaymentScheduleCreateMode.manual}>Manual Input</option>
+              <option value={VestScheduleCreateMode.csv}>CSV</option>
+              <option value={VestScheduleCreateMode.manual}>Manual Input</option>
             </FormControl>
           </InputGroup>
           {this.renderControlsForMode()}
@@ -227,21 +227,28 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
   }
 }
 
-interface IPaymentSchedulePreviewProps {
+interface IVestSchedulePreviewProps {
   editable?: boolean;
-  payments: ScheduledPayment[];
+  vests: ScheduledStockVest[];
 }
 
-const PaymentSchedulePreview: React.FC<IPaymentSchedulePreviewProps> = (props) => {
+const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
 
-  props.payments.sort((a, b) => a.date.valueOf() - b.date.valueOf());
+  props.vests.sort((a, b) => a.date.valueOf() - b.date.valueOf());
+  //TODO Get share price to get value
+  // useEffect(() => {
+  //   InvestmentCalculationManager.getStockPriceForSymbol(props.)
+  //   return () => {
 
-  function renderPayment(payment: ScheduledPayment) {
+  //   }
+  // },[]);
+
+  function renderPayment(vest: ScheduledStockVest) {
     return (
-      <tr key={payment.id}>
-        <td>{payment.name}</td>
-        <td>{payment.date.format("L")}</td>
-        <td>${payment.amount}</td>
+      <tr key={vest.id}>
+        <td>{vest.symbol}</td>
+        <td>{vest.date.format("L")}</td>
+        <td>{vest.shares}</td>
         {props.editable && (
           <td>
             <ButtonGroup className={`mr-2`} size='sm'>
@@ -264,12 +271,12 @@ const PaymentSchedulePreview: React.FC<IPaymentSchedulePreviewProps> = (props) =
         <Table responsive={"sm"}>
           <thead>
             <tr>
-              <th>Name</th>
+              <th>Symbol</th>
               <th>
                 <i className="bi bi-calendar" />
               </th>
               <th>
-                <i className="bi bi-cash-coin" />
+                Shares
               </th>
               {props.editable && (
                 <th>
@@ -279,7 +286,7 @@ const PaymentSchedulePreview: React.FC<IPaymentSchedulePreviewProps> = (props) =
             </tr>
           </thead>
           <tbody>
-            {props.payments.map(renderPayment)}
+            {props.vests.map(renderPayment)}
           </tbody>
         </Table>
       </div>
@@ -288,9 +295,9 @@ const PaymentSchedulePreview: React.FC<IPaymentSchedulePreviewProps> = (props) =
 
   function render(): JSX.Element {
     let result: JSX.Element;
-    if (props.payments.length === 0) {
+    if (props.vests.length === 0) {
       result = (
-        <div className={styles["no-payments-message"]}>No payments have been created yet.</div>
+        <div className={styles["no-payments-message"]}>No stock vests have been created yet.</div>
       );
     } else {
       result = renderSchedule();

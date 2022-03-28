@@ -8,7 +8,7 @@ export class CSVParser<T> {
 
   public parse(file: string) {
     try {
-      let lines = file.split("\n");
+      let lines = file.split("\n").map(line => line.replace("\r", ""));
       const results: string[][] = [];
       //we don't need the header line
       lines.shift();
