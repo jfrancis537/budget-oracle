@@ -145,6 +145,7 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
       const totalInvestmentValue = this.props.calculations?.investmentResults.totalValue;
       const totalInvestmentCost = this.props.calculations?.investmentResults.totalCostBasis;
       const totalInvestmentGain = totalInvestmentValue - totalInvestmentCost;
+      const totalVestGain = this.props.calculations.scheduledVestsTotal;
 
       const billCalcs = this.props.calculations.billResults;
       const unavoidableCosts = billCalcs.unavoidableBills[1];
@@ -168,6 +169,10 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
             <div>
               <label>Total Gain (After LT Taxes):&nbsp;</label>
               <span>${(totalInvestmentGain * .85).toFixed(2)}</span>
+            </div>
+            <div>
+              <label>Total Gain from Vests:&nbsp;</label>
+              <span>${totalVestGain.toFixed(2)}</span>
             </div>
           </Col>
           <Col>
