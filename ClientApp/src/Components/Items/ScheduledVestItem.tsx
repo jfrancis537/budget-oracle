@@ -1,4 +1,4 @@
-import moment from "moment";
+import moment, { Moment } from "moment";
 import { useEffect, useState } from "react";
 import { ButtonGroup, Button } from "react-bootstrap";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
@@ -8,19 +8,57 @@ import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { VestSchedule } from "../../Processing/Models/VestSchedule";
 
 import itemStyles from '../../styles/Item.module.css';
+import vestStyles from '../../styles/ScheduleVestItem.module.css';
 
 interface IScheduledVestProps {
   schedule: VestSchedule
 }
 
+enum DisplayMode {
+  Interim = "Interim",
+  Vested = "Vested",
+  Unvested = "Unvested",
+  TotalValue = "Total Value"
+}
+
+namespace DisplayMode {
+  export const itr = function* () {
+    yield DisplayMode.Interim;
+    yield DisplayMode.Vested;
+    yield DisplayMode.Unvested;
+    yield DisplayMode.TotalValue;
+  }
+
+  export function getNext(current: DisplayMode): DisplayMode {
+    let result: DisplayMode;
+    switch (current) {
+      case DisplayMode.Interim:
+        result = DisplayMode.Vested;
+        break;
+      case DisplayMode.Vested:
+        result = DisplayMode.Unvested;
+        break;
+      case DisplayMode.Unvested:
+        result = DisplayMode.TotalValue;
+        break;
+      case DisplayMode.TotalValue:
+        result = DisplayMode.Interim;
+        break;
+    }
+    return result;
+  }
+}
+
 
 export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
 
-  const [showBreakdown, setShowBreakdown] = useState(true);
+  const [displayMode, setDisplayMode] = useState(DisplayMode.Interim);
   const [symbolValues, setSymbolValues] = useState(getBaseSymbolValues());
+  const [endDate, setEndDate] = useState(CalculationsManager.instance.endDate);
 
   useEffect(() => {
     InvestmentCalculationManager.onsymbolvaluecalculated.addListener(onSymbolValueUpdated);
+    CalculationsManager.instance.onenddatechanged.addListener(handleEndDateChanged);
     getSymbolValues(true)
       .then(values => {
         setSymbolValues(values)
@@ -30,8 +68,13 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
       });
     return () => {
       InvestmentCalculationManager.onsymbolvaluecalculated.removeListener(onSymbolValueUpdated);
+      CalculationsManager.instance.onenddatechanged.removeListener(handleEndDateChanged);
     }
   }, []);
+
+  function handleEndDateChanged(date: Moment) {
+    setEndDate(date);
+  }
 
   function onSymbolValueUpdated(data: { symbol: string, value: number }) {
     const symbolKey = data.symbol.toLowerCase();
@@ -92,10 +135,9 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
 
   function calculateInterim() {
     let start = moment().startOf('day');
-    let end = CalculationsManager.instance.endDate;
     let sum = 0;
     for (let vest of props.schedule.vests) {
-      if (vest.date.isSameOrAfter(start) && vest.date.isSameOrBefore(end)) {
+      if (vest.date.isSameOrAfter(start) && vest.date.isSameOrBefore(endDate)) {
         const key = vest.symbol.toLowerCase();
         const symbolValue = symbolValues.get(key)!;
         sum += (symbolValue * vest.shares * (1 - vest.taxPercentage));
@@ -105,10 +147,9 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
   }
 
   function calculateRemaining() {
-    let end = CalculationsManager.instance.endDate;
     let sum = 0;
     for (let vest of props.schedule.vests) {
-      if (vest.date.isAfter(end)) {
+      if (vest.date.isAfter(endDate)) {
         const key = vest.symbol.toLowerCase();
         const symbolValue = symbolValues.get(key)!;
         sum += (symbolValue * vest.shares * (1 - vest.taxPercentage));
@@ -118,7 +159,7 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
   }
 
   function toggleBreakdown() {
-    setShowBreakdown(!showBreakdown);
+    setDisplayMode(DisplayMode.getNext(displayMode));
   }
 
   function view() {
@@ -138,6 +179,19 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
     await AppStateManager.deleteItem(props.schedule.id);
   }
 
+  function renderCurrentMode() {
+    switch (displayMode) {
+      case DisplayMode.Interim:
+        return <div>${calculateInterim()}</div>
+      case DisplayMode.Vested:
+        return <div>${calculateRedeemed()}</div>
+      case DisplayMode.Unvested:
+        return <div>${calculateRemaining()}</div>
+      case DisplayMode.TotalValue:
+        return <div>${calculateTotalPotentialValue()}</div>
+    }
+  }
+
   function render(): JSX.Element {
     return (
       <div className={itemStyles['item-body']}>
@@ -152,18 +206,19 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
             <i className="bi bi-arrow-clockwise"></i>
           </Button>
         </ButtonGroup>
-        <div>
-          <span>{props.schedule.name}: </span>
-          <span onClick={toggleBreakdown}>
-            {showBreakdown ? (
-              `${calculateRedeemed()} / ${calculateInterim()} / ${calculateRemaining()}`
-            ) : (
-              calculateTotalPotentialValue()
-            )}
-          </span>
+        <div className={vestStyles["data-container"]}>
+          <div className={vestStyles["title"]}>{props.schedule.name}</div>
+          <div className={vestStyles["value"]} onClick={toggleBreakdown}>
+            {displayMode}:&nbsp;{renderCurrentMode()}
+          </div>
         </div>
       </div>
     );
   }
   return render();
-} 
+}
+
+// display: flex;
+// background-color: #2d9b36;
+// padding: 5px;
+// border-radius: 5px;

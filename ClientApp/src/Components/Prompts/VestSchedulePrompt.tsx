@@ -150,6 +150,8 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
   private renderViewOnly() {
     const schedule = AppStateManager.getVestSchedule(this.props.scheduleToEdit!);
     if (schedule) {
+      const symbols = new Set(schedule.vests.map(item => item.symbol));
+      const title = symbols.size > 1 ? schedule.name : `${schedule.name} - ${[...symbols][0]}`;
       return (
         <Modal
           show
@@ -158,7 +160,7 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
           keyboard={false}
         >
           <Modal.Header closeButton>
-            <Modal.Title>{schedule.name}</Modal.Title>
+            <Modal.Title>{title}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <VestSchedulePreview vests={schedule.vests} />
@@ -235,6 +237,7 @@ interface IVestSchedulePreviewProps {
 const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
 
   props.vests.sort((a, b) => a.date.valueOf() - b.date.valueOf());
+  const symbols = new Set(props.vests.map(item => item.symbol));
   //TODO Get share price to get value
   // useEffect(() => {
   //   InvestmentCalculationManager.getStockPriceForSymbol(props.)
@@ -246,9 +249,10 @@ const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
   function renderPayment(vest: ScheduledStockVest) {
     return (
       <tr key={vest.id}>
-        <td>{vest.symbol}</td>
-        <td>{vest.date.format("L")}</td>
+        <td>{vest.name}</td>
+        {symbols.size > 1 && <td>{vest.symbol}</td>}
         <td>{vest.shares}</td>
+        <td>{vest.date.format("L")}</td>
         {props.editable && (
           <td>
             <ButtonGroup className={`mr-2`} size='sm'>
@@ -271,12 +275,11 @@ const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
         <Table responsive={"sm"}>
           <thead>
             <tr>
-              <th>Symbol</th>
+              <th>Name</th>
+              {symbols.size > 1 && <th>Symbol</th>}
+              <th>Shares</th>
               <th>
                 <i className="bi bi-calendar" />
-              </th>
-              <th>
-                Shares
               </th>
               {props.editable && (
                 <th>

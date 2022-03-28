@@ -290,7 +290,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
                 }>
                 {this.renderUngroupedArea()}
               </Col>
-              <Col xs sm={2}
+              <Col xs sm={2} md={3}
                 className={[
                   contentStyles['content-col'],
                   contentStyles['ungrouped'],

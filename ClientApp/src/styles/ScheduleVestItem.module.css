@@ -1,0 +1,17 @@
+.data-container {
+  display: flex;
+  flex-flow: column;
+  flex: 1;
+}
+
+.title {
+  display: flex;
+  justify-content: center;
+}
+
+.value {
+  display: flex;
+  justify-content: center;
+  background-color: #3b8b3b;
+  border-radius: 3px;
+}

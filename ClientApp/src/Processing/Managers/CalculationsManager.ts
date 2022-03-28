@@ -42,12 +42,14 @@ type QuarterNumber = 1 | 2 | 3 | 4;
 class CalculationsManager {
 
   public readonly onresultscalculated: Action<CalculationResult>;
+  public readonly onenddatechanged: Action<Moment>;
 
   private _endDate: Moment;
 
   constructor() {
     this._endDate = moment().add(1, 'days').startOf('day');
     this.onresultscalculated = new Action();
+    this.onenddatechanged = new Action();
     this.handleUpdate = this.handleUpdate.bind(this);
     AppStateManager.onbillsupdated.addListener(this.handleUpdate);
     AppStateManager.onaccountsupdated.addListener(this.handleUpdate);
@@ -64,6 +66,7 @@ class CalculationsManager {
   set endDate(date: Moment) {
     this._endDate = date;
     this.handleUpdate();
+    this.onenddatechanged.invoke(date);
   }
 
   public async requestCalculations(): Promise<CalculationResult> {
