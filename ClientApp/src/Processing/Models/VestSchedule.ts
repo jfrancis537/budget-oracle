@@ -54,7 +54,7 @@ export class VestSchedule extends Identifiable {
   }
 }
 
-interface ScheduledStockVestOptions extends IdentifiableOptions {
+export interface ScheduledStockVestOptions extends IdentifiableOptions {
   name: string;
   symbol: string;
   shares: number;

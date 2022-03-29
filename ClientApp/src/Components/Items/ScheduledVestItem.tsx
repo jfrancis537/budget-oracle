@@ -170,6 +170,14 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
     });
   }
 
+  function edit() {
+    PromptManager.requestVestSchedulePrompt({
+      editing: true,
+      viewOnly: false,
+      scheduleToEdit: props.schedule.id
+    });
+  }
+
   async function refresh() {
     const values = await getSymbolValues(true);
     setSymbolValues(values);
@@ -196,8 +204,8 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
     return (
       <div className={itemStyles['item-body']}>
         <ButtonGroup className="mr-2" size='sm'>
-          <Button onClick={view}>
-            <i className="bi bi-eye" />
+          <Button onClick={edit}>
+            <i className="bi bi-pencil" />
           </Button>
           <Button onClick={remove} variant='secondary'>
             <i className="bi bi-trash"></i>

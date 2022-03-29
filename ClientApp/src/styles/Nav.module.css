@@ -6,13 +6,14 @@
   justify-content: flex-end;
 }
 
-::-webkit-calendar-picker-indicator {
-  filter: invert();
-}
 
 .date-picker {
   background-color: transparent;
   border-style: none;
   color: white;
   text-align: end;
+}
+
+.date-picker::-webkit-calendar-picker-indicator {
+  filter: invert();
 }

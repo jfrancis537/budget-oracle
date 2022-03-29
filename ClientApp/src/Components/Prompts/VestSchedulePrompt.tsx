@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Button, ButtonGroup, FormControl, InputGroup, Modal, Table } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
@@ -7,7 +7,10 @@ import { FileLoader } from "../../Utilities/FileUtils";
 import { LoadingButton } from "./LoadingButton";
 
 import styles from "../../styles/PaymentSchedulePrompt.module.css";
-import { ScheduledStockVest, VestSchedule } from "../../Processing/Models/VestSchedule";
+import { ScheduledStockVest, ScheduledStockVestOptions, VestSchedule } from "../../Processing/Models/VestSchedule";
+import { CurrencyInput } from "../Inputs/CurrencyInput";
+import { NumberInput } from "../Inputs/NumberInput";
+import { DatePicker } from "../Inputs/DatePicker";
 
 export interface IVestSchedulePromptProps {
   editing: boolean;
@@ -20,6 +23,8 @@ interface IVestSchedulePromptState {
   vests: ScheduledStockVest[],
   isSaving: boolean,
   createMode: VestScheduleCreateMode,
+  vestToEdit?: ScheduledStockVest,
+  pendingVestChanges?: ScheduledStockVestOptions,
   errorMessage?: string
 }
 
@@ -41,7 +46,7 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
           name: schedule.name,
           vests: schedule.vests,
           isSaving: false,
-          createMode: VestScheduleCreateMode.csv
+          createMode: VestScheduleCreateMode.manual
         }
       } else {
         throw new Error('A Bill to edit must be provided if editing flag is true');
@@ -73,36 +78,77 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
 
   @autobind
   private async accept() {
-    this.setState({
-      isSaving: true
-    });
-    if (this.props.editing) {
-      // await AppStateManager.updateBill(
-      //   this.props.billToEdit,
-      //   this.state.name,
-      //   this.state.value,
-      //   this.state.frequency,
-      //   this.state.frequencyType,
-      //   this.state.initalDate,
-      //   this.state.unavoidable
-      // );
-    } else {
-      await AppStateManager.addVestSchedule(
-        new VestSchedule({
-          name: this.state.name,
-          vests: this.state.vests
+    if (this.state.vestToEdit) {
+      if (this.state.pendingVestChanges) {
+        const vests = this.state.vests.filter(item => item !== this.state.vestToEdit);
+        vests.push(new ScheduledStockVest(this.state.pendingVestChanges));
+        this.setState({
+          vests: vests,
+          vestToEdit: undefined,
+          pendingVestChanges: undefined
         })
-      );
+      } else {
+        this.cancel();
+      }
+    } else {
+      this.setState({
+        isSaving: true
+      });
+      if (this.props.editing) {
+        await AppStateManager.addVestSchedule(
+          new VestSchedule({
+            id: this.props.scheduleToEdit,
+            name: this.state.name,
+            vests: this.state.vests
+          })
+        );
+      } else {
+        await AppStateManager.addVestSchedule(
+          new VestSchedule({
+            name: this.state.name,
+            vests: this.state.vests
+          })
+        );
+      }
+      this.setState({
+        isSaving: false
+      });
+      PromptManager.requestClosePrompt();
     }
-    this.setState({
-      isSaving: false
-    });
-    PromptManager.requestClosePrompt();
   }
 
   @autobind
   private cancel() {
-    PromptManager.requestClosePrompt();
+    if (this.state.vestToEdit) {
+      this.setState({
+        vestToEdit: undefined,
+        pendingVestChanges: undefined
+      });
+    } else {
+      PromptManager.requestClosePrompt();
+    }
+  }
+
+  @autobind
+  private onEditSpecificVest(vest: ScheduledStockVest) {
+    this.setState({
+      vestToEdit: vest
+    });
+  }
+
+  @autobind
+  private onDeleteSpecificVest(vest: ScheduledStockVest) {
+    const vests = this.state.vests.filter(item => item !== vest);
+    this.setState({
+      vests: vests
+    });
+  }
+
+  @autobind
+  private handlePendingVestChanges(changes: ScheduledStockVestOptions) {
+    this.setState({
+      pendingVestChanges: changes
+    });
   }
 
   private renderControlsForMode() {
@@ -121,7 +167,12 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
         break;
       case VestScheduleCreateMode.manual:
         result = (
-          <VestSchedulePreview vests={this.state.vests} editable />
+          <VestSchedulePreview
+            vests={this.state.vests}
+            editable
+            onEditClicked={this.onEditSpecificVest}
+            onDeleteClicked={this.onDeleteSpecificVest}
+          />
         )
         break;
     }
@@ -144,6 +195,41 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
           errorMessage: "Failed to upload CSV. Ensure the document was formatted correctly."
         });
       }
+    }
+  }
+
+  private renderModalBody() {
+    if (this.state.vestToEdit) {
+      const vest = this.state.vestToEdit;
+      return (
+        <>
+          <VestEditor vest={vest} onChangeMade={this.handlePendingVestChanges} />
+        </>
+      )
+    } else {
+      return (
+        <>
+          <InputGroup className="mb-3">
+            <FormControl
+              placeholder="Name"
+              aria-label="name"
+              onChange={this.handleNameChanged}
+              value={this.state.name}
+            />
+          </InputGroup>
+          <InputGroup className="mb-3">
+            <FormControl
+              as='select'
+              onChange={this.handleCreateModeChanged}
+              value={this.state.createMode}
+            >
+              <option value={VestScheduleCreateMode.csv}>CSV</option>
+              <option value={VestScheduleCreateMode.manual}>Manual Input</option>
+            </FormControl>
+          </InputGroup>
+          {this.renderControlsForMode()}
+        </>
+      )
     }
   }
 
@@ -175,7 +261,10 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
     }
   }
 
+
+
   renderDefault() {
+    const title = this.state.vestToEdit ? this.state.vestToEdit.name : `${(this.props.editing ? "Update" : "Add")} Stock Vest Schedule`;
     return (
       <Modal
         show
@@ -184,29 +273,10 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
         keyboard={false}
       >
         <Modal.Header closeButton>
-          <Modal.Title>{this.props.editing ? "Update" : "Add"} Stock Vest Schedule</Modal.Title>
+          <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <InputGroup className="mb-3">
-            <FormControl
-              placeholder="Name"
-              aria-label="name"
-              onChange={this.handleNameChanged}
-              value={this.state.name}
-            />
-          </InputGroup>
-          <InputGroup className="mb-3">
-            <FormControl
-              as='select'
-              onChange={this.handleCreateModeChanged}
-              value={this.state.createMode}
-              disabled={this.props.editing}
-            >
-              <option value={VestScheduleCreateMode.csv}>CSV</option>
-              <option value={VestScheduleCreateMode.manual}>Manual Input</option>
-            </FormControl>
-          </InputGroup>
-          {this.renderControlsForMode()}
+          {this.renderModalBody()}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={this.cancel}>
@@ -232,6 +302,105 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
 interface IVestSchedulePreviewProps {
   editable?: boolean;
   vests: ScheduledStockVest[];
+  onEditClicked?: (vest: ScheduledStockVest) => void;
+  onDeleteClicked?: (vest: ScheduledStockVest) => void;
+
+}
+
+interface IVestEditorProps {
+  vest: ScheduledStockVest;
+  onChangeMade?: (options: ScheduledStockVestOptions) => void;
+}
+
+const VestEditor: React.FC<IVestEditorProps> = (props) => {
+
+  const [name, setName] = useState(props.vest.name);
+  const [symbol, setSymbol] = useState(props.vest.symbol);
+  const [shares, setShares] = useState(props.vest.shares);
+  const [date, setDate] = useState(props.vest.date);
+  const [costBasis, setCostBasis] = useState(props.vest.costBasisPerShare);
+  const [taxRate, setTaxRate] = useState(props.vest.taxPercentage);
+
+  useEffect(() => {
+    if (props.onChangeMade) {
+      props.onChangeMade({
+        name,
+        symbol,
+        shares,
+        date,
+        costBasisPerShare: costBasis,
+        taxPercentage: taxRate
+      });
+    }
+  }, [name, symbol, shares, date, costBasis, taxRate]);
+
+  return (
+    <>
+      <InputGroup className="mb-3">
+        <FormControl
+          placeholder="Name"
+          aria-label="name"
+          onChange={e => setName(e.target.value)}
+          value={name}
+        />
+      </InputGroup>
+      <InputGroup className="mb-3">
+        <FormControl
+          placeholder="Symbol"
+          aria-label="Ticker Symbol"
+          onChange={e => setSymbol(e.target.value)}
+          value={symbol}
+          maxLength={5}
+        />
+      </InputGroup>
+      <InputGroup className="mb-3">
+        <InputGroup.Prepend>
+          <InputGroup.Text>
+            <i className="bi bi-calendar-event" />
+          </InputGroup.Text>
+        </InputGroup.Prepend>
+        <DatePicker defaultDate={date} calendarIconBackgroundEnabled className="form-control" onChange={setDate} />
+      </InputGroup>
+      <InputGroup className="mb-3">
+        <InputGroup.Prepend>
+          <InputGroup.Text>Tax Rate</InputGroup.Text>
+        </InputGroup.Prepend>
+        <NumberInput
+          defaultValue={taxRate}
+          ariaLabel="tax rate"
+          onChange={val => setTaxRate(val / 100)}
+        />
+        <InputGroup.Append>
+          <InputGroup.Text>%</InputGroup.Text>
+        </InputGroup.Append>
+      </InputGroup>
+      <label>Cost Basis</label>
+      <InputGroup className="mb-3">
+        <NumberInput
+          defaultValue={shares}
+          ariaLabel="Number of shares"
+          onChange={setShares}
+        />
+        <InputGroup.Append>
+          <InputGroup.Text>Shares</InputGroup.Text>
+        </InputGroup.Append>
+      </InputGroup>
+      <InputGroup className="mb-3">
+        <InputGroup.Prepend>
+          <InputGroup.Text>@</InputGroup.Text>
+        </InputGroup.Prepend>
+        <CurrencyInput
+          ariaLabel="Cost basis per share"
+          defaultValue={costBasis}
+          onChange={setCostBasis}
+        />
+        <InputGroup.Append>
+          <InputGroup.Text>Per Share</InputGroup.Text>
+        </InputGroup.Append>
+      </InputGroup>
+
+    </>
+  )
 }
 
 const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
@@ -246,6 +415,10 @@ const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
   //   }
   // },[]);
 
+  function throwError(err: Error) {
+    throw err;
+  }
+
   function renderPayment(vest: ScheduledStockVest) {
     return (
       <tr key={vest.id}>
@@ -256,10 +429,10 @@ const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
         {props.editable && (
           <td>
             <ButtonGroup className={`mr-2`} size='sm'>
-              <Button onClick={() => { }}>
-                <i className="bi bi-plus-square"></i>
+              <Button onClick={() => props.onEditClicked ? props.onEditClicked(vest) : throwError(new Error("No edit function specified"))}>
+                <i className="bi bi-pencil"></i>
               </Button>
-              <Button onClick={() => { }} variant='secondary'>
+              <Button onClick={() => props.onDeleteClicked ? props.onDeleteClicked(vest) : throwError(new Error("No delete function specified"))} variant='secondary'>
                 <i className="bi bi-trash"></i>
               </Button>
             </ButtonGroup>

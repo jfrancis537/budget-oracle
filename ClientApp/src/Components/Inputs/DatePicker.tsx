@@ -6,6 +6,8 @@ interface IDatePickerProps {
   defaultDate?: Moment;
   inputProps?: React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
   onChange?: (date: Moment) => void;
+  calendarIconBackgroundEnabled?: boolean;
+  className?: string;
 }
 
 interface IDatePickerState {
@@ -38,6 +40,14 @@ export class DatePicker extends React.Component<IDatePickerProps, IDatePickerSta
     if (this.props.inputProps) {
       this.props.inputProps.type = undefined;
     }
-    return <input {...this.props.inputProps} type='date' onChange={this.handleChange} value={this.state.currentDate.format("yyyy-MM-DD")} />
+
+    return <input
+      className={this.props.className}
+      data-icon-color-enabled={`${!!this.props.calendarIconBackgroundEnabled}`}
+      {...this.props.inputProps}
+      type='date'
+      onChange={this.handleChange}
+      value={this.state.currentDate.format("yyyy-MM-DD")}
+    />
   }
 }
