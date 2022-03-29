@@ -14,6 +14,7 @@
 .modal-body {
   display: flex;
   flex-flow: column;
+  overflow: hidden;
 }
 
 .no-payments-message {
