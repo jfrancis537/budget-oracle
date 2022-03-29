@@ -157,12 +157,14 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
   private login() {
     this.setState({
       loginPromptVisible: true
-    })
+    });
   }
 
   @autobind
   private logout() {
-    UserManager.logout();
+    if (window.confirm("Do you want to sign out?")) {
+      UserManager.logout();
+    }
   }
 
   @autobind

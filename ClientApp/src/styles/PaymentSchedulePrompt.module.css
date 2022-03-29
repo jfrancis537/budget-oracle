@@ -7,6 +7,15 @@
 
 }
 
+.modal {
+  max-height: 90vh;
+}
+
+.modal-body {
+  display: flex;
+  flex-flow: column;
+}
+
 .no-payments-message {
   display: flex;
   justify-content: center;
@@ -27,7 +36,6 @@
 }
 
 .table-container {
-  max-height: 45vh;
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -38,4 +46,9 @@
 
 .table-container td {
   text-align: center;
+}
+
+.add-button {
+  width: 80%;
+  margin: 0 auto;
 }

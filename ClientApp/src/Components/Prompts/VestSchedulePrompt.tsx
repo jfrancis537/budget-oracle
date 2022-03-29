@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Button, ButtonGroup, FormControl, InputGroup, Modal, Table } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
@@ -11,6 +11,7 @@ import { ScheduledStockVest, ScheduledStockVestOptions, VestSchedule } from "../
 import { CurrencyInput } from "../Inputs/CurrencyInput";
 import { NumberInput } from "../Inputs/NumberInput";
 import { DatePicker } from "../Inputs/DatePicker";
+import moment from "moment";
 
 export interface IVestSchedulePromptProps {
   editing: boolean;
@@ -130,6 +131,21 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
   }
 
   @autobind
+  private onAddNewVest() {
+    const newVest = new ScheduledStockVest({
+      name: "",
+      date: moment(),
+      shares: 0,
+      costBasisPerShare: 0,
+      symbol: "",
+      taxPercentage: 0
+    });
+    this.setState({
+      vestToEdit: newVest
+    });
+  }
+
+  @autobind
   private onEditSpecificVest(vest: ScheduledStockVest) {
     this.setState({
       vestToEdit: vest
@@ -170,6 +186,7 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
           <VestSchedulePreview
             vests={this.state.vests}
             editable
+            onAddClicked={this.onAddNewVest}
             onEditClicked={this.onEditSpecificVest}
             onDeleteClicked={this.onDeleteSpecificVest}
           />
@@ -239,12 +256,7 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
       const symbols = new Set(schedule.vests.map(item => item.symbol));
       const title = symbols.size > 1 ? schedule.name : `${schedule.name} - ${[...symbols][0]}`;
       return (
-        <Modal
-          show
-          onHide={this.cancel}
-          backdrop="static"
-          keyboard={false}
-        >
+        <>
           <Modal.Header closeButton>
             <Modal.Title>{title}</Modal.Title>
           </Modal.Header>
@@ -256,7 +268,7 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
               Done
             </Button>
           </Modal.Footer>
-        </Modal>
+        </>
       );
     }
   }
@@ -265,17 +277,13 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
 
   renderDefault() {
     const title = this.state.vestToEdit ? this.state.vestToEdit.name : `${(this.props.editing ? "Update" : "Add")} Stock Vest Schedule`;
+    const buttonText = this.state.vestToEdit ? "Done" : (this.props.editing ? "Update" : "Add")
     return (
-      <Modal
-        show
-        onHide={this.cancel}
-        backdrop="static"
-        keyboard={false}
-      >
+      <>
         <Modal.Header closeButton>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className={styles["modal-body"]}>
           {this.renderModalBody()}
         </Modal.Body>
         <Modal.Footer>
@@ -283,29 +291,28 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
             Cancel
           </Button>
           <LoadingButton isLoading={this.state.isSaving} loadingText="Saving..." variant="primary" onClick={this.accept} disabled={!this.state.name || this.state.isSaving}>
-            {this.props.editing ? "Update" : "Add"}
+            {buttonText}
           </LoadingButton>
         </Modal.Footer>
-      </Modal>
+      </>
     )
   }
 
   render() {
-    if (this.props.viewOnly) {
-      return this.renderViewOnly();
-    } else {
-      return this.renderDefault();
-    }
+    return (
+      <Modal
+        show
+        onHide={this.cancel}
+        backdrop="static"
+        keyboard={false}
+        contentClassName={styles["modal"]}
+      >
+        {this.props.viewOnly ? this.renderViewOnly() : this.renderDefault()}
+      </Modal>
+    )
   }
 }
 
-interface IVestSchedulePreviewProps {
-  editable?: boolean;
-  vests: ScheduledStockVest[];
-  onEditClicked?: (vest: ScheduledStockVest) => void;
-  onDeleteClicked?: (vest: ScheduledStockVest) => void;
-
-}
 
 interface IVestEditorProps {
   vest: ScheduledStockVest;
@@ -403,6 +410,14 @@ const VestEditor: React.FC<IVestEditorProps> = (props) => {
   )
 }
 
+interface IVestSchedulePreviewProps {
+  editable?: boolean;
+  vests: ScheduledStockVest[];
+  onEditClicked?: (vest: ScheduledStockVest) => void;
+  onDeleteClicked?: (vest: ScheduledStockVest) => void;
+  onAddClicked?: () => void;
+}
+
 const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
 
   props.vests.sort((a, b) => a.date.valueOf() - b.date.valueOf());
@@ -414,7 +429,6 @@ const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
 
   //   }
   // },[]);
-
   function throwError(err: Error) {
     throw err;
   }
@@ -443,8 +457,9 @@ const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
   }
 
   function renderSchedule() {
+    const colCount = symbols.size > 1 ? 5 : 4;
     return (
-      <div className={styles["table-container"]}>
+      <div className={styles["table-container"]} >
         <Table responsive={"sm"}>
           <thead>
             <tr>
@@ -462,6 +477,15 @@ const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
             </tr>
           </thead>
           <tbody>
+            {props.editable && (
+              <tr>
+                <td colSpan={colCount}>
+                  <Button className={styles["add-button"]} onClick={props.onAddClicked}>
+                    <i className="bi bi-plus-lg" />
+                  </Button>
+                </td>
+              </tr>
+            )}
             {props.vests.map(renderPayment)}
           </tbody>
         </Table>
