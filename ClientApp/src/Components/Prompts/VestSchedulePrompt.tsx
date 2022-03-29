@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Button, ButtonGroup, FormControl, InputGroup, Modal, Table } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";

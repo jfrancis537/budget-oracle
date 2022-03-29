@@ -70,6 +70,7 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
       InvestmentCalculationManager.onsymbolvaluecalculated.removeListener(onSymbolValueUpdated);
       CalculationsManager.instance.onenddatechanged.removeListener(handleEndDateChanged);
     }
+
   }, []);
 
   function handleEndDateChanged(date: Moment) {
@@ -162,13 +163,13 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
     setDisplayMode(DisplayMode.getNext(displayMode));
   }
 
-  function view() {
-    PromptManager.requestVestSchedulePrompt({
-      editing: true,
-      viewOnly: true,
-      scheduleToEdit: props.schedule.id
-    });
-  }
+  // function view() {
+  //   PromptManager.requestVestSchedulePrompt({
+  //     editing: true,
+  //     viewOnly: true,
+  //     scheduleToEdit: props.schedule.id
+  //   });
+  // }
 
   function edit() {
     PromptManager.requestVestSchedulePrompt({
