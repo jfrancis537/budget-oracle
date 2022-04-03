@@ -11,6 +11,7 @@ import { UserManager } from "../Processing/Managers/UserManager";
 import { LoginPrompt } from "./Prompts/LoginPrompt";
 import { autobind } from "../Utilities/Decorators";
 import { PushNotificationWorker } from "../Workers/ServiceWorkerLoader";
+import { PlaidDropdownItem } from "./Plaid/PlaidDropdownItem";
 
 interface IUIHeaderState {
   loginPromptVisible: boolean;
@@ -211,6 +212,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
             <Navbar.Collapse>
               <Nav>
                 <NavDropdown title="Add" id='add_dropdown'>
+                  <PlaidDropdownItem isLoggedIn={UserManager.isLoggedIn} />
                   <NavDropdown.Item onClick={this.addAccount}>Account</NavDropdown.Item>
                   <NavDropdown.Item onClick={this.addIncomeSource}>Income</NavDropdown.Item>
                   <NavDropdown.Item disabled={!UserManager.isLoggedIn} onClick={this.addInvestment}>Investment</NavDropdown.Item>

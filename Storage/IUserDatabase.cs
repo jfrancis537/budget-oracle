@@ -1,4 +1,5 @@
 ﻿using BudgetOracle.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BudgetOracle.Storage
@@ -10,6 +11,9 @@ namespace BudgetOracle.Storage
     Task UpdateState(string username, string data);
     Task UpdateGroups(string username, string data);
     Task SetPassword(string username, string password);
+    Task<AccessToken> SetAccessToken(string username, string itemGuid, string accessToken);
+    Task<AccessToken> GetAccessToken(string username, string itemGuid);
+    Task<IEnumerable<string>> GetAllItemsForUser(string username);
     Task<bool> ContainsUser(string username);
   }
 }

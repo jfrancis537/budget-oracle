@@ -16,6 +16,9 @@ using Microsoft.Net.Http.Headers;
 using Microsoft.EntityFrameworkCore;
 using BudgetOracle.Configuration;
 using BudgetOracle.Services;
+using Going.Plaid;
+using Microsoft.Extensions.Options;
+using System.Net.Http;
 
 namespace BudgetOracle
 {
@@ -39,11 +42,11 @@ namespace BudgetOracle
       services.AddControllers().AddNewtonsoftJson();
       services.AddDbContext<PostgresUserDbContext>(options =>
       {
-
         options
         .UseNpgsql($"Host=localhost;Database=budget_oracle;Username=www-data;Password={password}")
         .UseSnakeCaseNamingConvention();
       });
+      services.Configure<PlaidConfiguration>(Configuration.GetSection("Plaid"));
       if (Environment.IsDevelopment())
       {
         services.AddSingleton<IUserDatabase, InMemoryUserDatabase>();
@@ -58,6 +61,13 @@ namespace BudgetOracle
       services.AddSingleton<IStockDataProvider, YahooFinanceAPIProvider>();
       services.AddAntiforgery();
       services.AddSingleton<PushNotificationService>();
+      services.AddSingleton(provider =>
+      {
+        var conf = provider.GetService<IOptions<PlaidConfiguration>>();
+        var httpFactory = provider.GetService<IHttpClientFactory>();
+        var env = false ? Going.Plaid.Environment.Sandbox : Going.Plaid.Environment.Development;
+        return new PlaidClient(env, conf.Value.ClientId, conf.Value.Secret, null, httpFactory);
+      });
       services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
       {
         options.TokenValidationParameters = new TokenValidationParameters

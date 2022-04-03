@@ -22,5 +22,6 @@ namespace BudgetOracle.Storage
 
     }
     public DbSet<User> Users { get; set; }
+    public DbSet<AccessToken> AccessTokens { get; set; }
   }
 }

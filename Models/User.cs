@@ -19,5 +19,7 @@ namespace BudgetOracle.Models
     public string StateData { get; set; }
     [Column("group_data")]
     public string GroupData { get; set; }
+    [Column("access_tokens")]
+    public string AccessTokens { get; set; }
   }
 }

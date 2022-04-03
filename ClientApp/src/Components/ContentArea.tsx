@@ -19,6 +19,8 @@ import { PaymentSchedule } from "../Processing/Models/ScheduledPayment";
 import { ScheduledPaymentItem } from "./Items/ScheduledPaymentItem";
 import { VestSchedule } from "../Processing/Models/VestSchedule";
 import { ScheduledVestItem } from "./Items/ScheduledVestItem";
+import { PlaidManager } from "../Processing/Managers/PlaidManager";
+import { PlaidItem } from "./Items/PlaidItem";
 
 export enum ContentTab {
   Costs = "costs",
@@ -29,6 +31,7 @@ export enum ContentTab {
 interface ContentAreaState {
   groups?: GroupsData;
   accounts?: Account[];
+  accountItemIds?: string[];
   incomeSources?: IncomeSource[];
   debts?: Debt[];
   bills?: Bill[];
@@ -46,6 +49,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     this.state = {
       groups: GroupManager.groups,
       accounts: [...AppStateManager.accounts],
+      accountItemIds: [],
       incomeSources: [...AppStateManager.incomeSources],
       investments: [...AppStateManager.investments],
       paymentSchedules: [...AppStateManager.paymentSchedules],
@@ -63,6 +67,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     AppStateManager.oninvestmentsupdated.addListener(this.handleInvestmentsUpdated);
     AppStateManager.onpaymentschedulesupdated.addListener(this.handlePaymentSchedulesUpdated);
     AppStateManager.onvestschedulesupdated.addListener(this.handleVestSchedulesUpdated);
+    PlaidManager.onitemsupdated.addListener(this.handlePlaidAccountsUpdated);
   }
 
   componentWillUnmount() {
@@ -74,6 +79,14 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     AppStateManager.oninvestmentsupdated.removeListener(this.handleInvestmentsUpdated);
     AppStateManager.onpaymentschedulesupdated.removeListener(this.handlePaymentSchedulesUpdated);
     AppStateManager.onvestschedulesupdated.removeListener(this.handleVestSchedulesUpdated);
+    PlaidManager.onitemsupdated.removeListener(this.handlePlaidAccountsUpdated);
+  }
+
+  @autobind
+  private handlePlaidAccountsUpdated(ids: Iterable<string>) {
+    this.setState({
+      accountItemIds: [...ids]
+    });
   }
 
   @autobind
@@ -182,6 +195,18 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     return result;
   }
 
+  private renderPlaidAccounts() {
+    const result: JSX.Element[] = [];
+    if (this.state.accountItemIds) {
+      for (let id of this.state.accountItemIds) {
+        result.push(
+          <PlaidItem id={id} key={id}/>
+        );
+      }
+    }
+    return result;
+  }
+
   private renderIncomeSources() {
     const result: JSX.Element[] = [];
     if (this.state.incomeSources) {
@@ -215,6 +240,13 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
       sections.push(
         <div className={contentStyles['ungrouped-section']} key="account_section">
           {this.renderAccounts()}
+        </div>
+      );
+    }
+    if (this.state.accountItemIds?.length) {
+      sections.push(
+        <div className={contentStyles['ungrouped-section']} key="account_section">
+          {this.renderPlaidAccounts()}
         </div>
       );
     }

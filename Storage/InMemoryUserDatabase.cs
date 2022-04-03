@@ -1,6 +1,8 @@
 ﻿using BudgetOracle.Models;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BudgetOracle.Storage
@@ -8,10 +10,12 @@ namespace BudgetOracle.Storage
   public class InMemoryUserDatabase : IUserDatabase
   {
     private readonly ConcurrentDictionary<string, User> database;
+    private readonly ConcurrentDictionary<string, AccessToken> tokens;
 
     public InMemoryUserDatabase()
     {
       database = new ConcurrentDictionary<string, User>();
+      tokens = new ConcurrentDictionary<string, AccessToken>();
     }
 
     public async Task<bool> ContainsUser(string username)
@@ -88,6 +92,55 @@ namespace BudgetOracle.Storage
       else
       {
         throw new InvalidOperationException("Can not update groups of user that does not exist");
+      }
+    }
+
+    public async Task<AccessToken> SetAccessToken(string username, string itemGuid, string accessToken)
+    {
+      var user = await GetUser(username);
+      if (user != null)
+      {
+        var key = $"{user.Username}-{itemGuid}";
+        var token = new AccessToken()
+        {
+          OwnerUsername = user.Username,
+          Token = accessToken,
+          ItemId = itemGuid
+        };
+        tokens[key] = token;
+        return token;
+      }
+      else
+      {
+        throw new InvalidOperationException("Can't create access token for user that does not exist.");
+      }
+    }
+
+    public async Task<AccessToken> GetAccessToken(string username, string itemGuid)
+    {
+      var user = await GetUser(username);
+      if (user != null)
+      {
+        var key = $"{user.Username}-{itemGuid}";
+        return tokens.GetValueOrDefault(key, null);
+      }
+      else
+      {
+        throw new InvalidOperationException("Can't create access token for user that does not exist.");
+      }
+    }
+
+    public async Task<IEnumerable<string>> GetAllItemsForUser(string username)
+    {
+      var user = await GetUser(username);
+      if (user != null)
+      {
+        var result = tokens.Values.Where(token => token.OwnerUsername == username).Select(token => token.ItemId);
+        return result;
+      }
+      else
+      {
+        throw new InvalidOperationException("Can't get items for a user that does not exist");
       }
     }
   }

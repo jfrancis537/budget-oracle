@@ -1,4 +1,5 @@
 ﻿using BudgetOracle.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BudgetOracle.Storage
@@ -15,7 +16,22 @@ namespace BudgetOracle.Storage
       throw new System.NotImplementedException();
     }
 
+    public Task<AccessToken> GetAccessToken(string username, string itemGuid)
+    {
+      throw new System.NotImplementedException();
+    }
+
+    public Task<IEnumerable<string>> GetAllItemsForUser(string username)
+    {
+      throw new System.NotImplementedException();
+    }
+
     public Task<User> GetUser(string username)
+    {
+      throw new System.NotImplementedException();
+    }
+
+    public Task<AccessToken> SetAccessToken(string username, string itemGuid, string accessToken)
     {
       throw new System.NotImplementedException();
     }

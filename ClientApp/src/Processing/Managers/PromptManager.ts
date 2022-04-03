@@ -115,6 +115,11 @@ class PromptManager {
     }
   }
 
+  public requestMessagePrompt()
+  {
+    
+  }
+
   public requestPromptForItem(item: IValued, groupName?: string) {
     if (item instanceof Bill) {
       this.requestBillPrompt({
