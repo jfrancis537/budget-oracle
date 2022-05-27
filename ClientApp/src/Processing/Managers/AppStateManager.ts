@@ -12,6 +12,7 @@ import { Investment, SerializedInvestment } from "../Models/Investment";
 import { PaymentSchedule, SerializedPaymentSchedule } from "../Models/ScheduledPayment";
 import { SerializedVestSchedule, VestSchedule } from "../Models/VestSchedule";
 import { GroupManager, GroupType } from "./GroupManager";
+import { LinkedAccount } from "./TellerManager";
 import { UserManager } from "./UserManager";
 
 interface StateData {
@@ -28,6 +29,7 @@ const StateDataKey = "app_state_data";
 
 class AppStateManager {
 
+  private _linkedAccounts: Set<LinkedAccount>;
   private _accounts: Map<string, Account>;
   private _debts: Map<string, Debt>;
   private _bills: Map<string, Bill>;
@@ -54,6 +56,7 @@ class AppStateManager {
     this._investments = new Map();
     this._paymentSchedules = new Map();
     this._vestSchedules = new Map();
+    this._linkedAccounts = new Set();
     this.blockSave = false;
 
     this.onaccountsupdated = new Action();

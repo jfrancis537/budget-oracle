@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,6 +10,8 @@ namespace BudgetOracle.Models
     [Key]
     [Column("username")]
     public string Username { get; set; }
+    [Column("teller_user_id")]
+    public string TellerUserId { get; set; }
     [Column("password")]
     public string Password { get; set; }
     [Column("salt")]
@@ -19,5 +22,7 @@ namespace BudgetOracle.Models
     public string StateData { get; set; }
     [Column("group_data")]
     public string GroupData { get; set; }
+    [Column("enrollments")]
+    public List<string> Enrollments { get; set; }
   }
 }

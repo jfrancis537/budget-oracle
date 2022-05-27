@@ -1,6 +1,7 @@
 import { AuthAPI } from "../../APIs/AuthAPI";
 import { Action } from "../../Utilities/Action";
 import { AuthorizationError } from "../../Utilities/Errors/AuthorizationError";
+import { TellerManager } from "./TellerManager";
 
 class UserManager {
   public readonly onuserloggedin: Action<void>;

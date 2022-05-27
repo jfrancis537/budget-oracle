@@ -16,6 +16,8 @@ using Microsoft.Net.Http.Headers;
 using Microsoft.EntityFrameworkCore;
 using BudgetOracle.Configuration;
 using BudgetOracle.Services;
+using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 
 namespace BudgetOracle
 {
@@ -54,6 +56,20 @@ namespace BudgetOracle
         services.AddSingleton<IUserDatabase, PostgresUserDatabase>();
       }
       services.AddHttpClient();
+      services.AddHttpClient("Teller")
+              .ConfigurePrimaryHttpMessageHandler(() =>
+              {
+                var certPath = Configuration.GetSection("Credentials:TellerSSLCertPath").Get<string>();
+                var keyPath = Configuration.GetSection("Credentials:TellerSSLKeyPath").Get<string>();
+                var cert = X509Certificate2.CreateFromPemFile(certPath, keyPath);
+                if (OperatingSystem.IsWindows())
+                {
+                  cert = new X509Certificate2(cert.Export(X509ContentType.Pfx));
+                }
+                var handler = new HttpClientHandler();
+                handler.ClientCertificates.Add(cert);
+                return handler;
+              });
       services.AddSingleton<IAuthFactory, AuthFactory>();
       services.AddSingleton<IStockDataProvider, YahooFinanceAPIProvider>();
       services.AddAntiforgery();

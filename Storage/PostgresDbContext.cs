@@ -1,4 +1,5 @@
 ﻿using BudgetOracle.Models;
+using BudgetOracle.Models.Teller;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -22,5 +23,6 @@ namespace BudgetOracle.Storage
 
     }
     public DbSet<User> Users { get; set; }
+    public DbSet<Enrollment> Enrollments { get; set; }
   }
 }
