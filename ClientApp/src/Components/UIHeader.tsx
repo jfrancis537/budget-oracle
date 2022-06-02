@@ -11,11 +11,15 @@ import { UserManager } from "../Processing/Managers/UserManager";
 import { LoginPrompt } from "./Prompts/LoginPrompt";
 import { autobind } from "../Utilities/Decorators";
 import { PushNotificationWorker } from "../Workers/ServiceWorkerLoader";
+import { TellerManager } from "../Processing/Managers/TellerManager";
+import { LinkedAccountDetails } from "../APIs/TellerAPI";
+import { LinkedAccountPrompt } from "./Prompts/LinkedAccountPrompt";
 
 interface IUIHeaderState {
   loginPromptVisible: boolean;
   userLoggedIn: boolean;
   isSubscribed?: boolean;
+  linkedAccountsToSelect?: LinkedAccountDetails[];
 }
 
 export class UIHeader extends React.Component<{}, IUIHeaderState> {
@@ -135,7 +139,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
 
   @autobind
   private async reset() {
-    var doIt = window.confirm("Are you sure you want to reset?");
+    let doIt = window.confirm("Are you sure you want to reset?");
     if (doIt) {
       let promises = [
         AppStateManager.reset(),
@@ -201,6 +205,35 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
     }
   }
 
+  @autobind
+  private async linkAccount() {
+    try {
+      const linked = await TellerManager.linkNewAccounts();
+      this.setState({
+        linkedAccountsToSelect: linked
+      });
+    }
+    catch (exited) {
+      if (typeof exited === 'boolean') {
+        //TODO handle error or exited
+      } else {
+        console.warn(exited);
+      }
+    }
+  }
+
+  @autobind
+  private async acceptLinked(accounts: LinkedAccountDetails[]) {
+    await TellerManager.saveLinkedAccounts(accounts);
+  }
+
+  @autobind
+  private closeLinkedAccountPrompt() {
+    this.setState({
+      linkedAccountsToSelect: undefined
+    });
+  }
+
   render() {
     return (
       <>
@@ -211,9 +244,11 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
             <Navbar.Collapse>
               <Nav>
                 <NavDropdown title="Add" id='add_dropdown'>
+                  <NavDropdown.Item disabled={!this.state.userLoggedIn} onClick={this.linkAccount}>Link Account</NavDropdown.Item>
+                  <NavDropdown.Divider />
                   <NavDropdown.Item onClick={this.addAccount}>Account</NavDropdown.Item>
                   <NavDropdown.Item onClick={this.addIncomeSource}>Income</NavDropdown.Item>
-                  <NavDropdown.Item disabled={!UserManager.isLoggedIn} onClick={this.addInvestment}>Investment</NavDropdown.Item>
+                  <NavDropdown.Item disabled={!this.state.userLoggedIn} onClick={this.addInvestment}>Investment</NavDropdown.Item>
                   <NavDropdown.Divider />
                   <NavDropdown.Item onClick={this.addGroup}>Group</NavDropdown.Item>
                   <NavDropdown.Divider />
@@ -247,6 +282,13 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
           </Navbar>
         </Row>
         <LoginPrompt isOpen={this.state.loginPromptVisible} onClose={() => this.closeLoginPrompt()} />
+        {this.state.linkedAccountsToSelect && (
+          <LinkedAccountPrompt
+            processAccept={this.acceptLinked}
+            handleCloseRequested={this.closeLinkedAccountPrompt}
+            accountsToLink={this.state.linkedAccountsToSelect}
+          />
+        )}
       </>
     )
   }

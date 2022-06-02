@@ -1,4 +1,5 @@
 ﻿using BudgetOracle.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BudgetOracle.Storage
@@ -11,5 +12,9 @@ namespace BudgetOracle.Storage
     Task UpdateGroups(string username, string data);
     Task SetPassword(string username, string password);
     Task<bool> ContainsUser(string username);
+    Task SetTellerUserId(string username, string id);
+    Task<LinkedAccountDetails> AddLinkedAccount(string username, LinkedAccountDetails linkedAccount);
+    Task<LinkedAccountDetails> GetLinkedAccount(string userId, string accountId);
+    Task<List<LinkedAccountDetails>> GetAllLinkedAccountDetails(string username);
   }
 }

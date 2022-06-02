@@ -516,6 +516,6 @@ class AppStateManager {
   }
 }
 
-let instance = new AppStateManager();
+const instance = new AppStateManager();
 
 export { instance as AppStateManager };

@@ -29,7 +29,7 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
   }
 
   async componentDidMount() {
-    var results = await CalculationsManager.instance.requestCalculations();
+    let results = await CalculationsManager.instance.requestCalculations();
     this.setState({
       calculations: results
     });
@@ -52,6 +52,8 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
       const calcs = this.state.calculations;
       const totals =
         calcs.accountTotal +
+        calcs.linkedAccountTotal.accountsValue -
+        calcs.linkedAccountTotal.debt +
         calcs.incomeResults[1] -
         calcs.debtTotal -
         calcs.billResults.allBills[1] +

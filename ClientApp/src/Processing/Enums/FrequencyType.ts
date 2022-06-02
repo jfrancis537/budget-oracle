@@ -11,7 +11,7 @@ export enum FrequencyType {
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace FrequencyType {
   export function toMomentType(type: FrequencyType): unitOfTime.Base {
-    var result: unitOfTime.Base = 'seconds';
+    let result: unitOfTime.Base = 'seconds';
     switch (type) {
       case FrequencyType.Daily:
         result = 'days';

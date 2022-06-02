@@ -9,6 +9,8 @@ namespace BudgetOracle.Models
     [Key]
     [Column("username")]
     public string Username { get; set; }
+    [Column("teller_user_id")]
+    public string TellerUserId { get; set; }
     [Column("password")]
     public string Password { get; set; }
     [Column("salt")]

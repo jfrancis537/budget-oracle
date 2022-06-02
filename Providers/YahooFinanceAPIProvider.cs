@@ -37,7 +37,7 @@ namespace BudgetOracle_.Providers
           {
             return -1;
           }
-          return result[0]["meta"]["regularMarketPrice"].Value<double>();
+          return result[0]["meta"]["regularMarketPrice"]?.Value<double>() ?? -1;
         }
         catch
         {

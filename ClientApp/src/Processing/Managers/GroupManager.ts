@@ -241,5 +241,5 @@ function mapper(kvp: [string, Set<string>]): [string, string[]] {
   return [kvp[0], [...kvp[1]]];
 }
 
-let instance = new GroupManager();
+const instance = new GroupManager();
 export { instance as GroupManager }

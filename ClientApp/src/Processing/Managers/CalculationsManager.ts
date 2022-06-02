@@ -12,6 +12,7 @@ import { PaymentSchedule } from "../Models/ScheduledPayment";
 import { VestSchedule } from "../Models/VestSchedule";
 import { AppStateManager } from "./AppStateManager";
 import { InvestmentCalculationManager } from "./InvestmentCalculationManager";
+import { TellerManager } from "./TellerManager";
 
 export type ResultPair<T> = [Map<T, number>, number];
 
@@ -27,6 +28,11 @@ export interface BillCalculation {
   unavoidableBills: ResultPair<Bill>;
 }
 
+export interface LinkedAccountCalculation {
+  debt: number,
+  accountsValue: number 
+}
+
 export interface CalculationResult {
   billResults: BillCalculation;
   debtTotal: number;
@@ -35,6 +41,7 @@ export interface CalculationResult {
   investmentResults: InvestmentCalculation;
   scheduledPaymentsTotal: number;
   scheduledVestsTotal: number;
+  linkedAccountTotal: LinkedAccountCalculation
 }
 
 type QuarterNumber = 1 | 2 | 3 | 4;
@@ -56,6 +63,7 @@ class CalculationsManager {
     AppStateManager.ondebtsupdated.addListener(this.handleUpdate);
     AppStateManager.onincomesourcesupdated.addListener(this.handleUpdate);
     AppStateManager.onpaymentschedulesupdated.addListener(this.handleUpdate);
+    TellerManager.onlinkedbalanceupdated.addListener(this.handleUpdate);
     InvestmentCalculationManager.oninvestmentvaluecalculated.addListener(this.handleUpdate);
   }
 
@@ -81,6 +89,7 @@ class CalculationsManager {
     let investmentValue = this.calculateTotalInvestmentValue(start, this.endDate, AppStateManager.investments);
     let scheduledpaymentsvalue = this.calculateTotalForScheduledPayments(start, this.endDate, AppStateManager.paymentSchedules);
     let stockScheduleValue = await this.calculateTotalForScheduledStockVests(start, this.endDate, AppStateManager.vestSchedules);
+    let linkedAccountValue = TellerManager.getTotalValueOfAccounts();
 
     let results: CalculationResult = {
       billResults: {
@@ -92,7 +101,8 @@ class CalculationsManager {
       incomeResults: incomeValue,
       investmentResults: investmentValue,
       scheduledPaymentsTotal: scheduledpaymentsvalue,
-      scheduledVestsTotal: stockScheduleValue
+      scheduledVestsTotal: stockScheduleValue,
+      linkedAccountTotal: linkedAccountValue
     }
     return results;
   }
@@ -173,7 +183,7 @@ class CalculationsManager {
 
   public async calculateTotalIncome(start: Moment, end: Moment, incomeSources: Iterable<IncomeSource>): Promise<ResultPair<IncomeSource>> {
     let result = 0;
-    var promises: Promise<[IncomeSource, number]>[] = [];
+    let promises: Promise<[IncomeSource, number]>[] = [];
     for (let source of incomeSources) {
       promises.push(this.calculateTotalForIncomeSource(source, start, end));
     }

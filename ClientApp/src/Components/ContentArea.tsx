@@ -19,6 +19,10 @@ import { PaymentSchedule } from "../Processing/Models/ScheduledPayment";
 import { ScheduledPaymentItem } from "./Items/ScheduledPaymentItem";
 import { VestSchedule } from "../Processing/Models/VestSchedule";
 import { ScheduledVestItem } from "./Items/ScheduledVestItem";
+import { TellerManager } from "../Processing/Managers/TellerManager";
+import { LinkedAccountDetails } from "../APIs/TellerAPI";
+import { LinkedAccountItem } from "./Items/LinkedAccountItem";
+import { LinkedAccountGroup } from "./Items/LinkedAccountGroup";
 
 export enum ContentTab {
   Costs = "costs",
@@ -35,6 +39,7 @@ interface ContentAreaState {
   investments?: Investment[];
   paymentSchedules?: PaymentSchedule[];
   vestSchedules?: VestSchedule[];
+  linkedAccounts?: LinkedAccountDetails[];
   tab: ContentTab;
 }
 
@@ -63,6 +68,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     AppStateManager.oninvestmentsupdated.addListener(this.handleInvestmentsUpdated);
     AppStateManager.onpaymentschedulesupdated.addListener(this.handlePaymentSchedulesUpdated);
     AppStateManager.onvestschedulesupdated.addListener(this.handleVestSchedulesUpdated);
+    TellerManager.onlinkedaccountsupdated.addListener(this.handleLinkedAccountsUpdated);
   }
 
   componentWillUnmount() {
@@ -74,6 +80,14 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     AppStateManager.oninvestmentsupdated.removeListener(this.handleInvestmentsUpdated);
     AppStateManager.onpaymentschedulesupdated.removeListener(this.handlePaymentSchedulesUpdated);
     AppStateManager.onvestschedulesupdated.removeListener(this.handleVestSchedulesUpdated);
+    TellerManager.onlinkedaccountsupdated.removeListener(this.handleLinkedAccountsUpdated);
+  }
+
+  @autobind
+  private handleLinkedAccountsUpdated(data: LinkedAccountDetails[]) {
+    this.setState({
+      linkedAccounts: data
+    });
   }
 
   @autobind
@@ -163,6 +177,14 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
           />
         );
       }
+      if (this.state.linkedAccounts) {
+        const creditItems = this.state.linkedAccounts.filter(item => item.type === "credit");
+        if (creditItems.length > 0) {
+          result.push(
+            <LinkedAccountGroup key="linked_group" accounts={creditItems} name="Linked Cards" />
+          )
+        }
+      }
     }
     return result;
   }
@@ -177,6 +199,15 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
             key={account.id}
           />
         );
+      }
+    }
+    if (this.state.linkedAccounts) {
+      for (let account of this.state.linkedAccounts) {
+        if (account.type === "depository") {
+          result.push(
+            <LinkedAccountItem account={account} key={account.id} />
+          );
+        }
       }
     }
     return result;
@@ -211,7 +242,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
 
   private renderUngroupedArea() {
     let sections: JSX.Element[] = [];
-    if (this.state.accounts?.length) {
+    if (this.state.accounts?.length || this.state.linkedAccounts?.length) {
       sections.push(
         <div className={contentStyles['ungrouped-section']} key="account_section">
           {this.renderAccounts()}

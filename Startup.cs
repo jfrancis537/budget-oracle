@@ -16,6 +16,12 @@ using Microsoft.Net.Http.Headers;
 using Microsoft.EntityFrameworkCore;
 using BudgetOracle.Configuration;
 using BudgetOracle.Services;
+using BudgetOracle.Constants;
+using System.Security.Cryptography.X509Certificates;
+using System.Net.Http;
+using BudgetOracle.Models.Configuration;
+using Microsoft.Extensions.Options;
+using BudgetOracle.Providers;
 
 namespace BudgetOracle
 {
@@ -53,11 +59,26 @@ namespace BudgetOracle
         //services.AddSingleton<IUserDatabase, MongoUserDatabase>();
         services.AddSingleton<IUserDatabase, PostgresUserDatabase>();
       }
+      services.Configure<TellerConfiguration>(Configuration.GetSection("Teller"));
       services.AddHttpClient();
+      services.AddHttpClient(TellerConstants.TellerHttpClientName)
+               .ConfigurePrimaryHttpMessageHandler((provider) =>
+               {
+                 var conf = provider.GetService<IOptions<TellerConfiguration>>();
+                 var cert = X509Certificate2.CreateFromPemFile(conf.Value.SSLCertPath, conf.Value.SSLKeyPath);
+                 if (OperatingSystem.IsWindows())
+                 {
+                   cert = new X509Certificate2(cert.Export(X509ContentType.Pfx));
+                 }
+                 var handler = new HttpClientHandler();
+                 handler.ClientCertificates.Add(cert);
+                 return handler;
+               });
       services.AddSingleton<IAuthFactory, AuthFactory>();
       services.AddSingleton<IStockDataProvider, YahooFinanceAPIProvider>();
       services.AddAntiforgery();
       services.AddSingleton<PushNotificationService>();
+      services.AddSingleton<TellerProvider>();
       services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
       {
         options.TokenValidationParameters = new TokenValidationParameters

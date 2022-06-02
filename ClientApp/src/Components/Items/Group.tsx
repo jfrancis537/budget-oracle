@@ -4,9 +4,10 @@ import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { GroupManager, GroupType } from "../../Processing/Managers/GroupManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { IValued } from "../../Processing/Models/Valued";
+import { autobind } from "../../Utilities/Decorators";
+import { ValueItem } from "./ValueItem";
 
 import groupStyles from '../../styles/Group.module.css';
-import { ValueItem } from "./ValueItem";
 
 interface IGroupProps {
   type: GroupType;
@@ -16,13 +17,7 @@ interface IGroupProps {
 
 export class Group extends React.Component<IGroupProps> {
 
-  constructor(props: IGroupProps) {
-    super(props);
-    this.renderItem = this.renderItem.bind(this);
-    this.add = this.add.bind(this);
-    this.delete = this.delete.bind(this);
-  }
-
+  @autobind
   private renderItem(id: string) {
     let result: JSX.Element | null;
     let item: IValued | undefined;
@@ -43,6 +38,7 @@ export class Group extends React.Component<IGroupProps> {
     return result;
   }
 
+  @autobind
   private add() {
     if (this.props.type === GroupType.Bill) {
       PromptManager.requestBillPrompt({
@@ -57,6 +53,7 @@ export class Group extends React.Component<IGroupProps> {
     }
   }
 
+  @autobind
   private async delete() {
     let yes = window.confirm("Are you sure you want to delete " + this.props.name + "?");
     if (yes) {
