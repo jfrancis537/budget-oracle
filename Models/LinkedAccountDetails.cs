@@ -9,7 +9,7 @@ namespace BudgetOracle.Models
     public string Name { get; set; }
     [Column("enrollment_id")]
     public string EnrollmentId { get; set; }
-    [Key, Column("user_id",Order = 0)]
+    [Column("user_id")]
     public string UserId { get; set; }
     [Column("type")]
     public string Type { get; set; }
