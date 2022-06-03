@@ -43,9 +43,26 @@ namespace BudgetOracle.Controllers
     [HttpGet]
     [Route("get/userid")]
     [Authorize]
-    public IActionResult GetUserId()
+    public async Task<IActionResult> GetUserId()
     {
-      return NotFound();
+      var usernameClaim = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name);
+      var username = usernameClaim.Value;
+      try
+      {
+        var user = await database.GetUser(username);
+        if (user == null)
+        {
+          return NotFound();
+        }
+        else
+        {
+          return Ok(user.TellerUserId);
+        }
+      }
+      catch
+      {
+        return StatusCode(500);
+      }
     }
 
     [HttpPut]
