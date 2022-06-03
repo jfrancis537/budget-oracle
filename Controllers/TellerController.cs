@@ -122,6 +122,15 @@ namespace BudgetOracle.Controllers
       }
     }
 
+    [HttpDelete]
+    [Route("delete/account/{id}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteAccount()
+    {
+      await Task.CompletedTask;
+      return BadRequest();
+    }
+
     [HttpPost]
     [Route("get/accounts")]
     [Authorize]

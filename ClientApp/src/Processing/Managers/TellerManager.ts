@@ -20,6 +20,7 @@ class TellerManager {
     this.accounts = new Map();
     this.balances = new Map();
     UserManager.onuserloggedin.addListener(this.getSavedAccounts);
+    UserManager.onuserloggedout.addListener(this.clear);
   }
 
   public async linkNewAccounts(): Promise<LinkedAccountDetails[]> {
@@ -30,7 +31,7 @@ class TellerManager {
         environment: "development",
         applicationId: applicationId,
         onSuccess: async (e) => {
-          const linked = await TellerAPI.getLinkedAccountDetailsForEnrollment(e);
+          const linked = (await TellerAPI.getLinkedAccountDetailsForEnrollment(e)).filter(acc => acc.enrollmentId === e.enrollment.id && !this.accounts.has(acc.id));
           if (!userId) {
             await TellerAPI.setTellerUserId(e.user.id);
           }
@@ -63,6 +64,19 @@ class TellerManager {
     for (let account of linked) {
       this.loadAccountBalance(account.id);
     }
+  }
+
+  public delete(id: string) {
+    this.balances.delete(id);
+    this.accounts.delete(id);
+    this.onlinkedaccountsupdated.invoke([...this.accounts.values()]);
+  }
+
+  @autobind
+  public clear() {
+    this.accounts.clear();
+    this.balances.clear();
+    this.onlinkedaccountsupdated.invoke([]);
   }
 
   public getCurrentAccountBalance(id: string) {

@@ -30,7 +30,7 @@ export const LinkedAccountItem: React.FC<LinkedAccountItemProps> = (props) => {
   }
 
   function remove() {
-    //TODO remove account
+    TellerManager.delete(props.account.id);
   }
 
   function refresh() {

@@ -92,6 +92,17 @@ export namespace TellerAPI {
     }
   }
 
+  export async function deleteAccount(id: string)
+  {
+    const url = `${baseUrl}/delete/account/${id}`;
+    let response = await fetch(url, {
+      method: "DELETE"
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete account");
+    }
+  }
+
   //Add Accounts
   export async function addLinkedAccounts(accounts: LinkedAccountDetails[]): Promise<LinkedAccountDetails[]> {
     const url = `${baseUrl}/add/accounts`;
