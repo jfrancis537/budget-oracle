@@ -57,7 +57,7 @@ namespace BudgetOracle
       else
       {
         //services.AddSingleton<IUserDatabase, MongoUserDatabase>();
-        services.AddSingleton<IUserDatabase, PostgresUserDatabase>();
+        services.AddScoped<IUserDatabase, PostgresUserDatabase>();
       }
       services.Configure<TellerConfiguration>(Configuration.GetSection("Teller"));
       services.AddHttpClient();
