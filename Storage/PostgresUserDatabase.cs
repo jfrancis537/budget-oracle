@@ -36,7 +36,7 @@ namespace BudgetOracle.Storage
         var id = user.TellerUserId;
         if (id != null)
         {
-          return await dbContext.Accounts.Where(account => account.Id == id).ToListAsync();
+          return await dbContext.Accounts.Where(account => account.UserId == id).ToListAsync();
         }
       }
       return null;
