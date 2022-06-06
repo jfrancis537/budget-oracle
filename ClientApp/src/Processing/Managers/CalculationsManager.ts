@@ -64,6 +64,7 @@ class CalculationsManager {
     AppStateManager.onincomesourcesupdated.addListener(this.handleUpdate);
     AppStateManager.onpaymentschedulesupdated.addListener(this.handleUpdate);
     TellerManager.onlinkedbalanceupdated.addListener(this.handleUpdate);
+    TellerManager.onlinkedtransactionsupdated.addListener(this.handleUpdate);
     InvestmentCalculationManager.oninvestmentvaluecalculated.addListener(this.handleUpdate);
   }
 

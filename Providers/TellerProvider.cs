@@ -72,5 +72,33 @@ namespace BudgetOracle.Providers
         throw new TellerException("Failed to get balance", (int)response.StatusCode);
       }
     }
+
+    public async Task<IEnumerable<TransactionData>> GetTransactionsAsync(LinkedAccountDetails account)
+    {
+      var client = httpClientFactory.CreateClient(TellerConstants.TellerHttpClientName);
+      var base64Token = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes($"{account.AccessToken}:"));
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64Token);
+      var response = await client.GetAsync($"https://api.teller.io/accounts/{account.Id}/transactions");
+      if (response.IsSuccessStatusCode)
+      {
+        JArray json = JArray.Parse(await response.Content.ReadAsStringAsync());
+        var result = new List<TransactionData>();
+        foreach (var transactionJson in json)
+        {
+          result.Add(new TransactionData()
+          {
+            Id = transactionJson["account_id"].ToString(),
+            Status = transactionJson["status"].ToString(),
+            Amount = double.Parse(transactionJson["amount"].ToString()),
+            Type = transactionJson["type"].ToString()
+          });
+        };
+        return result;
+      }
+      else
+      {
+        throw new TellerException("Failed to get balance", (int)response.StatusCode);
+      }
+    }
   }
 }

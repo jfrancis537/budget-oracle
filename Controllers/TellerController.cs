@@ -159,5 +159,24 @@ namespace BudgetOracle.Controllers
       }
     }
 
+    [HttpGet]
+    [Route("get/transactions/{accountId}")]
+    [Authorize]
+    public async Task<IActionResult> GetAccountTransactions(string accountId)
+    {
+      try
+      {
+        var usernameClaim = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name);
+        var username = usernameClaim.Value;
+        var user = await database.GetUser(username);
+        var account = await database.GetLinkedAccount(user.TellerUserId, accountId);
+        var transactions = await provider.GetTransactionsAsync(account);
+        return Ok(transactions);
+      }
+      catch
+      {
+        return StatusCode(500);
+      }
+    }
   }
 }

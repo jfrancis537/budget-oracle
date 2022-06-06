@@ -16,6 +16,13 @@ export interface BalanceData {
   available: number;
 }
 
+export interface TransactionData {
+  id: string,
+  status: "pending" | "posted"
+  type: "transaction" | "card_payment" | "ach" | "atm",
+  amount: number
+}
+
 export namespace TellerAPI {
   const baseUrl = "/api/teller";
   //Application Id
@@ -65,6 +72,17 @@ export namespace TellerAPI {
     let response = await fetch(url);
     if (response.ok) {
       return (await response.json()) as BalanceData;
+    }
+    else {
+      throw new Error("Failed to get linked accounts");
+    }
+  }
+
+  export async function getAccountTransactions(accountId: string) {
+    const url = `${baseUrl}/get/transactions/${accountId}`;
+    let response = await fetch(url);
+    if (response.ok) {
+      return (await response.json()) as TransactionData[];
     }
     else {
       throw new Error("Failed to get linked accounts");
