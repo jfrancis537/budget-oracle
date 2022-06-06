@@ -54,7 +54,7 @@ class CalculationsManager {
   private _endDate: Moment;
 
   constructor() {
-    this._endDate = moment().add(1, 'days').startOf('day');
+    this._endDate = moment().startOf('day');
     this.onresultscalculated = new Action();
     this.onenddatechanged = new Action();
     this.handleUpdate = this.handleUpdate.bind(this);
