@@ -134,6 +134,15 @@ class TellerManager {
       if (this.balances.has(account.id)) {
         if (account.type === "credit") {
           result.debt += this.balances.get(account.id)?.current!;
+          if (this.transactions.has(account.id)) {
+            const pendingTotal = this.transactions.get(account.id)!.reduce((prev, next) => {
+              if (next.status === "pending" && (next.type === "transaction" || next.type === "atm")) {
+                return prev + next.amount;
+              }
+              return prev;
+            }, 0);
+            result.debt += pendingTotal;
+          }
         } else {
           //Use available for bank accounts
           result.accountsValue += this.balances.get(account.id)?.available!;

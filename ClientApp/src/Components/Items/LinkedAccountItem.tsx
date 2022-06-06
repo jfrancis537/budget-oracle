@@ -57,7 +57,7 @@ export const LinkedAccountItem: React.FC<LinkedAccountItemProps> = (props) => {
           }
           return prev;
         }, 0);
-        result = (balance - transactionTotal).toFixed(2);
+        result = (balance + transactionTotal).toFixed(2);
       } else {
         result = balance.toFixed(2);
       }
