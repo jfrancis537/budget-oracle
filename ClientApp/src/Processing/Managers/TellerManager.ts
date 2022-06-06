@@ -112,12 +112,12 @@ class TellerManager {
     TellerAPI.getAccountBalance(id).then(balance => {
       this.onlinkedbalanceupdated.invoke(balance);
       this.balances.set(id, balance);
-    }).catch(this.handleError),
+    }).catch(this.handleError);
 
     TellerAPI.getAccountTransactions(id).then(transactions => {
       this.onlinkedtransactionsupdated.invoke(transactions);
       this.transactions.set(id, transactions);
-    }).catch(this.handleError)
+    }).catch(this.handleError);
     // const [balance, transactions] = await Promise.all([TellerAPI.getAccountBalance(id), TellerAPI.getAccountTransactions(id)]);
     // this.onlinkedbalanceupdated.invoke(balance);
     // this.onlinkedtransactionsupdated.invoke(transactions);
