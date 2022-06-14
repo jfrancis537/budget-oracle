@@ -7,6 +7,7 @@ import itemStyles from '../../styles/Item.module.css';
 
 interface LinkedAccountItemProps {
   account: LinkedAccountDetails;
+  onValueUpdated?: (val: number) => void;
 }
 export const LinkedAccountItem: React.FC<LinkedAccountItemProps> = (props) => {
 

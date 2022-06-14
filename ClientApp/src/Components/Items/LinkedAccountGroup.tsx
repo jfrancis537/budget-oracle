@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card } from "react-bootstrap";
 import { LinkedAccountDetails } from "../../APIs/TellerAPI";
 
@@ -11,13 +12,23 @@ interface LinkedAccountGroupProps {
 
 export const LinkedAccountGroup: React.FC<LinkedAccountGroupProps> = (props) => {
 
+  const [values, setValues] = useState<{ [id: string]: number }>({})
+
   function renderAccount(linkedAccount: LinkedAccountDetails) {
     return (
-      <LinkedAccountItem account={linkedAccount} key={linkedAccount.id} />
+      <LinkedAccountItem account={linkedAccount} key={linkedAccount.id} onValueUpdated={(amount) => {
+        values[linkedAccount.id] = amount;
+        setValues({ ...values });
+      }} />
     )
   }
 
   function render() {
+    let total = 0;
+    for (const id in values) {
+      const val = values[id];
+      total += val;
+    }
     return (
       <Card className={groupStyles['card']} bg='dark' text='light'>
         <Card.Header className={groupStyles['header']}>
