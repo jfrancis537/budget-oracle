@@ -9,6 +9,9 @@ interface LinkedAccountItemProps {
   account: LinkedAccountDetails;
   onValueUpdated?: (val: number) => void;
 }
+
+const doNothing = () => { };
+
 export const LinkedAccountItem: React.FC<LinkedAccountItemProps> = (props) => {
 
   const [balance, setBalance] = useState<number | undefined>(undefined);
@@ -22,6 +25,12 @@ export const LinkedAccountItem: React.FC<LinkedAccountItemProps> = (props) => {
       TellerManager.onlinkedbalanceupdated.removeListener(handleBalanceUpdated);
     }
   }, []);
+
+  useEffect(() => {
+    if (props.onValueUpdated) {
+      props.onValueUpdated(Number(getValue()))
+    }
+  }, [balance, transactions]);
 
   function handleBalanceUpdated(balanceData: BalanceData) {
     if (props.account.id === balanceData.id) {
