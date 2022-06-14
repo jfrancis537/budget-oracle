@@ -9,7 +9,6 @@
 
 .group-title {
   overflow: hidden;
-  max-width: 50%;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
@@ -21,12 +20,12 @@
 
 .header {
   position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .button-group {
-  position: absolute;
-  right: calc(.75rem - .3em);
-  top: calc(.75rem - .15em);
   display: flex;
 }
 
