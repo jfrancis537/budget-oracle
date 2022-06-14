@@ -10,6 +10,8 @@
 .group-title {
   overflow: hidden;
   max-width: 50%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .items {

@@ -28,7 +28,10 @@ export const LinkedAccountItem: React.FC<LinkedAccountItemProps> = (props) => {
 
   useEffect(() => {
     if (props.onValueUpdated) {
-      props.onValueUpdated(Number(getValue()))
+      const val = Number(getValue());
+      if (!isNaN(val)) {
+        props.onValueUpdated(val);
+      }
     }
   }, [balance, transactions]);
 
