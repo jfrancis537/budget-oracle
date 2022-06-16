@@ -229,7 +229,7 @@ class CalculationsManager {
           let startDow = currentDate.weekday();
           let endDow = end.weekday();
           let weeks = Math.abs(currentDate.diff(end, 'weeks'));
-          weeks /= 2;
+          weeks = Math.floor(weeks / 2);
           const startIsInPayWeek = (currentDate.week() % 2 === 0) === even
           const paidThisWeek = startIsInPayWeek && (startDow < payDow);
           const endIsInAPayWeek = ((end.week() % 2 === 0) === even)
