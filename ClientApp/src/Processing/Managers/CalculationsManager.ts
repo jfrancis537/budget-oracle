@@ -186,7 +186,7 @@ class CalculationsManager {
     let result = 0;
     let promises: Promise<[IncomeSource, number]>[] = [];
     for (let source of incomeSources) {
-      promises.push(this.calculateTotalForIncomeSource(source, start, end));
+      promises.push(this.calculateTotalForIncomeSource(source, start.clone(), end.clone()));
     }
     let incomeMap = new Map<IncomeSource, number>();
     let results = await Promise.all(promises);
