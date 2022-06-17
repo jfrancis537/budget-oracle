@@ -493,17 +493,5 @@ const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
     );
   }
 
-  function render(): JSX.Element {
-    let result: JSX.Element;
-    if (props.vests.length === 0) {
-      result = (
-        <div className={styles["no-payments-message"]}>No stock vests have been created yet.</div>
-      );
-    } else {
-      result = renderSchedule();
-    }
-    return result;
-  }
-
-  return render();
+  return renderSchedule();
 }

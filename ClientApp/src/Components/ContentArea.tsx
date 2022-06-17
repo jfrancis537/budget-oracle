@@ -277,7 +277,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
 
   @autobind
   private renderPaymentSchedule(schedule: PaymentSchedule) {
-    return <ScheduledPaymentItem paymentSchedule={schedule} key={schedule.id} />
+    return <ScheduledPaymentItem schedule={schedule} key={schedule.id} />
   }
 
   @autobind renderVestSchedule(schedule: VestSchedule) {

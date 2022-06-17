@@ -30,7 +30,7 @@ export interface BillCalculation {
 
 export interface LinkedAccountCalculation {
   debt: number,
-  accountsValue: number 
+  accountsValue: number
 }
 
 export interface CalculationResult {

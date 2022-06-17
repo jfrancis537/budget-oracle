@@ -52,7 +52,7 @@ export class PaymentSchedule extends Identifiable {
   }
 }
 
-interface ScheduledPaymentOptions extends IdentifiableOptions {
+export interface ScheduledPaymentOptions extends IdentifiableOptions {
   name: string;
   amount: number;
   date: Moment

@@ -1,13 +1,17 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Button, ButtonGroup, FormControl, InputGroup, Modal, Table } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
-import { PaymentSchedule, ScheduledPayment } from "../../Processing/Models/ScheduledPayment";
 import { autobind } from "../../Utilities/Decorators";
 import { FileLoader } from "../../Utilities/FileUtils";
 import { LoadingButton } from "./LoadingButton";
 
 import styles from "../../styles/PaymentSchedulePrompt.module.css";
+import { CurrencyInput } from "../Inputs/CurrencyInput";
+import { NumberInput } from "../Inputs/NumberInput";
+import { DatePicker } from "../Inputs/DatePicker";
+import moment from "moment";
+import { PaymentSchedule, ScheduledPayment, ScheduledPaymentOptions } from "../../Processing/Models/ScheduledPayment";
 
 export interface IPaymentSchedulePromptProps {
   editing: boolean;
@@ -19,11 +23,13 @@ interface IPaymentSchedulePromptState {
   name: string,
   payments: ScheduledPayment[],
   isSaving: boolean,
-  createMode: PaymentScheduleCreateMode,
+  createMode: CreateMode,
+  paymentToEdit?: ScheduledPayment,
+  pendingPaymentChanges?: ScheduledPaymentOptions,
   errorMessage?: string
 }
 
-enum PaymentScheduleCreateMode {
+enum CreateMode {
   csv = "csv",
   manual = "mannual"
 }
@@ -41,7 +47,7 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
           name: schedule.name,
           payments: schedule.payments,
           isSaving: false,
-          createMode: PaymentScheduleCreateMode.csv
+          createMode: CreateMode.manual
         }
       } else {
         throw new Error('A Bill to edit must be provided if editing flag is true');
@@ -51,7 +57,7 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
         name: '',
         payments: [],
         isSaving: false,
-        createMode: PaymentScheduleCreateMode.csv
+        createMode: CreateMode.csv
       };
     }
   }
@@ -65,7 +71,7 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
 
   @autobind
   private handleCreateModeChanged(event: React.ChangeEvent<HTMLInputElement>) {
-    let value = event.target.value as PaymentScheduleCreateMode;
+    let value = event.target.value as CreateMode;
     this.setState({
       createMode: value
     });
@@ -73,42 +79,95 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
 
   @autobind
   private async accept() {
-    this.setState({
-      isSaving: true
-    });
-    if (this.props.editing) {
-      // await AppStateManager.updateBill(
-      //   this.props.billToEdit,
-      //   this.state.name,
-      //   this.state.value,
-      //   this.state.frequency,
-      //   this.state.frequencyType,
-      //   this.state.initalDate,
-      //   this.state.unavoidable
-      // );
-    } else {
-      await AppStateManager.addPaymentSchedule(
-        new PaymentSchedule({
-          name: this.state.name,
-          payments: this.state.payments
+    if (this.state.paymentToEdit) {
+      if (this.state.pendingPaymentChanges) {
+        const payments = this.state.payments.filter(item => item !== this.state.paymentToEdit);
+        payments.push(new ScheduledPayment(this.state.pendingPaymentChanges));
+        this.setState({
+          payments: payments,
+          paymentToEdit: undefined,
+          pendingPaymentChanges: undefined
         })
-      );
+      } else {
+        this.cancel();
+      }
+    } else {
+      this.setState({
+        isSaving: true
+      });
+      if (this.props.editing) {
+        await AppStateManager.addPaymentSchedule(
+          new PaymentSchedule({
+            id: this.props.scheduleToEdit,
+            name: this.state.name,
+            payments: this.state.payments
+          })
+        );
+      } else {
+        await AppStateManager.addPaymentSchedule(
+          new PaymentSchedule({
+            name: this.state.name,
+            payments: this.state.payments
+          })
+        );
+      }
+      this.setState({
+        isSaving: false
+      });
+      PromptManager.requestClosePrompt();
     }
-    this.setState({
-      isSaving: false
-    });
-    PromptManager.requestClosePrompt();
   }
 
   @autobind
   private cancel() {
-    PromptManager.requestClosePrompt();
+    if (this.state.paymentToEdit) {
+      this.setState({
+        paymentToEdit: undefined,
+        pendingPaymentChanges: undefined
+      });
+    } else {
+      PromptManager.requestClosePrompt();
+    }
+  }
+
+  @autobind
+  private onAddNewPayment() {
+    const newPayment = new ScheduledPayment({
+      name: "",
+      date: moment(),
+      amount: 0
+    });
+    this.setState({
+      paymentToEdit: newPayment
+    });
+  }
+
+  @autobind
+  private onEditSpecificPayment(payment: ScheduledPayment) {
+    this.setState({
+      paymentToEdit: payment
+    });
+  }
+
+  @autobind
+  private onDeleteSpecificPayment(payment: ScheduledPayment) {
+    const payments = this.state.payments.filter(item => item !== payment);
+    this.setState({
+      payments: payments
+    });
+  }
+
+  @autobind
+  private handlePendingPaymentChanges(changes: ScheduledPaymentOptions) {
+    this.setState({
+      pendingPaymentChanges: changes
+    });
   }
 
   private renderControlsForMode() {
     let result: JSX.Element
     switch (this.state.createMode) {
-      case PaymentScheduleCreateMode.csv:
+      case CreateMode.csv:
         result = (
           <>
             <InputGroup className={styles["csv-group"]}>
@@ -119,9 +178,15 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
           </>
         );
         break;
-      case PaymentScheduleCreateMode.manual:
+      case CreateMode.manual:
         result = (
-          <PaymentSchedulePreview payments={this.state.payments} editable />
+          <PaymentSchedulePreview
+            payments={this.state.payments}
+            editable
+            onAddClicked={this.onAddNewPayment}
+            onEditClicked={this.onEditSpecificPayment}
+            onDeleteClicked={this.onDeleteSpecificPayment}
+          />
         )
         break;
     }
@@ -147,44 +212,17 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
     }
   }
 
-  private renderViewOnly() {
-    const schedule = AppStateManager.getPaymentSchedule(this.props.scheduleToEdit!);
-    if (schedule) {
+  private renderModalBody() {
+    if (this.state.paymentToEdit) {
+      const payment = this.state.paymentToEdit;
       return (
-        <Modal
-          show
-          onHide={this.cancel}
-          backdrop="static"
-          keyboard={false}
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>{schedule.name}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <PaymentSchedulePreview payments={schedule.payments} />
-          </Modal.Body>
-          <Modal.Footer>
-            <Button onClick={this.cancel}>
-              Done
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      );
-    }
-  }
-
-  renderDefault() {
-    return (
-      <Modal
-        show
-        onHide={this.cancel}
-        backdrop="static"
-        keyboard={false}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>{this.props.editing ? "Update" : "Add"} Payment Schedule</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
+        <>
+          <PaymentEditor payment={payment} onChangeMade={this.handlePendingPaymentChanges} />
+        </>
+      )
+    } else {
+      return (
+        <>
           <InputGroup className="mb-3">
             <FormControl
               placeholder="Name"
@@ -198,57 +236,135 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
               as='select'
               onChange={this.handleCreateModeChanged}
               value={this.state.createMode}
-              disabled={this.props.editing}
             >
-              <option value={PaymentScheduleCreateMode.csv}>CSV</option>
-              <option value={PaymentScheduleCreateMode.manual}>Manual Input</option>
+              <option value={CreateMode.csv}>CSV</option>
+              <option value={CreateMode.manual}>Manual Input</option>
             </FormControl>
           </InputGroup>
           {this.renderControlsForMode()}
+        </>
+      )
+    }
+  }
+
+  renderDefault() {
+    const title = this.state.paymentToEdit ? this.state.paymentToEdit.name : `${(this.props.editing ? "Update" : "Add")} Payment Schedule`;
+    const buttonText = this.state.paymentToEdit ? "Done" : (this.props.editing ? "Update" : "Add")
+    return (
+      <>
+        <Modal.Header closeButton>
+          <Modal.Title>{title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className={styles["modal-body"]}>
+          {this.renderModalBody()}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={this.cancel}>
             Cancel
           </Button>
           <LoadingButton isLoading={this.state.isSaving} loadingText="Saving..." variant="primary" onClick={this.accept} disabled={!this.state.name || this.state.isSaving}>
-            {this.props.editing ? "Update" : "Add"}
+            {buttonText}
           </LoadingButton>
         </Modal.Footer>
-      </Modal>
+      </>
     )
   }
 
   render() {
-    if (this.props.viewOnly) {
-      return this.renderViewOnly();
-    } else {
-      return this.renderDefault();
-    }
+    return (
+      <Modal
+        show
+        onHide={this.cancel}
+        backdrop="static"
+        keyboard={false}
+        contentClassName={styles["modal"]}
+      >
+        {this.renderDefault()}
+      </Modal>
+    )
   }
+}
+
+
+interface IPaymentEditorProps {
+  payment: ScheduledPayment;
+  onChangeMade?: (options: ScheduledPaymentOptions) => void;
+}
+
+const PaymentEditor: React.FC<IPaymentEditorProps> = (props) => {
+
+  const [name, setName] = useState(props.payment.name);
+  const [amount, setAmount] = useState(props.payment.amount);
+  const [date, setDate] = useState(props.payment.date);
+
+  useEffect(() => {
+    if (props.onChangeMade) {
+      props.onChangeMade({
+        name,
+        date,
+        amount
+      });
+    }
+  }, [name, amount, date]);
+
+  return (
+    <>
+      <InputGroup className="mb-3">
+        <FormControl
+          placeholder="Name"
+          aria-label="name"
+          onChange={e => setName(e.target.value)}
+          value={name}
+        />
+      </InputGroup>
+      <InputGroup className="mb-3">
+        <InputGroup.Prepend>
+          <InputGroup.Text>
+            <i className="bi bi-calendar-event" />
+          </InputGroup.Text>
+        </InputGroup.Prepend>
+        <DatePicker defaultDate={date} calendarIconBackgroundEnabled className="form-control" onChange={setDate} />
+      </InputGroup>
+      <InputGroup className="mb-3">
+        <CurrencyInput
+          ariaLabel="Value"
+          defaultValue={amount}
+          onChange={setAmount}
+        />
+      </InputGroup>
+
+    </>
+  )
 }
 
 interface IPaymentSchedulePreviewProps {
   editable?: boolean;
   payments: ScheduledPayment[];
+  onEditClicked?: (payment: ScheduledPayment) => void;
+  onDeleteClicked?: (payment: ScheduledPayment) => void;
+  onAddClicked?: () => void;
 }
 
 const PaymentSchedulePreview: React.FC<IPaymentSchedulePreviewProps> = (props) => {
 
   props.payments.sort((a, b) => a.date.valueOf() - b.date.valueOf());
+  function throwError(err: Error) {
+    throw err;
+  }
 
   function renderPayment(payment: ScheduledPayment) {
     return (
       <tr key={payment.id}>
         <td>{payment.name}</td>
+        <td>{payment.amount}</td>
         <td>{payment.date.format("L")}</td>
-        <td>${payment.amount}</td>
         {props.editable && (
           <td>
             <ButtonGroup className={`mr-2`} size='sm'>
-              <Button onClick={() => { }}>
-                <i className="bi bi-plus-square"></i>
+              <Button onClick={() => props.onEditClicked ? props.onEditClicked(payment) : throwError(new Error("No edit function specified"))}>
+                <i className="bi bi-pencil"></i>
               </Button>
-              <Button onClick={() => { }} variant='secondary'>
+              <Button onClick={() => props.onDeleteClicked ? props.onDeleteClicked(payment) : throwError(new Error("No delete function specified"))} variant='secondary'>
                 <i className="bi bi-trash"></i>
               </Button>
             </ButtonGroup>
@@ -259,17 +375,16 @@ const PaymentSchedulePreview: React.FC<IPaymentSchedulePreviewProps> = (props) =
   }
 
   function renderSchedule() {
+    const colCount = 4;
     return (
-      <div className={styles["table-container"]}>
+      <div className={styles["table-container"]} >
         <Table responsive={"sm"}>
           <thead>
             <tr>
               <th>Name</th>
+              <th><i className="bi bi-cash"></i></th>
               <th>
                 <i className="bi bi-calendar" />
-              </th>
-              <th>
-                <i className="bi bi-cash-coin" />
               </th>
               {props.editable && (
                 <th>
@@ -279,6 +394,15 @@ const PaymentSchedulePreview: React.FC<IPaymentSchedulePreviewProps> = (props) =
             </tr>
           </thead>
           <tbody>
+            {props.editable && (
+              <tr>
+                <td colSpan={colCount}>
+                  <Button className={styles["add-button"]} onClick={props.onAddClicked}>
+                    <i className="bi bi-plus-lg" />
+                  </Button>
+                </td>
+              </tr>
+            )}
             {props.payments.map(renderPayment)}
           </tbody>
         </Table>
@@ -286,17 +410,5 @@ const PaymentSchedulePreview: React.FC<IPaymentSchedulePreviewProps> = (props) =
     );
   }
 
-  function render(): JSX.Element {
-    let result: JSX.Element;
-    if (props.payments.length === 0) {
-      result = (
-        <div className={styles["no-payments-message"]}>No payments have been created yet.</div>
-      );
-    } else {
-      result = renderSchedule();
-    }
-    return result;
-  }
-
-  return render();
+  return renderSchedule();
 }
