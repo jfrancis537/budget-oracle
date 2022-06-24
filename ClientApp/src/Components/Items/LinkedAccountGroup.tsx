@@ -32,7 +32,7 @@ export const LinkedAccountGroup: React.FC<LinkedAccountGroupProps> = (props) => 
     return (
       <Card className={groupStyles['card']} bg='dark' text='light'>
         <Card.Header className={groupStyles['header']}>
-          <div className={groupStyles['group-title']}>{props.name} : {total}</div>
+          <div className={groupStyles['group-title']}>{props.name} : {total.toFixed(2)}</div>
         </Card.Header>
         <Card.Body className={groupStyles['items']}>
           {[...props.accounts].map(renderAccount)}

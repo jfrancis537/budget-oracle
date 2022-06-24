@@ -40,7 +40,7 @@ export const LinkedAccountItem: React.FC<LinkedAccountItemProps> = (props) => {
       if (props.account.type === "credit") {
         setBalance(balanceData.current);
       } else {
-        setBalance(balanceData.available);
+        setBalance(balanceData.current);
       }
     }
   }

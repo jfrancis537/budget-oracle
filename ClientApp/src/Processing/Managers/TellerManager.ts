@@ -145,7 +145,7 @@ class TellerManager {
           }
         } else {
           //Use available for bank accounts
-          result.accountsValue += this.balances.get(account.id)?.available!;
+          result.accountsValue += this.balances.get(account.id)?.current!;
         }
       }
     }
