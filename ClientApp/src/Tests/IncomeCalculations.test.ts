@@ -117,12 +117,46 @@ describe('Income Calc Bi-Weekly', () => {
       dayOfMonth: -1
     }
     sources.add(new IncomeSource(opts));
-    TestLogger.setLogsEnabled(true);
     let result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2022-06-15"), moment("2022-08-31"), sources.values()
     );
-    TestLogger.setLogsEnabled(false);
     expect(result[1]).toEqual(23470);
+  });
+
+  test('Even Real World pt.3', async () => {
+    sources.clear();
+    let opts = {
+      name: "Google",
+      amount: 4131,
+      frequencyType: IncomeFrequency.BiWeeklyEven,
+      paysOnWeekends: false,
+      dayOfMonth: -1
+    }
+    sources.add(new IncomeSource(opts));
+    //TestLogger.setLogsEnabled(true);
+    let result = await CalculationsManager.instance.calculateTotalIncome(
+      moment("2022-07-09"), moment("2022-07-16"), sources.values()
+    );
+    //TestLogger.setLogsEnabled(false);
+    expect(result[1]).toEqual(0);
+  });
+
+  test('Even Real World pt.4', async () => {
+    sources.clear();
+    let opts = {
+      name: "Google",
+      amount: 4131,
+      frequencyType: IncomeFrequency.BiWeeklyEven,
+      paysOnWeekends: false,
+      dayOfMonth: -1
+    }
+    sources.add(new IncomeSource(opts));
+    TestLogger.setLogsEnabled(true);
+    let result = await CalculationsManager.instance.calculateTotalIncome(
+      moment("2022-07-07"), moment("2022-07-30"), sources.values()
+    );
+    TestLogger.setLogsEnabled(false);
+    expect(result[1]).toEqual(8262);
   });
 
   test('Even w/ start in pay week', async () => {

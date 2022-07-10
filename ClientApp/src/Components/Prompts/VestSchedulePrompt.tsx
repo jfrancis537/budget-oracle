@@ -25,6 +25,7 @@ interface IVestSchedulePromptState {
   isSaving: boolean,
   createMode: VestScheduleCreateMode,
   vestToEdit?: ScheduledStockVest,
+  pendingGlobalChanges?: GlobalChanges,
   pendingVestChanges?: ScheduledStockVestOptions,
   errorMessage?: string
 }
@@ -32,6 +33,10 @@ interface IVestSchedulePromptState {
 enum VestScheduleCreateMode {
   csv = "csv",
   manual = "mannual"
+}
+
+interface GlobalChanges {
+  stockSplitMultiplier?: number;
 }
 
 export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps, IVestSchedulePromptState> {
@@ -79,6 +84,7 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
 
   @autobind
   private async accept() {
+    //Handle individual vest changes
     if (this.state.vestToEdit) {
       if (this.state.pendingVestChanges) {
         const vests = this.state.vests.filter(item => item !== this.state.vestToEdit);
@@ -91,7 +97,26 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
       } else {
         this.cancel();
       }
-    } else {
+    }
+    //Handle global vest changes
+    else if (this.state.pendingGlobalChanges) {
+      const vests: ScheduledStockVest[] = [];
+      for (const vest of this.state.vests) {
+        const options: ScheduledStockVestOptions = { ...vest };
+        if (this.state.pendingGlobalChanges.stockSplitMultiplier !== undefined) {
+          const multiplier = this.state.pendingGlobalChanges.stockSplitMultiplier;
+          options.shares *= multiplier;
+          options.costBasisPerShare /= multiplier;
+        }
+        vests.push(new ScheduledStockVest(options));
+      }
+      this.setState({
+        vests: vests,
+        pendingGlobalChanges: undefined
+      });
+    }
+    //handle regular view
+    else {
       this.setState({
         isSaving: true
       });
@@ -125,7 +150,12 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
         vestToEdit: undefined,
         pendingVestChanges: undefined
       });
-    } else {
+    } else if (this.state.pendingGlobalChanges) {
+      this.setState({
+        pendingGlobalChanges: undefined,
+      });
+    }
+    else {
       PromptManager.requestClosePrompt();
     }
   }
@@ -142,6 +172,13 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
     });
     this.setState({
       vestToEdit: newVest
+    });
+  }
+
+  @autobind
+  private onChangeGlobalSettings() {
+    this.setState({
+      pendingGlobalChanges: {}
     });
   }
 
@@ -167,6 +204,13 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
     });
   }
 
+  @autobind
+  private handleGlobalChanges(changes: GlobalChanges) {
+    this.setState({
+      pendingGlobalChanges: changes
+    });
+  }
+
   private renderControlsForMode() {
     let result: JSX.Element
     switch (this.state.createMode) {
@@ -187,6 +231,7 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
             vests={this.state.vests}
             editable
             onAddClicked={this.onAddNewVest}
+            onGlobalSettingsClicked={this.onChangeGlobalSettings}
             onEditClicked={this.onEditSpecificVest}
             onDeleteClicked={this.onDeleteSpecificVest}
           />
@@ -223,7 +268,15 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
           <VestEditor vest={vest} onChangeMade={this.handlePendingVestChanges} />
         </>
       )
-    } else {
+    }
+    else if (this.state.pendingGlobalChanges) {
+      return (
+        <>
+          <GlobalVestEditor onChangeMade={this.handleGlobalChanges} />
+        </>
+      )
+    }
+    else {
       return (
         <>
           <InputGroup className="mb-3">
@@ -416,6 +469,7 @@ interface IVestSchedulePreviewProps {
   onEditClicked?: (vest: ScheduledStockVest) => void;
   onDeleteClicked?: (vest: ScheduledStockVest) => void;
   onAddClicked?: () => void;
+  onGlobalSettingsClicked?: () => void;
 }
 
 const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
@@ -480,9 +534,14 @@ const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
             {props.editable && (
               <tr>
                 <td colSpan={colCount}>
-                  <Button className={styles["add-button"]} onClick={props.onAddClicked}>
-                    <i className="bi bi-plus-lg" />
-                  </Button>
+                  <div className={styles["schedule-modifier-buttons"]}>
+                    <Button className={styles["modifier-button"]} onClick={props.onAddClicked}>
+                      <i className="bi bi-plus-lg" />
+                    </Button>
+                    <Button className={styles["modifier-button"]} onClick={props.onGlobalSettingsClicked}>
+                      <i className="bi bi-sliders2" />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             )}
@@ -494,4 +553,40 @@ const VestSchedulePreview: React.FC<IVestSchedulePreviewProps> = (props) => {
   }
 
   return renderSchedule();
+}
+
+interface IGlobalVestEditorProps {
+  onChangeMade: (changes: GlobalChanges) => void
+}
+
+const GlobalVestEditor: React.FC<IGlobalVestEditorProps> = (props) => {
+
+  const [splitMultiplier, setSplitMultiplier] = useState(1);
+
+  useEffect(() => {
+    if (props.onChangeMade) {
+      props.onChangeMade({
+        stockSplitMultiplier: splitMultiplier
+      });
+    }
+  }, [splitMultiplier]);
+
+  function render(): JSX.Element {
+    return (
+      <>
+        <InputGroup className="mb-3">
+          <InputGroup.Prepend>
+            <InputGroup.Text>Split Multiplier</InputGroup.Text>
+          </InputGroup.Prepend>
+          <NumberInput
+            defaultValue={splitMultiplier}
+            ariaLabel="Share multiplier"
+            onChange={setSplitMultiplier}
+          />
+        </InputGroup>
+      </>
+    )
+  }
+
+  return render();
 }
