@@ -151,12 +151,28 @@ describe('Income Calc Bi-Weekly', () => {
       dayOfMonth: -1
     }
     sources.add(new IncomeSource(opts));
-    TestLogger.setLogsEnabled(true);
     let result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2022-07-07"), moment("2022-07-30"), sources.values()
     );
-    TestLogger.setLogsEnabled(false);
     expect(result[1]).toEqual(8262);
+  });
+
+  test('Biweekly wraps years', async () => {
+    sources.clear();
+    let opts = {
+      name: "Google",
+      amount: 10,
+      frequencyType: IncomeFrequency.BiWeeklyEven,
+      paysOnWeekends: false,
+      dayOfMonth: -1
+    }
+    sources.add(new IncomeSource(opts)); 
+    TestLogger.setLogsEnabled(true);
+    let result = await CalculationsManager.instance.calculateTotalIncome(
+      moment("2022-07-10"), moment("2023-07-10"), sources.values()
+    );
+    TestLogger.setLogsEnabled(false);
+    expect(result[1]).toEqual(260);
   });
 
   test('Even w/ start in pay week', async () => {
@@ -221,24 +237,20 @@ describe('Income Calc Semi-Monthly', () => {
   let sources = new Set<IncomeSource>();
 
   test('Paid Today, end same day, Middle of month', async () => {
-    TestLogger.setLogsEnabled(true);
     sources.clear();
     sources.add(new IncomeSource(options));
     let result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-10-29"), moment("2021-10-29"), sources.values()
     );
-    TestLogger.setLogsEnabled(false);
     expect(result[1]).toEqual(0);
   });
 
   test('Paid Today, end next day, Middle of month', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    TestLogger.setLogsEnabled(true);
     let result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-10-29"), moment("2021-10-29"), sources.values()
     );
-    TestLogger.setLogsEnabled(false);
     expect(result[1]).toEqual(0);
   });
 

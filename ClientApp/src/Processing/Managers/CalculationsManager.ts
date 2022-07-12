@@ -224,45 +224,39 @@ class CalculationsManager {
       case IncomeFrequency.BiWeeklyEven:
       case IncomeFrequency.BiWeeklyOdd:
         {
+          //TODO implemnt simple bi-weekly with smaple start date. We can get the week even or oddness by checking the OG date and year and comparing that to the current date and year, we can then determine if the current week is a payweek for the other info.
           const even = IncomeFrequency.BiWeeklyEven === source.frequencyType ? true : false;
           const payDow = 5; //Friday;
           let startDow = currentDate.weekday();
           let endDow = end.weekday();
           let weekNum = currentDate.week();
-          let endWeekNum = end.week();
           let weeks = 0;
-          //If start and end are the same week
-          if (weekNum === endWeekNum) {
-            if (weekNum % 2 === 0 && even && startDow < payDow && endDow >= payDow) {
-              weeks = 1;
-            }
-          } else {
-            const weekDiff = endWeekNum - weekNum + 1;
-            const isEvenWeek = weekNum % 2 === 0;
-            const isPayWeek = even ? isEvenWeek : !isEvenWeek;
-            const endIsEvenWeek = endWeekNum % 2 === 0;
-            const endIsPayWeek = even ? endIsEvenWeek : !endIsEvenWeek;
-            //if there is an even number of weeks, pay weeks and non pay weeks will be the same amount
-            if (weekDiff % 2 === 0) {
-              weeks = Math.round(weekDiff / 2); // remove rounding errors.
-            }
-            //If it's odd, then there will be more depending on if the pay is in the start week or not. 
-            else {
-              weeks = weekDiff / 2;
+          const startWeek = currentDate.clone().startOf('week');
+          const endWeek = end.clone().startOf('week');
+          const weekDiff = endWeek.diff(startWeek,'weeks') + 1;
+          const isEvenWeek = weekNum % 2 === 0;
+          const isPayWeek = even ? isEvenWeek : !isEvenWeek;
+          const endIsPayWeek = isPayWeek ? weekDiff % 2 !== 0 : weekDiff %2 === 0;
+          //if there is an even number of weeks, pay weeks and non pay weeks will be the same amount
+          if (weekDiff % 2 === 0) {
+            weeks = Math.round(weekDiff / 2); // remove rounding errors.
+          }
+          //If it's odd, then there will be more depending on if the pay is in the start week or not. 
+          else {
+            weeks = weekDiff / 2;
 
-              if (isPayWeek) {
-                weeks = Math.ceil(weeks);
-              } else {
-                weeks = Math.floor(weeks);
-              }
+            if (isPayWeek) {
+              weeks = Math.ceil(weeks);
+            } else {
+              weeks = Math.floor(weeks);
             }
-            //Handle first and last week
-            if (startDow >= payDow && isPayWeek) {
-              weeks--;
-            }
-            if (endDow < payDow && endIsPayWeek) {
-              weeks--;
-            }
+          }
+          //Handle first and last week
+          if (startDow >= payDow && isPayWeek) {
+            weeks--;
+          }
+          if (endDow < payDow && endIsPayWeek) {
+            weeks--;
           }
           value = weeks * source.amount;
         }
