@@ -135,7 +135,7 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
         components.push(
           <div key={schedule.id}>
             <label>{schedule.name}:&nbsp;</label>
-            <span>${value.amount} from {value.shares} shares</span>
+            <span>${value.amount.toFixed(2)} from {value.shares} shares</span>
           </div>
         );
       }
