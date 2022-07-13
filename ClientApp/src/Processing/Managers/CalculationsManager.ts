@@ -14,7 +14,7 @@ import { AppStateManager } from "./AppStateManager";
 import { InvestmentCalculationManager } from "./InvestmentCalculationManager";
 import { TellerManager } from "./TellerManager";
 
-export type ResultPair<T> = [Map<T, number>, number];
+export type ResultPair<T, V = number> = [Map<T, V>, number];
 
 export interface InvestmentCalculation {
   totalValue: number;
@@ -37,12 +37,14 @@ export interface CalculationResult {
   billResults: BillCalculation;
   debtTotal: number;
   accountTotal: number;
-  incomeResults: ResultPair<IncomeSource>;
+  incomeResults: ResultPair<IncomeSource, IncomeResult>;
   investmentResults: InvestmentCalculation;
   scheduledPaymentsTotal: number;
   scheduledVestsTotal: number;
   linkedAccountTotal: LinkedAccountCalculation
 }
+
+type IncomeResult = { amount: number, periods: number };
 
 type QuarterNumber = 1 | 2 | 3 | 4;
 
@@ -181,26 +183,27 @@ class CalculationsManager {
     }
     return result;
   }
-
-  public async calculateTotalIncome(start: Moment, end: Moment, incomeSources: Iterable<IncomeSource>): Promise<ResultPair<IncomeSource>> {
+  public async calculateTotalIncome(start: Moment, end: Moment, incomeSources: Iterable<IncomeSource>): Promise<ResultPair<IncomeSource, IncomeResult>> {
     let result = 0;
-    let promises: Promise<[IncomeSource, number]>[] = [];
+    let promises: Promise<[IncomeSource, number, number]>[] = [];
     for (let source of incomeSources) {
       promises.push(this.calculateTotalForIncomeSource(source, start.clone(), end.clone()));
     }
-    let incomeMap = new Map<IncomeSource, number>();
+    let incomeMap = new Map<IncomeSource, IncomeResult>();
     let results = await Promise.all(promises);
-    for (let [source, value] of results) {
-      if (value > 0) {
-        incomeMap.set(source, value);
+    for (let [source, amount, periods] of results) {
+      if (amount > 0) {
+        incomeMap.set(source, {
+          amount,
+          periods
+        });
       }
-      result += value;
+      result += amount;
     }
     return [incomeMap, result];
   }
 
-  private paysOnEvenWeeks(baseDate: Moment, currentDate: Moment): boolean
-  {
+  private paysOnEvenWeeks(baseDate: Moment, currentDate: Moment): boolean {
     const baseEven = baseDate.week() % 2 === 0;
     const baseYear = baseDate.year();
     const currentYear = currentDate.year();
@@ -208,9 +211,10 @@ class CalculationsManager {
     return currentYearSameAsBase ? baseEven : !baseEven;
   }
 
-  private async calculateTotalForIncomeSource(source: IncomeSource, start: Moment, end: Moment): Promise<[IncomeSource, number]> {
+  private async calculateTotalForIncomeSource(source: IncomeSource, start: Moment, end: Moment): Promise<[IncomeSource, number, number]> {
     let currentDate = start.clone();
     let value = 0;
+    let payPeriods = 0;
     switch (source.frequencyType) {
       case IncomeFrequency.Weekly:
         {
@@ -228,11 +232,12 @@ class CalculationsManager {
             weeks++;
           }
           value = weeks * source.amount;
+          payPeriods = weeks;
         }
         break;
       case IncomeFrequency.Biweekly:
         {
-          const even = this.paysOnEvenWeeks(source.startDate,currentDate);
+          const even = this.paysOnEvenWeeks(source.startDate, currentDate);
           const payDow = 5; //Friday;
           let startDow = currentDate.weekday();
           let endDow = end.weekday();
@@ -240,10 +245,10 @@ class CalculationsManager {
           let weeks = 0;
           const startWeek = currentDate.clone().startOf('week');
           const endWeek = end.clone().startOf('week');
-          const weekDiff = endWeek.diff(startWeek,'weeks') + 1;
+          const weekDiff = endWeek.diff(startWeek, 'weeks') + 1;
           const isEvenWeek = weekNum % 2 === 0;
           const isPayWeek = even ? isEvenWeek : !isEvenWeek;
-          const endIsPayWeek = isPayWeek ? weekDiff % 2 !== 0 : weekDiff %2 === 0;
+          const endIsPayWeek = isPayWeek ? weekDiff % 2 !== 0 : weekDiff % 2 === 0;
           //if there is an even number of weeks, pay weeks and non pay weeks will be the same amount
           if (weekDiff % 2 === 0) {
             weeks = Math.round(weekDiff / 2); // remove rounding errors.
@@ -265,6 +270,7 @@ class CalculationsManager {
           if (endDow < payDow && endIsPayWeek) {
             weeks--;
           }
+          payPeriods = weeks;
           value = weeks * source.amount;
         }
         break;
@@ -343,6 +349,7 @@ class CalculationsManager {
             } else if (end.isSameOrAfter(lastMonthPayDayA)) {
               totalPaydays++;
             }
+            payPeriods = totalPaydays;
             value = totalPaydays * source.amount;
           }
         }
@@ -370,8 +377,8 @@ class CalculationsManager {
           let monthsBetween = Math.abs(currentDate.diff(end, 'month'));
           timesOccured += monthsBetween;
           value = timesOccured * source.amount;
+          payPeriods = timesOccured;
         }
-
         break;
       case IncomeFrequency.Quarterly:
         let timesOccured = 0;
@@ -384,12 +391,13 @@ class CalculationsManager {
           let yearsBetween = end.year() - currentDate.year();
           timesOccured += ((yearsBetween - 1) * 4);
         }
+        payPeriods = timesOccured;
         value = timesOccured * source.amount;
         break;
       case IncomeFrequency.Anually:
         break;
     }
-    return [source, value];
+    return [source, value, payPeriods];
   }
 
   private getCurrentQuarter(date: Moment): QuarterNumber {

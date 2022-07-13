@@ -47,7 +47,8 @@ export class IncomeSource extends Identifiable implements IValued {
       name: source.name,
       paysOnWeekends: source.paysOnWeekends,
       dayOfMonth: source.dayOfMonth,
-      startDate: moment(source.startDate)
+      startDate: moment(source.startDate),
+      id: source.id
     });
   }
 }

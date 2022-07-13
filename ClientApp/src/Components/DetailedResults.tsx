@@ -126,7 +126,7 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
         components.push(
           <div key={source.id}>
             <label>{source.name}:&nbsp;</label>
-            <span>${value}</span>
+            <span>${value.amount} over {value.periods} periods</span>
           </div>
         );
       }
