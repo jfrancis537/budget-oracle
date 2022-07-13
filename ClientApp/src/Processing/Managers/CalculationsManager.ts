@@ -232,7 +232,6 @@ class CalculationsManager {
         break;
       case IncomeFrequency.Biweekly:
         {
-          //TODO implemnt simple bi-weekly with smaple start date. We can get the week even or oddness by checking the OG date and year and comparing that to the current date and year, we can then determine if the current week is a payweek for the other info.
           const even = this.paysOnEvenWeeks(source.startDate,currentDate);
           const payDow = 5; //Friday;
           let startDow = currentDate.weekday();

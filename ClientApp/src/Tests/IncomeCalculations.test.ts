@@ -178,12 +178,29 @@ describe('Income Calc Bi-Weekly', () => {
       startDate: moment("2022-05-27")
     }
     sources.add(new IncomeSource(opts)); 
-    TestLogger.setLogsEnabled(true);
     let result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2022-07-10"), moment("2023-07-10"), sources.values()
     );
-    TestLogger.setLogsEnabled(false);
     expect(result[1]).toEqual(260);
+  });
+
+  test('Biweekly wraps years', async () => {
+    sources.clear();
+    let opts = {
+      name: "Google",
+      amount: 10,
+      frequencyType: IncomeFrequency.Biweekly,
+      paysOnWeekends: false,
+      dayOfMonth: -1,
+      startDate: moment("2022-05-27")
+    }
+    sources.add(new IncomeSource(opts)); 
+    TestLogger.setLogsEnabled(true);
+    let result = await CalculationsManager.instance.calculateTotalIncome(
+      moment("2022-12-30"), moment("2023-01-07"), sources.values()
+    );
+    TestLogger.setLogsEnabled(false);
+    expect(result[1]).toEqual(10);
   });
 
   test('Even w/ start in pay week', async () => {
