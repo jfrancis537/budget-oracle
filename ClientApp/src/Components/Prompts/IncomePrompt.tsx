@@ -75,8 +75,7 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
   }
 
   @autobind
-  private handleStartDateChanged(date: Moment)
-  {
+  private handleStartDateChanged(date: Moment) {
     this.setState({
       startDate: date
     });
@@ -130,7 +129,7 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
         this.state.paysOnWeekends,
         this.state.dayOfMonth,
         this.state.startDate
-        );
+      );
     }
     this.setState({
       isSaving: false
@@ -191,14 +190,14 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
               <option disabled value={IncomeFrequency.Anually}>Anually</option>
             </FormControl>
           </InputGroup>
-          <InputGroup className="mb-3">
-        <InputGroup.Prepend>
-          <InputGroup.Text>
-            <i className="bi bi-calendar-event" />
-          </InputGroup.Text>
-        </InputGroup.Prepend>
-        <DatePicker defaultDate={this.state.startDate} calendarIconBackgroundEnabled className="form-control" onChange={this.handleStartDateChanged} />
-      </InputGroup>
+          <InputGroup className="mb-3" hidden={this.state.incomeFrequency !== IncomeFrequency.Biweekly}>
+            <InputGroup.Prepend>
+              <InputGroup.Text>
+                <i className="bi bi-calendar-event" />
+              </InputGroup.Text>
+            </InputGroup.Prepend>
+            <DatePicker defaultDate={this.state.startDate} calendarIconBackgroundEnabled className="form-control" onChange={this.handleStartDateChanged} />
+          </InputGroup>
           <InputGroup
             className="mb-3"
             hidden={
