@@ -39,12 +39,16 @@ export interface CalculationResult {
   accountTotal: number;
   incomeResults: ResultPair<IncomeSource, IncomeResult>;
   investmentResults: InvestmentCalculation;
-  scheduledPaymentsTotal: number;
-  scheduledVestsTotal: number;
+  scheduledPaymentsResult: ResultPair<PaymentSchedule>;
+  scheduledVestsResult: ResultPair<VestSchedule, VestResult>;
   linkedAccountTotal: LinkedAccountCalculation
 }
 
 type IncomeResult = { amount: number, periods: number };
+type VestResult = {
+  amount: number,
+  shares: number
+}
 
 type QuarterNumber = 1 | 2 | 3 | 4;
 
@@ -103,8 +107,8 @@ class CalculationsManager {
       accountTotal: accountValue,
       incomeResults: incomeValue,
       investmentResults: investmentValue,
-      scheduledPaymentsTotal: scheduledpaymentsvalue,
-      scheduledVestsTotal: stockScheduleValue,
+      scheduledPaymentsResult: scheduledpaymentsvalue,
+      scheduledVestsResult: stockScheduleValue,
       linkedAccountTotal: linkedAccountValue
     }
     return results;
@@ -123,30 +127,42 @@ class CalculationsManager {
     return result;
   }
 
-  private calculateTotalForScheduledPayments(start: Moment, end: Moment, schedules: Iterable<PaymentSchedule>): number {
+  private calculateTotalForScheduledPayments(start: Moment, end: Moment, schedules: Iterable<PaymentSchedule>): ResultPair<PaymentSchedule> {
     let sum = 0;
+    const results = new Map<PaymentSchedule, number>();
     for (let schedule of schedules) {
+      let scheduleSum = 0;
       for (let payment of schedule.payments) {
         if (payment.date.isBetween(start, end)) {
-          sum += payment.amount;
+          scheduleSum += payment.amount;
         }
       }
+      results.set(schedule, scheduleSum);
+      sum += scheduleSum;
     }
-    return sum;
+    return [results, sum];
   }
 
-  private async calculateTotalForScheduledStockVests(start: Moment, end: Moment, schedules: Iterable<VestSchedule>) {
+  private async calculateTotalForScheduledStockVests(start: Moment, end: Moment, schedules: Iterable<VestSchedule>): Promise<ResultPair<VestSchedule, VestResult>> {
     let sum = 0;
+    const results = new Map<VestSchedule, VestResult>();
     for (let schedule of schedules) {
+      let scheduleSum = 0;
+      let shares = 0;
       for (let vest of schedule.vests) {
-
         if (vest.date.isBetween(start, end)) {
           const symbolValue = (await InvestmentCalculationManager.getStockPriceForSymbol(vest.symbol)) ?? 0;
-          sum += (vest.shares * symbolValue * (1 - vest.taxPercentage));
+          scheduleSum += (vest.shares * symbolValue * (1 - vest.taxPercentage));
+          shares += vest.shares;
         }
       }
+      results.set(schedule, {
+        amount: scheduleSum,
+        shares: shares
+      });
+      sum += scheduleSum;
     }
-    return sum;
+    return [results, sum];
   }
 
   private calculateTotalInvestmentValue(start: Moment, end: Moment, investments: Iterable<Investment>): InvestmentCalculation {

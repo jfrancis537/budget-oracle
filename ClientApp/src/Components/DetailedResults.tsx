@@ -120,13 +120,31 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
 
   private renderIncomeResults() {
     if (this.props.calculations) {
-      let resultMap = this.props.calculations.incomeResults[0];
-      let components: JSX.Element[] = [];
-      for (let [source, value] of resultMap) {
+      const incomeResultMap = this.props.calculations.incomeResults[0];
+      const components: JSX.Element[] = [];
+      for (let [source, value] of incomeResultMap) {
         components.push(
           <div key={source.id}>
             <label>{source.name}:&nbsp;</label>
             <span>${value.amount} over {value.periods} periods</span>
+          </div>
+        );
+      }
+      const vestResultMap = this.props.calculations.scheduledVestsResult[0];
+      for (let [schedule, value] of vestResultMap) {
+        components.push(
+          <div key={schedule.id}>
+            <label>{schedule.name}:&nbsp;</label>
+            <span>${value.amount} from {value.shares} shares</span>
+          </div>
+        );
+      }
+      const paymentResultMap = this.props.calculations.scheduledPaymentsResult[0];
+      for (let [schedule, value] of paymentResultMap) {
+        components.push(
+          <div key={schedule.id}>
+            <label>{schedule.name}:&nbsp;</label>
+            <span>${value}</span>
           </div>
         );
       }
@@ -145,7 +163,7 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
       const totalInvestmentValue = this.props.calculations?.investmentResults.totalValue;
       const totalInvestmentCost = this.props.calculations?.investmentResults.totalCostBasis;
       const totalInvestmentGain = totalInvestmentValue - totalInvestmentCost;
-      const totalVestGain = this.props.calculations.scheduledVestsTotal;
+      const totalVestGain = this.props.calculations.scheduledVestsResult[1];
 
       const billCalcs = this.props.calculations.billResults;
       const unavoidableCosts = billCalcs.unavoidableBills[1];

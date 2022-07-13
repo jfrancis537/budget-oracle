@@ -57,8 +57,8 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
         calcs.incomeResults[1] -
         calcs.debtTotal -
         calcs.billResults.allBills[1] +
-        calcs.scheduledVestsTotal +
-        calcs.scheduledPaymentsTotal +
+        calcs.scheduledVestsResult[1] +
+        calcs.scheduledPaymentsResult[1] +
         (this.state.displayUnrealized ? calcs.investmentResults.totalValue : (calcs.investmentResults.totalCostBasis - calcs.investmentResults.totalUnrealizedLosses)) -
         calcs.investmentResults.totalInterestOwed;
 
