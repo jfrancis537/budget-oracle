@@ -55,14 +55,6 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
         startDate: moment()
       };
     }
-
-    this.accept = this.accept.bind(this);
-    this.cancel = this.cancel.bind(this);
-    this.handleNameChanged = this.handleNameChanged.bind(this);
-    this.handleValueChanged = this.handleValueChanged.bind(this);
-    this.handleFrequencyChanged = this.handleFrequencyChanged.bind(this);
-    this.handlePaysOnWeekendsChanged = this.handlePaysOnWeekendsChanged.bind(this);
-    this.handleDayOfMonthChanged = this.handleDayOfMonthChanged.bind(this);
   }
 
   @autobind
@@ -82,6 +74,7 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
     }
   }
 
+  @autobind
   private handleStartDateChanged(date: Moment)
   {
     this.setState({
@@ -89,12 +82,14 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
     });
   }
 
+  @autobind
   private handleFrequencyChanged(event: React.ChangeEvent<HTMLSelectElement>) {
     this.setState({
       incomeFrequency: (Number(event.target.value) as IncomeFrequency)
     });
   }
 
+  @autobind
   private handlePaysOnWeekendsChanged(event: React.ChangeEvent<HTMLSelectElement>) {
     const value = event.target.value === `${true}`;
     this.setState({
@@ -102,6 +97,7 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
     });
   }
 
+  @autobind
   private handleDayOfMonthChanged(event: React.ChangeEvent<HTMLSelectElement>) {
     const newValue = Number(event.target.value);
     if (!isNaN(newValue)) {
@@ -111,6 +107,7 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
     }
   }
 
+  @autobind
   private async accept() {
     this.setState({
       isSaving: true
@@ -141,6 +138,7 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
     PromptManager.requestClosePrompt();
   }
 
+  @autobind
   private cancel() {
     PromptManager.requestClosePrompt();
   }
