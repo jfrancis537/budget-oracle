@@ -199,6 +199,15 @@ class CalculationsManager {
     return [incomeMap, result];
   }
 
+  private paysOnEvenWeeks(baseDate: Moment, currentDate: Moment): boolean
+  {
+    const baseEven = baseDate.week() % 2 === 0;
+    const baseYear = baseDate.year();
+    const currentYear = currentDate.year();
+    const currentYearSameAsBase = (Math.abs(currentYear - baseYear) % 2 === 0)
+    return currentYearSameAsBase ? baseEven : !baseEven;
+  }
+
   private async calculateTotalForIncomeSource(source: IncomeSource, start: Moment, end: Moment): Promise<[IncomeSource, number]> {
     let currentDate = start.clone();
     let value = 0;
@@ -221,11 +230,10 @@ class CalculationsManager {
           value = weeks * source.amount;
         }
         break;
-      case IncomeFrequency.BiWeeklyEven:
-      case IncomeFrequency.BiWeeklyOdd:
+      case IncomeFrequency.Biweekly:
         {
           //TODO implemnt simple bi-weekly with smaple start date. We can get the week even or oddness by checking the OG date and year and comparing that to the current date and year, we can then determine if the current week is a payweek for the other info.
-          const even = IncomeFrequency.BiWeeklyEven === source.frequencyType ? true : false;
+          const even = this.paysOnEvenWeeks(source.startDate,currentDate);
           const payDow = 5; //Friday;
           let startDow = currentDate.weekday();
           let endDow = end.weekday();

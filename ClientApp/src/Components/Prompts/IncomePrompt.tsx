@@ -1,8 +1,11 @@
+import moment, { Moment } from "moment";
 import React from "react"
 import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
 import { IncomeFrequency } from "../../Processing/Enums/IncomeFrequency";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
+import { autobind } from "../../Utilities/Decorators";
+import { DatePicker } from "../Inputs/DatePicker";
 import { LoadingButton } from "./LoadingButton";
 
 export interface IIncomePromptProps {
@@ -16,6 +19,7 @@ interface IIncomePromptState {
   incomeFrequency: IncomeFrequency,
   paysOnWeekends: boolean,
   dayOfMonth: number,
+  startDate: Moment,
   isSaving: boolean
 }
 
@@ -34,6 +38,7 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
           incomeFrequency: source.frequencyType,
           paysOnWeekends: source.paysOnWeekends,
           dayOfMonth: source.dayOfMonth,
+          startDate: source.startDate,
           isSaving: false
         }
       } else {
@@ -46,7 +51,8 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
         incomeFrequency: IncomeFrequency.Monthly,
         paysOnWeekends: false,
         dayOfMonth: 1,
-        isSaving: false
+        isSaving: false,
+        startDate: moment()
       };
     }
 
@@ -59,12 +65,14 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
     this.handleDayOfMonthChanged = this.handleDayOfMonthChanged.bind(this);
   }
 
+  @autobind
   private handleNameChanged(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
       name: event.target.value
     });
   }
 
+  @autobind
   private handleValueChanged(event: React.ChangeEvent<HTMLInputElement>) {
     const newValue = Number(event.target.value);
     if (!isNaN(newValue)) {
@@ -72,6 +80,13 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
         value: Number(event.target.value)
       });
     }
+  }
+
+  private handleStartDateChanged(date: Moment)
+  {
+    this.setState({
+      startDate: date
+    });
   }
 
   private handleFrequencyChanged(event: React.ChangeEvent<HTMLSelectElement>) {
@@ -107,7 +122,8 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
         this.state.value,
         this.state.incomeFrequency,
         this.state.paysOnWeekends,
-        this.state.dayOfMonth
+        this.state.dayOfMonth,
+        this.state.startDate
       );
     } else {
       await AppStateManager.addIncomeSource(
@@ -115,7 +131,9 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
         this.state.value,
         this.state.incomeFrequency,
         this.state.paysOnWeekends,
-        this.state.dayOfMonth);
+        this.state.dayOfMonth,
+        this.state.startDate
+        );
     }
     this.setState({
       isSaving: false
@@ -167,8 +185,7 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
               value={this.state.incomeFrequency}
             >
               <option value={IncomeFrequency.Weekly}>Weekly</option>
-              <option value={IncomeFrequency.BiWeeklyEven}>Bi-Weekly Even Weeks</option>
-              <option value={IncomeFrequency.BiWeeklyOdd}>Bi-Weekly Odd Weeks</option>
+              <option value={IncomeFrequency.Biweekly}>Bi-Weekly</option>
               <option value={IncomeFrequency.SemiMonthlyMiddleOM}>Semi-Monthly (1st pay @ Middle of month)</option>
               <option value={IncomeFrequency.SemiMonthlyStartOM}>Semi-Monthly (1st pay @ start of month)</option>
               <option value={IncomeFrequency.Monthly}>Monthly</option>
@@ -176,10 +193,18 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
               <option disabled value={IncomeFrequency.Anually}>Anually</option>
             </FormControl>
           </InputGroup>
+          <InputGroup className="mb-3">
+        <InputGroup.Prepend>
+          <InputGroup.Text>
+            <i className="bi bi-calendar-event" />
+          </InputGroup.Text>
+        </InputGroup.Prepend>
+        <DatePicker defaultDate={this.state.startDate} calendarIconBackgroundEnabled className="form-control" onChange={this.handleStartDateChanged} />
+      </InputGroup>
           <InputGroup
             className="mb-3"
             hidden={
-              this.state.incomeFrequency <= IncomeFrequency.BiWeeklyOdd ||
+              this.state.incomeFrequency <= IncomeFrequency.Biweekly ||
               this.state.incomeFrequency >= IncomeFrequency.Monthly
             }
           >

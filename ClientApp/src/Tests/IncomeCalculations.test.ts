@@ -10,7 +10,8 @@ describe('Income Calc Weekly', () => {
     amount: 10,
     frequencyType: IncomeFrequency.Weekly,
     paysOnWeekends: false,
-    dayOfMonth: -1
+    dayOfMonth: -1,
+    startDate: moment()
   };
 
   let sources = new Set<IncomeSource>();
@@ -70,12 +71,17 @@ describe('Income Calc Weekly', () => {
 });
 
 describe('Income Calc Bi-Weekly', () => {
+
+  const oddStart = moment('2021-01-01');
+  const evenStart = moment('2021-01-08');
+
   let options = {
     name: 'Sample Source',
     amount: 10,
-    frequencyType: IncomeFrequency.BiWeeklyOdd,
+    frequencyType: IncomeFrequency.Biweekly,
     paysOnWeekends: false,
-    dayOfMonth: -1
+    dayOfMonth: -1,
+    startDate: oddStart
   };
 
   let sources = new Set<IncomeSource>();
@@ -83,7 +89,7 @@ describe('Income Calc Bi-Weekly', () => {
   test('Super Close days', async () => {
     sources.clear();
     let opts = { ...options };
-    opts.frequencyType = IncomeFrequency.BiWeeklyEven;
+    opts.startDate = evenStart;
     sources.add(new IncomeSource(opts));
     let result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-09-02"), sources.values()
@@ -96,9 +102,10 @@ describe('Income Calc Bi-Weekly', () => {
     let opts = {
       name: "Google",
       amount: 4694,
-      frequencyType: IncomeFrequency.BiWeeklyEven,
+      frequencyType: IncomeFrequency.Biweekly,
       paysOnWeekends: false,
-      dayOfMonth: -1
+      dayOfMonth: -1,
+      startDate: moment("2022-05-27")
     }
     sources.add(new IncomeSource(opts));
     let result = await CalculationsManager.instance.calculateTotalIncome(
@@ -112,9 +119,10 @@ describe('Income Calc Bi-Weekly', () => {
     let opts = {
       name: "Google",
       amount: 4694,
-      frequencyType: IncomeFrequency.BiWeeklyEven,
+      frequencyType: IncomeFrequency.Biweekly,
       paysOnWeekends: false,
-      dayOfMonth: -1
+      dayOfMonth: -1,
+      startDate: moment("2022-05-27")
     }
     sources.add(new IncomeSource(opts));
     let result = await CalculationsManager.instance.calculateTotalIncome(
@@ -128,9 +136,10 @@ describe('Income Calc Bi-Weekly', () => {
     let opts = {
       name: "Google",
       amount: 4131,
-      frequencyType: IncomeFrequency.BiWeeklyEven,
+      frequencyType: IncomeFrequency.Biweekly,
       paysOnWeekends: false,
-      dayOfMonth: -1
+      dayOfMonth: -1,
+      startDate: moment("2022-05-27")
     }
     sources.add(new IncomeSource(opts));
     //TestLogger.setLogsEnabled(true);
@@ -146,9 +155,10 @@ describe('Income Calc Bi-Weekly', () => {
     let opts = {
       name: "Google",
       amount: 4131,
-      frequencyType: IncomeFrequency.BiWeeklyEven,
+      frequencyType: IncomeFrequency.Biweekly,
       paysOnWeekends: false,
-      dayOfMonth: -1
+      dayOfMonth: -1,
+      startDate: moment("2022-05-27")
     }
     sources.add(new IncomeSource(opts));
     let result = await CalculationsManager.instance.calculateTotalIncome(
@@ -162,9 +172,10 @@ describe('Income Calc Bi-Weekly', () => {
     let opts = {
       name: "Google",
       amount: 10,
-      frequencyType: IncomeFrequency.BiWeeklyEven,
+      frequencyType: IncomeFrequency.Biweekly,
       paysOnWeekends: false,
-      dayOfMonth: -1
+      dayOfMonth: -1,
+      startDate: moment("2022-05-27")
     }
     sources.add(new IncomeSource(opts)); 
     TestLogger.setLogsEnabled(true);
@@ -178,7 +189,7 @@ describe('Income Calc Bi-Weekly', () => {
   test('Even w/ start in pay week', async () => {
     sources.clear();
     let opts = { ...options };
-    opts.frequencyType = IncomeFrequency.BiWeeklyEven;
+    opts.startDate = evenStart;
     sources.add(new IncomeSource(opts));
     let result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-10-02"), sources.values()
@@ -198,7 +209,7 @@ describe('Income Calc Bi-Weekly', () => {
   test('Even w/ start not in pay week', async () => {
     sources.clear();
     let opts = { ...options };
-    opts.frequencyType = IncomeFrequency.BiWeeklyEven;
+    opts.startDate = evenStart;
     sources.add(new IncomeSource(opts));
     let result = await CalculationsManager.instance.calculateTotalIncome(
       moment("2021-09-08"), moment("2021-10-09"), sources.values()
@@ -231,7 +242,8 @@ describe('Income Calc Semi-Monthly', () => {
     amount: 10,
     frequencyType: IncomeFrequency.SemiMonthlyMiddleOM,
     paysOnWeekends: false,
-    dayOfMonth: -1
+    dayOfMonth: -1,
+    startDate: moment()
   };
 
   let sources = new Set<IncomeSource>();
@@ -416,7 +428,8 @@ describe('Income Calc Monthly', () => {
     amount: 10,
     frequencyType: IncomeFrequency.Monthly,
     paysOnWeekends: false,
-    dayOfMonth: 15
+    dayOfMonth: 15,
+    startDate: moment()
   };
 
   let sources = new Set<IncomeSource>();

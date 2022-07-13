@@ -285,8 +285,8 @@ class AppStateManager {
 
   //INCOME SOURCES
 
-  public async addIncomeSource(name: string, amount: number, frequency: IncomeFrequency, paysOnWeekends: boolean, dayOfMonth: number) {
-    await this.updateIncomeSource(undefined, name, amount, frequency, paysOnWeekends, dayOfMonth);
+  public async addIncomeSource(name: string, amount: number, frequency: IncomeFrequency, paysOnWeekends: boolean, dayOfMonth: number, startDate: Moment) {
+    await this.updateIncomeSource(undefined, name, amount, frequency, paysOnWeekends, dayOfMonth, startDate);
   }
 
   public async updateIncomeSource(id: string | undefined,
@@ -294,14 +294,16 @@ class AppStateManager {
     amount: number,
     frequency: IncomeFrequency,
     paysOnWeekends: boolean,
-    dayOfMonth: number) {
+    dayOfMonth: number,
+    startDate: Moment) {
     const incomeSource = new IncomeSource({
       id: id,
       name: name,
       frequencyType: frequency,
       paysOnWeekends: paysOnWeekends,
       amount: amount,
-      dayOfMonth: dayOfMonth
+      dayOfMonth: dayOfMonth,
+      startDate: startDate
     });
     this._incomeSources.set(incomeSource.id, incomeSource);
     this.onincomesourcesupdated.invoke(this.incomeSources);

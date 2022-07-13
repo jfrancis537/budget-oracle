@@ -1,7 +1,6 @@
 export enum IncomeFrequency {
   Weekly,
-  BiWeeklyEven,
-  BiWeeklyOdd,
+  Biweekly,
   SemiMonthlyMiddleOM,
   SemiMonthlyStartOM,
   Monthly,
