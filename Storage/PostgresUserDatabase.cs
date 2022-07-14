@@ -48,6 +48,7 @@ namespace BudgetOracle.Storage
       if (result != null)
       {
         dbContext.Remove(result);
+        await dbContext.SaveChangesAsync();
       }
       return result;
 
