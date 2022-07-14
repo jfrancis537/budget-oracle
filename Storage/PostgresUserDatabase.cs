@@ -47,7 +47,7 @@ namespace BudgetOracle.Storage
       var result = await dbContext.Accounts.Where(account => account.Id == accountId && account.UserId == userId).FirstOrDefaultAsync();
       if (result != null)
       {
-        dbContext.Accounts.Remove(result);
+        dbContext.Remove(result);
       }
       return result;
 
