@@ -18,9 +18,8 @@ namespace BudgetOracle.Cryptography
     public static string GenerateSalt()
     {
       // generate a 128-bit salt using a cryptographically strong random sequence of nonzero values
-      byte[] salt = new byte[128 / 8];
-      using var rngCsp = new RNGCryptoServiceProvider();
-      rngCsp.GetNonZeroBytes(salt);
+      byte[] salt = RandomNumberGenerator.GetBytes(128/2);
+      //rngCsp.GetNonZeroBytes(salt);
       return Convert.ToBase64String(salt);
     }
 
