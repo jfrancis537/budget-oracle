@@ -137,5 +137,15 @@ namespace BudgetOracle.Storage
       }
       return null;
     }
+
+    public async Task<LinkedAccountDetails> DeleteLinkedAccount(string userId, string accountId)
+    {
+      LinkedAccountDetails result = await GetLinkedAccount(userId,accountId);
+      if(accounts.ContainsKey(userId))
+      {
+        accounts[userId].Remove(result);
+      }
+      return result;
+    }
   }
 }

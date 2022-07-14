@@ -74,6 +74,7 @@ class TellerManager {
     this.balances.delete(id);
     this.accounts.delete(id);
     this.onlinkedaccountsupdated.invoke([...this.accounts.values()]);
+    TellerAPI.deleteAccount(id);
   }
 
   @autobind

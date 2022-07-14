@@ -42,6 +42,17 @@ namespace BudgetOracle.Storage
       return null;
     }
 
+    public async Task<LinkedAccountDetails> DeleteLinkedAccount(string userId, string accountId)
+    {
+      var result = await dbContext.Accounts.Where(account => account.Id == accountId && account.UserId == userId).FirstOrDefaultAsync();
+      if (result != null)
+      {
+        dbContext.Accounts.Remove(result);
+      }
+      return result;
+
+    }
+
     public async Task SetTellerUserId(string username, string id)
     {
       var user = await GetUser(username);
@@ -103,5 +114,6 @@ namespace BudgetOracle.Storage
       }
       await dbContext.SaveChangesAsync();
     }
+
   }
 }
