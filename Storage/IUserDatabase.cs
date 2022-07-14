@@ -15,6 +15,7 @@ namespace BudgetOracle.Storage
     Task SetTellerUserId(string username, string id);
     Task<LinkedAccountDetails> AddLinkedAccount(string username, LinkedAccountDetails linkedAccount);
     Task<LinkedAccountDetails> GetLinkedAccount(string userId, string accountId);
+    Task<LinkedAccountDetails> DeleteLinkedAccount(string userId, string accountId);
     Task<List<LinkedAccountDetails>> GetAllLinkedAccountDetails(string username);
   }
 }

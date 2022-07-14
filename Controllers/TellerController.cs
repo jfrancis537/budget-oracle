@@ -125,10 +125,20 @@ namespace BudgetOracle.Controllers
     [HttpDelete]
     [Route("delete/account/{id}")]
     [Authorize]
-    public async Task<IActionResult> DeleteAccount()
+    public async Task<IActionResult> DeleteAccount(string id)
     {
-      await Task.CompletedTask;
-      return BadRequest();
+      try
+      {
+        var usernameClaim = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name);
+        var username = usernameClaim.Value;
+        var user = await database.GetUser(username);
+        var deleted = await database.DeleteLinkedAccount(user.TellerUserId, id);
+        return Accepted();
+      }
+      catch (Exception)
+      {
+        return StatusCode(500);
+      }
     }
 
     [HttpPost]
