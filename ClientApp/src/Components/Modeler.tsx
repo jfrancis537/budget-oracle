@@ -11,10 +11,16 @@ import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { FormControl, InputGroup } from "react-bootstrap";
 import { Line } from "react-chartjs-2";
-import { NumberInput } from "./Inputs/NumberInput";
 import styles from "../styles/Modeler.module.css";
 import { CalculationResult } from "../Processing/Managers/CalculationsManager";
 import { CalculationTools } from "../Utilities/CalculationTools";
+
+Chart.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement
+);
 
 enum ModelerResolution {
   Days,
@@ -50,13 +56,6 @@ interface IModelerProps {
   visible: boolean;
 }
 
-Chart.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement
-);
-
 export const Modeler: React.FC<IModelerProps> = (props) => {
 
 
@@ -72,7 +71,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
     fetchData().then(data => {
       setCalculations(data);
     });
-  }, [resolution, count])
+  }, [resolution, count, props.visible])
 
   async function fetchData() {
     const today = moment();
@@ -161,8 +160,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
         {
           const curDay = today.clone().startOf('year');
           for (let i = 0; i < count * 2; i++) {
-            if(i % 2 === 0)
-            {
+            if (i % 2 === 0) {
               result.push(curDay.format('YYYY'));
             } else {
               result.push("");
@@ -282,7 +280,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
 
   function render() {
     return (
-      <div style={{display: props.visible ? undefined : "none"}}>
+      <div style={{ display: props.visible ? undefined : "none" }}>
         {renderControls()}
         {calculations.length !== 0 && renderLineChart()}
       </div>
