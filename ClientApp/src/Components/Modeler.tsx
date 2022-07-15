@@ -24,7 +24,7 @@ enum ModelerResolution {
 }
 
 namespace ModelerResolution {
-  export function getDefault(val: ModelerResolution) {
+  export function getDefaultCount(val: ModelerResolution): number {
     switch (val) {
       case ModelerResolution.Days:
         return 7;
@@ -34,6 +34,8 @@ namespace ModelerResolution {
         return 6;
       case ModelerResolution.Days:
         return 3;
+      default:
+        return 5;
     }
   }
 }
@@ -45,7 +47,7 @@ enum ModelerMode {
 }
 
 interface IModelerProps {
-
+  visible: boolean;
 }
 
 Chart.register(
@@ -55,7 +57,7 @@ Chart.register(
   LineElement
 );
 
-export const Modeler: React.FC<IModelerProps> = () => {
+export const Modeler: React.FC<IModelerProps> = (props) => {
 
 
   const [resolution, setResolution] = useState(ModelerResolution.Weeks);
@@ -204,8 +206,9 @@ export const Modeler: React.FC<IModelerProps> = () => {
   }
 
   function handleResolutionChanged(event: React.ChangeEvent<HTMLInputElement>) {
-    const value = Number(event.currentTarget.value);
-    setResolution(value as ModelerResolution);
+    const value = Number(event.currentTarget.value) as ModelerResolution;
+    setResolution(value);
+    setCount(ModelerResolution.getDefaultCount(value));
   }
 
   function handleCountChanged(event: React.ChangeEvent<HTMLInputElement>) {
@@ -279,7 +282,7 @@ export const Modeler: React.FC<IModelerProps> = () => {
 
   function render() {
     return (
-      <div>
+      <div style={{display: props.visible ? undefined : "none"}}>
         {renderControls()}
         {calculations.length !== 0 && renderLineChart()}
       </div>

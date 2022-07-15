@@ -340,7 +340,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
                   this.state.tab === ContentTab.Modeler ? '' : contentStyles["hidden"]
                 ].join(" ")
                 }>
-                {<Modeler />}
+                {<Modeler visible={this.state.tab === ContentTab.Modeler}/>}
               </Col>
             </Row>
           </Container>
