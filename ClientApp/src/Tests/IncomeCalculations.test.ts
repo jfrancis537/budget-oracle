@@ -2,6 +2,7 @@ import moment from 'moment';
 import { IncomeFrequency } from '../Processing/Enums/IncomeFrequency';
 import { CalculationsManager } from '../Processing/Managers/CalculationsManager';
 import { IncomeSource } from '../Processing/Models/IncomeSource';
+import { CalculationTools } from '../Utilities/CalculationTools';
 import { TestLogger } from '../Utilities/TestLogger';
 
 describe('Income Calc Weekly', () => {
@@ -18,7 +19,7 @@ describe('Income Calc Weekly', () => {
   test('Start Just Before, End Just After', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-09-25"), sources.values()
     );
     expect(result[1]).toEqual(40);
@@ -27,7 +28,7 @@ describe('Income Calc Weekly', () => {
   test('Start much Before, End Just After', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-08-28"), moment("2021-09-25"), sources.values()
     );
     expect(result[1]).toEqual(40);
@@ -37,7 +38,7 @@ describe('Income Calc Weekly', () => {
   test('Start Just After, End Just After', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-04"), moment("2021-09-25"), sources.values()
     );
     expect(result[1]).toEqual(30);
@@ -46,7 +47,7 @@ describe('Income Calc Weekly', () => {
   test('Start Just After, End Just Before', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-08-28"), moment("2021-09-23"), sources.values()
     );
     expect(result[1]).toEqual(30);
@@ -54,7 +55,7 @@ describe('Income Calc Weekly', () => {
   test('Start Just After, End Much Before', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-08-28"), moment("2021-09-20"), sources.values()
     );
     expect(result[1]).toEqual(30);
@@ -63,7 +64,7 @@ describe('Income Calc Weekly', () => {
   test('Paid Today', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-10-29"), moment("2021-11-02"), sources.values()
     );
     expect(result[1]).toEqual(0);
@@ -91,7 +92,7 @@ describe('Income Calc Bi-Weekly', () => {
     let opts = { ...options };
     opts.startDate = evenStart;
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-09-02"), sources.values()
     );
     expect(result[1]).toEqual(0);
@@ -108,7 +109,7 @@ describe('Income Calc Bi-Weekly', () => {
       startDate: moment("2022-05-27")
     }
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2022-06-15"), moment("2022-06-25"), sources.values()
     );
     expect(result[1]).toEqual(4694);
@@ -125,7 +126,7 @@ describe('Income Calc Bi-Weekly', () => {
       startDate: moment("2022-05-27")
     }
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2022-06-15"), moment("2022-08-31"), sources.values()
     );
     expect(result[1]).toEqual(23470);
@@ -143,7 +144,7 @@ describe('Income Calc Bi-Weekly', () => {
     }
     sources.add(new IncomeSource(opts));
     //TestLogger.setLogsEnabled(true);
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2022-07-09"), moment("2022-07-16"), sources.values()
     );
     //TestLogger.setLogsEnabled(false);
@@ -161,7 +162,7 @@ describe('Income Calc Bi-Weekly', () => {
       startDate: moment("2022-05-27")
     }
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2022-07-07"), moment("2022-07-30"), sources.values()
     );
     expect(result[1]).toEqual(8262);
@@ -178,7 +179,7 @@ describe('Income Calc Bi-Weekly', () => {
       startDate: moment("2022-05-27")
     }
     sources.add(new IncomeSource(opts)); 
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2022-07-10"), moment("2023-07-10"), sources.values()
     );
     expect(result[1]).toEqual(260);
@@ -196,7 +197,7 @@ describe('Income Calc Bi-Weekly', () => {
     }
     sources.add(new IncomeSource(opts)); 
     TestLogger.setLogsEnabled(true);
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2022-12-30"), moment("2023-01-07"), sources.values()
     );
     TestLogger.setLogsEnabled(false);
@@ -208,7 +209,7 @@ describe('Income Calc Bi-Weekly', () => {
     let opts = { ...options };
     opts.startDate = evenStart;
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-10-02"), sources.values()
     );
     expect(result[1]).toEqual(30);
@@ -217,7 +218,7 @@ describe('Income Calc Bi-Weekly', () => {
   test('odd w/ Start in pay week', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-08"), moment("2021-10-09"), sources.values()
     );
     expect(result[1]).toEqual(30);
@@ -228,7 +229,7 @@ describe('Income Calc Bi-Weekly', () => {
     let opts = { ...options };
     opts.startDate = evenStart;
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-08"), moment("2021-10-09"), sources.values()
     );
     expect(result[1]).toEqual(20);
@@ -237,7 +238,7 @@ describe('Income Calc Bi-Weekly', () => {
   test('odd w/ Start not in pay week', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-10-02"), sources.values()
     );
     expect(result[1]).toEqual(20);
@@ -246,7 +247,7 @@ describe('Income Calc Bi-Weekly', () => {
   test('Paid Today', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-10-29"), moment("2021-11-02"), sources.values()
     );
     expect(result[1]).toEqual(0);
@@ -268,7 +269,7 @@ describe('Income Calc Semi-Monthly', () => {
   test('Paid Today, end same day, Middle of month', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-10-29"), moment("2021-10-29"), sources.values()
     );
     expect(result[1]).toEqual(0);
@@ -277,7 +278,7 @@ describe('Income Calc Semi-Monthly', () => {
   test('Paid Today, end next day, Middle of month', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-10-29"), moment("2021-10-29"), sources.values()
     );
     expect(result[1]).toEqual(0);
@@ -287,7 +288,7 @@ describe('Income Calc Semi-Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-12-31"), sources.values()
     );
     expect(result[1]).toEqual(80);
@@ -297,7 +298,7 @@ describe('Income Calc Semi-Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-16"), moment("2021-12-31"), sources.values()
     );
     expect(result[1]).toEqual(70);
@@ -307,7 +308,7 @@ describe('Income Calc Semi-Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-01"), moment("2021-12-30"), sources.values()
     );
     expect(result[1]).toEqual(70);
@@ -317,7 +318,7 @@ describe('Income Calc Semi-Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-16"), moment("2021-12-30"), sources.values()
     );
     expect(result[1]).toEqual(60);
@@ -328,7 +329,7 @@ describe('Income Calc Semi-Monthly', () => {
     let opts = { ...options };
     opts.frequencyType = IncomeFrequency.SemiMonthlyStartOM
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-08-31"), moment("2021-12-31"), sources.values()
     );
     expect(result[1]).toEqual(80);
@@ -339,7 +340,7 @@ describe('Income Calc Semi-Monthly', () => {
     let opts = { ...options };
     opts.frequencyType = IncomeFrequency.SemiMonthlyStartOM
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-02"), moment("2021-12-31"), sources.values()
     );
     expect(result[1]).toEqual(70);
@@ -350,7 +351,7 @@ describe('Income Calc Semi-Monthly', () => {
     let opts = { ...options };
     opts.frequencyType = IncomeFrequency.SemiMonthlyStartOM
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-08-31"), moment("2021-12-13"), sources.values()
     );
     expect(result[1]).toEqual(70);
@@ -361,7 +362,7 @@ describe('Income Calc Semi-Monthly', () => {
     let opts = { ...options };
     opts.frequencyType = IncomeFrequency.SemiMonthlyStartOM
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-02"), moment("2021-12-13"), sources.values()
     );
     expect(result[1]).toEqual(60);
@@ -371,7 +372,7 @@ describe('Income Calc Semi-Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2022-01-15"), moment("2022-03-31"), sources.values()
     );
     expect(result[1]).toEqual(50);
@@ -382,7 +383,7 @@ describe('Income Calc Semi-Monthly', () => {
     let opts = { ...options };
     opts.paysOnWeekends = true;
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2022-01-01"), moment("2022-03-31"), sources.values()
     );
     expect(result[1]).toEqual(60);
@@ -392,7 +393,7 @@ describe('Income Calc Semi-Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-04-13"), moment("2021-08-13"), sources.values()
     );
     expect(result[1]).toEqual(90);
@@ -403,7 +404,7 @@ describe('Income Calc Semi-Monthly', () => {
     let opts = { ...options };
     opts.paysOnWeekends = true;
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-04-13"), moment("2021-08-13"), sources.values()
     );
     expect(result[1]).toEqual(80);
@@ -413,7 +414,7 @@ describe('Income Calc Semi-Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-03"), moment("2021-09-04"), sources.values()
     );
     expect(result[1]).toEqual(0);
@@ -423,7 +424,7 @@ describe('Income Calc Semi-Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-09-03"), moment("2021-09-17"), sources.values()
     );
     expect(result[1]).toEqual(10);
@@ -432,7 +433,7 @@ describe('Income Calc Semi-Monthly', () => {
   test('Paid Today', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-10-29"), moment("2021-11-02"), sources.values()
     );
     expect(result[1]).toEqual(0);
@@ -454,7 +455,7 @@ describe('Income Calc Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-01-16"), moment("2021-08-16"), sources.values()
     );
     expect(result[1]).toEqual(70);
@@ -464,7 +465,7 @@ describe('Income Calc Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-01-14"), moment("2021-08-16"), sources.values()
     );
     expect(result[1]).toEqual(80);
@@ -474,7 +475,7 @@ describe('Income Calc Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-01-15"), moment("2021-08-16"), sources.values()
     );
     expect(result[1]).toEqual(70);
@@ -484,7 +485,7 @@ describe('Income Calc Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-01-14"), moment("2021-08-14"), sources.values()
     );
     expect(result[1]).toEqual(70);
@@ -494,7 +495,7 @@ describe('Income Calc Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-01-16"), moment("2021-08-14"), sources.values()
     );
     expect(result[1]).toEqual(60);
@@ -504,7 +505,7 @@ describe('Income Calc Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-01-15"), moment("2021-08-14"), sources.values()
     );
     expect(result[1]).toEqual(60);
@@ -515,7 +516,7 @@ describe('Income Calc Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-01-14"), moment("2021-08-15"), sources.values()
     );
     expect(result[1]).toEqual(80);
@@ -525,7 +526,7 @@ describe('Income Calc Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-01-15"), moment("2021-08-15"), sources.values()
     );
     expect(result[1]).toEqual(70);
@@ -535,7 +536,7 @@ describe('Income Calc Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-01-16"), moment("2021-08-15"), sources.values()
     );
     expect(result[1]).toEqual(70);
@@ -546,7 +547,7 @@ describe('Income Calc Monthly', () => {
     let opts = { ...options };
     opts.amount = 400;
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-10-20"), moment("2021-10-21"), sources.values()
     );
     expect(result[1]).toEqual(0);
@@ -556,7 +557,7 @@ describe('Income Calc Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-10-14"), moment("2021-11-14"), sources.values()
     );
     expect(result[1]).toEqual(10);
@@ -566,7 +567,7 @@ describe('Income Calc Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-10-16"), moment("2021-11-14"), sources.values()
     );
     expect(result[1]).toEqual(0);
@@ -576,7 +577,7 @@ describe('Income Calc Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-10-16"), moment("2021-11-16"), sources.values()
     );
     expect(result[1]).toEqual(10);
@@ -586,7 +587,7 @@ describe('Income Calc Monthly', () => {
     sources.clear();
     let opts = { ...options };
     sources.add(new IncomeSource(opts));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-10-14"), moment("2021-11-16"), sources.values()
     );
     expect(result[1]).toEqual(20);
@@ -595,7 +596,7 @@ describe('Income Calc Monthly', () => {
   test('Paid Today', async () => {
     sources.clear();
     sources.add(new IncomeSource(options));
-    let result = await CalculationsManager.instance.calculateTotalIncome(
+    let result = await CalculationTools.calculateTotalIncome(
       moment("2021-10-15"), moment("2021-11-02"), sources.values()
     );
     expect(result[1]).toEqual(0);

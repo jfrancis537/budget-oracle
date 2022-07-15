@@ -8,6 +8,7 @@ import { MobileHelper } from "../Utilities/MobileUtils";
 import { autobind } from "../Utilities/Decorators";
 import { DetailedResults } from "./DetailedResults";
 import { AnimatedHeightDiv } from "./Animation/AnimatedHeightDiv";
+import { CalculationTools } from "../Utilities/CalculationTools";
 
 interface ResultsBarState {
   calculations?: CalculationResult
@@ -50,17 +51,7 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
   private renderCalculations(): JSX.Element | JSX.Element[] {
     if (this.state.calculations) {
       const calcs = this.state.calculations;
-      const totals =
-        calcs.accountTotal +
-        calcs.linkedAccountTotal.accountsValue -
-        calcs.linkedAccountTotal.debt +
-        calcs.incomeResults[1] -
-        calcs.debtTotal -
-        calcs.billResults.allBills[1] +
-        calcs.scheduledVestsResult[1] +
-        calcs.scheduledPaymentsResult[1] +
-        (this.state.displayUnrealized ? calcs.investmentResults.totalValue : (calcs.investmentResults.totalCostBasis - calcs.investmentResults.totalUnrealizedLosses)) -
-        calcs.investmentResults.totalInterestOwed;
+      const totals = CalculationTools.calculateTotal(calcs, this.state.displayUnrealized);
 
       const hasGain = calcs.investmentResults.totalValue > calcs.investmentResults.totalCostBasis;
       const color = this.state.displayUnrealized ? (hasGain ? "lime" : "red") : undefined;

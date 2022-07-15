@@ -17,6 +17,10 @@
   margin-right: -15px;
 }
 
+.ungrouped.hidden {
+  display: none;
+}
+
 .content-row {
   flex: 1;
   overflow: hidden;

@@ -23,11 +23,13 @@ import { TellerManager } from "../Processing/Managers/TellerManager";
 import { LinkedAccountDetails } from "../APIs/TellerAPI";
 import { LinkedAccountItem } from "./Items/LinkedAccountItem";
 import { LinkedAccountGroup } from "./Items/LinkedAccountGroup";
+import { Modeler } from "./Modeler";
 
 export enum ContentTab {
   Costs = "costs",
   Reserves = "reserves",
-  Schedules = "schedules"
+  Schedules = "schedules",
+  Modeler = "modeler"
 }
 
 interface ContentAreaState {
@@ -329,6 +331,16 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
                 ].join(" ")
                 }>
                 {this.renderSchedules()}
+              </Col>
+              <Col xs sm={2} md={3}
+                className={[
+                  contentStyles['content-col'],
+                  contentStyles['ungrouped'],
+                  mobileStyles["mobile-only"],
+                  this.state.tab === ContentTab.Modeler ? '' : contentStyles["hidden"]
+                ].join(" ")
+                }>
+                {<Modeler />}
               </Col>
             </Row>
           </Container>

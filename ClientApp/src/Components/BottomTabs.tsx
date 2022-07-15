@@ -50,6 +50,16 @@ export class BottomTabs extends React.Component<IBottomTabProps> {
               </span>
             </Nav.Link>
           </Nav.Item>
+          <Nav.Item>
+            <Nav.Link
+              onClick={() => this.handleChange(ContentTab.Modeler)}
+              eventKey={ContentTab.Modeler}
+            >
+              <span style={{ color: 'rgb(74 196 255)' }}>
+                <i className="bi bi-bar-chart-line" />
+              </span>
+            </Nav.Link>
+          </Nav.Item>
         </Nav>
       </Navbar>
     )
