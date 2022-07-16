@@ -34,11 +34,11 @@ namespace ModelerResolution {
     switch (val) {
       case ModelerResolution.Days:
         return 7;
-      case ModelerResolution.Days:
+      case ModelerResolution.Weeks:
         return 5;
-      case ModelerResolution.Days:
+      case ModelerResolution.Months:
         return 6;
-      case ModelerResolution.Days:
+      case ModelerResolution.Years:
         return 3;
       default:
         return 5;
@@ -112,7 +112,8 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
         break;
       case ModelerResolution.Years:
         {
-          const curDay = today.clone().startOf('year');
+          const pastHalfYear = today.month() >= 5; //months are zero indexed lol
+          const curDay = pastHalfYear ? today.clone().month(5).startOf('month') : today.clone().startOf('year');
           for (let i = 0; i < count * 2; i++) {
             curDay.add(6, 'months');
             result.push(
@@ -158,8 +159,11 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
         break;
       case ModelerResolution.Years:
         {
-          const curDay = today.clone().startOf('year');
-          for (let i = 0; i < count * 2; i++) {
+          const pastHalfYear = today.month() >= 5; //months are zero indexed lol
+          const intervals = count * 2;
+          const startPos = pastHalfYear ? 1 : 0;
+          const curDay = pastHalfYear ? today.clone().month(5).startOf('month') : today.clone().startOf('year');
+          for (let i = startPos; i < intervals + startPos; i++) {
             if (i % 2 === 0) {
               result.push(curDay.format('YYYY'));
             } else {
@@ -229,7 +233,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
         break;
       case ModelerResolution.Months:
         start = 4;
-        end = 12;
+        end = 18;
         break;
       case ModelerResolution.Years:
         start = 3;
