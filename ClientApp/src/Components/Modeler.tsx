@@ -193,6 +193,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
   }
 
   function renderLineChart() {
+    const disableAutoSkip = window.innerWidth <= 416 && count % 2 === 0 && count > 13;
     return (
       <Line
         data={{
@@ -200,7 +201,46 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
           datasets: [generateLineData()]
         }}
         options={{
-          responsive: true
+          responsive: true,
+          aspectRatio: 1,
+          layout: {
+          },
+          scales: {
+            yAxis: {
+              beginAtZero: false,
+              grid: {
+                borderColor: "white",
+                color: "white"
+              },
+              ticks: {
+                font: {
+                  family: "consolas"
+                },
+                color: "white",
+                callback: (val,i,vals) => {
+                  if(val >= 10000)
+                  {
+                    return (Number(val) / 1000).toFixed(0) + "k"
+                  } else {
+                    return val;
+                  }
+                }
+              }
+            },
+            xAxis: {
+              grid: {
+                borderColor: "white",
+                color: "white"
+              },
+              ticks: {
+                color: "white",
+                font: {
+                  family: "consolas",
+                },
+                autoSkip: false
+              }
+            }
+          }
         }}
         className={styles["line-chart"]}
       />
@@ -233,7 +273,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
         break;
       case ModelerResolution.Months:
         start = 4;
-        end = 18;
+        end = 19;
         break;
       case ModelerResolution.Years:
         start = 3;
@@ -284,9 +324,11 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
 
   function render() {
     return (
-      <div style={{ display: props.visible ? undefined : "none" }}>
+      <div style={{ display: props.visible ? undefined : "none"}} className={styles.container}>
+        <div className={styles["chart-area"]}>
+          {calculations.length !== 0 && renderLineChart()}
+        </div>
         {renderControls()}
-        {calculations.length !== 0 && renderLineChart()}
       </div>
     );
   }
