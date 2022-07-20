@@ -63,7 +63,8 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
   const [count, setCount] = useState(5);
   const [calculations, setCalculations] = useState<CalculationResult[]>([]);
   //TODO: Display Unrealized
-  //TODO: Add estimated stock growth
+  //TODO: Add estimated stock growth - do this via a new anticipated growth field on investmetns. 
+  //Allow for zero value investments.
   //TODO: add different chart types
   const [mode, setMode] = useState(ModelerMode.Line);
 
