@@ -58,7 +58,7 @@ export class ResultsBar extends React.Component<{}, ResultsBarState> {
       return (
         <>
           <div className={barStyles['item']}>Expenses: ${(calcs.billResults.allBills[1] + calcs.investmentResults.totalInterestOwed).toFixed(2)}</div>
-          <div className={barStyles['item']}>Income: ${calcs.incomeResults[1]}</div>
+          <div className={barStyles['item']}>Income: ${calcs.incomeResults[1] + calcs.scheduledVestsResult[1] + calcs.scheduledPaymentsResult[1]}</div>
           <div onClick={this.toggleDisplayUnrealized} className={`${barStyles['item']}`} style={{ color: color, cursor: "pointer" }} >Total: ${totals.toFixed(2)}</div>
         </>
       )
