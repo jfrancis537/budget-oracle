@@ -70,7 +70,12 @@ export class Group extends React.Component<IGroupProps> {
       }
       return `${this.props.name} : ${sum}`
     } else {
-      return this.props.name;
+      let sum = 0;
+      for (let id of this.props.items) {
+        let item = AppStateManager.getBill(id);
+        sum += item?.amount ?? 0;
+      }
+      return `${this.props.name} : ${sum}`
     }
   }
 
