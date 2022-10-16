@@ -11,6 +11,7 @@ import groupStyles from '../../styles/Group.module.css';
 import { InvestmentItem } from "./InvestmentItem";
 import { InvestmentGroupManager } from "../../Processing/Managers/InvestmentGroupManager";
 import { GroupType } from "../../Processing/Enums/GroupType";
+import { InvestmentManager } from "../../Processing/Managers/InvestmentManger";
 
 interface IGroupProps {
   name: string;
@@ -113,14 +114,31 @@ export class CostGroup extends Group<ICostGroupProps> {
 }
 
 export class InvestmentGroup extends Group<IGroupProps> {
-  
+
+  constructor(props: IGroupProps) {
+    super(props);
+    InvestmentManager.oninvestmentvaluecalculated.addListener(this.handleInvestmentCalculated);
+    AppStateManager.oninvestmentsupdated.addListener(this.handleInvestmentsUpdated);
+  }
+
+  @autobind
+  private handleInvestmentsUpdated() {
+    this.forceUpdate();
+  }
+
+  @autobind
+  private handleInvestmentCalculated(data: { id: string, value: number }) {
+    if (this.props.items.has(data.id)) {
+      this.handleInvestmentsUpdated();
+    }
+  }
+
   @autobind
   protected renderItem(id: string): JSX.Element | null {
     let result: JSX.Element | null;
     const item = AppStateManager.getInvestment(id);
-    if(item)
-    {
-      result =  <InvestmentItem item={item} groupName={this.props.name}/>
+    if (item) {
+      result = <InvestmentItem item={item} groupName={this.props.name} key={`${item.symbol}`}/>
     } else {
       result = null;
     }
@@ -142,9 +160,19 @@ export class InvestmentGroup extends Group<IGroupProps> {
       InvestmentGroupManager.deleteGroup(this.props.name);
     }
   }
+
   protected get title(): string {
-    return this.props.name;
-    //TODO add sum
+    let costBasisTotal = 0;
+    let totalValue = 0;
+    for (const id of this.props.items) {
+      const investment = AppStateManager.getInvestment(id);
+      if(investment)
+      {
+        costBasisTotal += investment.costBasisPerShare * investment.shares;
+        totalValue += InvestmentManager.getExistingCalculation(id) ?? 0;
+      }
+    }
+    return `${this.props.name} : ${totalValue}`;
   }
 
 }

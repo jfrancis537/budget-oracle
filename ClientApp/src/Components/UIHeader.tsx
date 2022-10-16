@@ -14,6 +14,7 @@ import { PushNotificationWorker } from "../Workers/ServiceWorkerLoader";
 import { TellerManager } from "../Processing/Managers/TellerManager";
 import { LinkedAccountDetails } from "../APIs/TellerAPI";
 import { LinkedAccountPrompt } from "./Prompts/LinkedAccountPrompt";
+import { InvestmentGroupManager } from "../Processing/Managers/InvestmentGroupManager";
 
 interface IUIHeaderState {
   loginPromptVisible: boolean;
@@ -97,13 +98,15 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
   private async export() {
     let promises = [
       AppStateManager.export(),
-      GroupManager.export()
+      GroupManager.export(),
+      InvestmentGroupManager.export()
     ];
-    let [stateData, groupData] = await Promise.all(promises);
-    if (groupData && stateData) {
+    let [stateData, groupData, investmentGroupData] = await Promise.all(promises);
+    if (groupData && stateData && investmentGroupData) {
       download(`budget_export_${(new Date()).toLocaleString().replace(", ", "-")}.json`, JSON.stringify({
         stateData: stateData,
-        groupData: groupData
+        groupData: groupData,
+        investmentGroupData: investmentGroupData
       }));
     }
   }
@@ -120,9 +123,10 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
     try {
       let file = await FileLoader.openWithDialog();
       let text = await FileLoader.readAsText(file);
-      let obj: { stateData: string, groupData: string } = JSON.parse(text);
+      let obj: { stateData: string, groupData: string, investmentGroupData: string } = JSON.parse(text);
       await AppStateManager.import(obj.stateData);
       await GroupManager.import(obj.groupData);
+      await InvestmentGroupManager.import(obj.investmentGroupData);
     } catch (errCode) {
       if ((errCode as number) < 0) {
         alert('Something went wrong');
