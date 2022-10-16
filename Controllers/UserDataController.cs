@@ -120,7 +120,7 @@ namespace BudgetOracle_.Controllers
       try
       {
         var groups = data["groups"].ToString();
-        await userDatabase.UpdateGroups(username, groups);
+        await userDatabase.UpdateInvestmentGroups(username, groups);
         return Ok();
       }
       catch
