@@ -54,6 +54,24 @@ namespace BudgetOracle_.Controllers
       }
     }
 
+    [HttpGet]
+    [Route("getInvestmentGroups")]
+    [Authorize]
+    public async Task<IActionResult> GetInvestmentGroups()
+    {
+      var usernameClaim = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name);
+      var username = usernameClaim.Value;
+      var user = await userDatabase.GetUser(username);
+      if (user != null)
+      {
+        return Ok(user.InvestmentGroupData);
+      }
+      else
+      {
+        return BadRequest();
+      }
+    }
+
     [HttpPut]
     [Route("updateState")]
     [Authorize]
@@ -91,5 +109,26 @@ namespace BudgetOracle_.Controllers
         return BadRequest();
       }
     }
+
+    [HttpPut]
+    [Route("updateInvestmentGroups")]
+    [Authorize]
+    public async Task<IActionResult> UpdateInvestmentGroups(JObject data)
+    {
+      var usernameClaim = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name);
+      var username = usernameClaim.Value;
+      try
+      {
+        var groups = data["groups"].ToString();
+        await userDatabase.UpdateGroups(username, groups);
+        return Ok();
+      }
+      catch
+      {
+        return BadRequest();
+      }
+    }
+
+
   }
 }

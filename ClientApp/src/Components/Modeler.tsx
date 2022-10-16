@@ -46,11 +46,11 @@ namespace ModelerResolution {
   }
 }
 
-enum ModelerMode {
-  Line,
-  Pie,
-  Bar
-}
+// enum ModelerMode {
+//   Line,
+//   Pie,
+//   Bar
+// }
 
 interface IModelerProps {
   visible: boolean;
@@ -66,7 +66,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
   //TODO: Add estimated stock growth - do this via a new anticipated growth field on investmetns. 
   //Allow for zero value investments.
   //TODO: add different chart types
-  const [mode, setMode] = useState(ModelerMode.Line);
+  // const [mode, setMode] = useState(ModelerMode.Line);
 
   useEffect(() => {
     fetchData().then(data => {
@@ -194,7 +194,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
   }
 
   function renderLineChart() {
-    const disableAutoSkip = window.innerWidth <= 416 && count % 2 === 0 && count > 13;
+    //const disableAutoSkip = window.innerWidth <= 416 && count % 2 === 0 && count > 13;
     return (
       <Line
         data={{

@@ -1,6 +1,8 @@
 import React from "react"
 import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
-import { GroupManager, GroupType } from "../../Processing/Managers/GroupManager";
+import { GroupType } from "../../Processing/Enums/GroupType";
+import { GroupManager } from "../../Processing/Managers/GroupManager";
+import { InvestmentGroupManager } from "../../Processing/Managers/InvestmentGroupManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { LoadingButton } from "./LoadingButton";
 
@@ -49,11 +51,21 @@ export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptS
     this.setState({
       isSaving: true
     });
-    if (!this.props.editing) {
-      await GroupManager.addGroup(this.state.name, this.state.groupType);
+    if(this.state.groupType !== GroupType.Investment)
+    {
+      if (!this.props.editing) {
+        await GroupManager.addGroup(this.state.name, this.state.groupType);
+      } else {
+        let oldName = this.props.groupToEdit![1];
+        await GroupManager.updateGroup(this.state.groupType, oldName, this.state.name);
+      }
     } else {
-      let oldName = this.props.groupToEdit![1];
-      await GroupManager.updateGroup(this.state.groupType, oldName, this.state.name);
+      if (!this.props.editing) {
+        await InvestmentGroupManager.addGroup(this.state.name);
+      } else {
+        let oldName = this.props.groupToEdit![1];
+        await InvestmentGroupManager.updateGroup(oldName, this.state.name);
+      }
     }
     this.setState({
       isSaving: false
@@ -78,13 +90,25 @@ export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptS
   }
 
   private checkNameValid() {
-    if (this.props.editing) {
-      let exists = GroupManager.hasGroup(this.state.groupType, this.state.name);
-      let isStartingName = this.state.name === this.props.groupToEdit![1];
-      return isStartingName || !exists;
+    if(this.state.groupType !== GroupType.Investment)
+    {
+      if (this.props.editing) {
+        let exists = GroupManager.hasGroup(this.state.groupType, this.state.name);
+        let isStartingName = this.state.name === this.props.groupToEdit![1];
+        return isStartingName || !exists;
+      } else {
+        return !GroupManager.hasGroup(this.state.groupType, this.state.name);
+      }
     } else {
-      return !GroupManager.hasGroup(this.state.groupType, this.state.name);
+      if (this.props.editing) {
+        let exists = InvestmentGroupManager.hasGroup(this.state.name);
+        let isStartingName = this.state.name === this.props.groupToEdit![1];
+        return isStartingName || !exists;
+      } else {
+        return !InvestmentGroupManager.hasGroup(this.state.name);
+      }
     }
+
   }
 
   private acceptEnabled() {
@@ -127,6 +151,7 @@ export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptS
             >
               <option value={GroupType.Bill}>Bill</option>
               <option value={GroupType.Debt}>Debt</option>
+              <option value={GroupType.Investment}>Investment</option>
             </FormControl>
           </InputGroup>
         </Modal.Body>

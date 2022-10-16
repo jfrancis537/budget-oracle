@@ -105,6 +105,17 @@ namespace BudgetOracle.Storage
       await dbContext.SaveChangesAsync();
     }
 
+    public async Task UpdateInvestmentGroups(string username, string data)
+    {
+      var user = await GetUser(username);
+      if (user != null)
+      {
+        user.InvestmentGroupData = data;
+        dbContext.Update(user);
+      }
+      await dbContext.SaveChangesAsync();
+    }
+
     public async Task UpdateState(string username, string data)
     {
       var user = await GetUser(username);

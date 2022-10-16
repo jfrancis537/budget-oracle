@@ -4,7 +4,7 @@ import { FrequencyType } from "../Processing/Enums/FrequencyType";
 import { IncomeFrequency } from "../Processing/Enums/IncomeFrequency";
 import { AppStateManager } from "../Processing/Managers/AppStateManager";
 import { CalculationResult, InvestmentCalculation, ResultPair } from "../Processing/Managers/CalculationsManager";
-import { InvestmentCalculationManager } from "../Processing/Managers/InvestmentCalculationManager";
+import { InvestmentManager } from "../Processing/Managers/InvestmentManger";
 import { TellerManager } from "../Processing/Managers/TellerManager";
 import { Account } from "../Processing/Models/Account";
 import { Bill } from "../Processing/Models/Bill";
@@ -110,7 +110,7 @@ export namespace CalculationTools {
       let shares = 0;
       for (let vest of schedule.vests) {
         if (vest.date.isBetween(start, end)) {
-          const symbolValue = (await InvestmentCalculationManager.getStockPriceForSymbol(vest.symbol)) ?? 0;
+          const symbolValue = (await InvestmentManager.getStockPriceForSymbol(vest.symbol)) ?? 0;
           scheduleSum += (vest.shares * symbolValue * (1 - vest.taxPercentage));
           shares += vest.shares;
         }
@@ -132,7 +132,7 @@ export namespace CalculationTools {
     // console.log(start, end);
     const daysBetween = Math.abs(start.diff(end, 'day'));
     for (let investment of investments) {
-      const investmentValue = InvestmentCalculationManager.getExistingCalculation(investment.id) ?? 0;
+      const investmentValue = InvestmentManager.getExistingCalculation(investment.id) ?? 0;
       value += investmentValue
       const margin = ((((investment.marginInterestRate / 100) * investment.marginDebt) / 360) * daysBetween);
       marginInterest += margin;

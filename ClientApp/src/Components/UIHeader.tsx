@@ -78,13 +78,6 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
   }
 
   @autobind
-  private addInvestment() {
-    PromptManager.requestInvestmentPrompt({
-      editing: false
-    });
-  }
-
-  @autobind
   private addPaymentSchedule() {
     PromptManager.requestPaymentSchedulePrompt({
       editing: false,
@@ -248,7 +241,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
                   <NavDropdown.Divider />
                   <NavDropdown.Item onClick={this.addAccount}>Account</NavDropdown.Item>
                   <NavDropdown.Item onClick={this.addIncomeSource}>Income</NavDropdown.Item>
-                  <NavDropdown.Item disabled={!this.state.userLoggedIn} onClick={this.addInvestment}>Investment</NavDropdown.Item>
+                  {/* <NavDropdown.Item disabled={!this.state.userLoggedIn} onClick={this.addInvestment}>Investment</NavDropdown.Item> */}
                   <NavDropdown.Divider />
                   <NavDropdown.Item onClick={this.addGroup}>Group</NavDropdown.Item>
                   <NavDropdown.Divider />

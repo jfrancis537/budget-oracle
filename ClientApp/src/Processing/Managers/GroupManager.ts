@@ -1,6 +1,7 @@
 import { DataAPI } from "../../APIs/DataAPI";
 import { Action } from "../../Utilities/Action";
 import { AuthorizationError } from "../../Utilities/Errors/AuthorizationError";
+import { GroupType } from "../Enums/GroupType";
 import { AppStateManager } from "./AppStateManager";
 import { UserManager } from "./UserManager";
 
@@ -9,11 +10,6 @@ export const GroupStateKey = 'group_state_data'
 type GroupState = {
   billGroups: [string, string[]][];
   debtGroups: [string, string[]][];
-}
-
-export enum GroupType {
-  Bill,
-  Debt
 }
 
 export interface GroupsData {

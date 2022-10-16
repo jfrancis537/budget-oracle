@@ -6,7 +6,7 @@ import { IncomeSource } from "../Models/IncomeSource";
 import { PaymentSchedule } from "../Models/ScheduledPayment";
 import { VestSchedule } from "../Models/VestSchedule";
 import { AppStateManager } from "./AppStateManager";
-import { InvestmentCalculationManager } from "./InvestmentCalculationManager";
+import { InvestmentManager } from "./InvestmentManger";
 import { TellerManager } from "./TellerManager";
 
 export type ResultPair<T, V = number> = [Map<T, V>, number];
@@ -55,10 +55,11 @@ class CalculationsManager {
     AppStateManager.onaccountsupdated.addListener(this.handleUpdate);
     AppStateManager.ondebtsupdated.addListener(this.handleUpdate);
     AppStateManager.onincomesourcesupdated.addListener(this.handleUpdate);
+    AppStateManager.oninvestmentsupdated.addListener(this.handleUpdate);
     AppStateManager.onpaymentschedulesupdated.addListener(this.handleUpdate);
     TellerManager.onlinkedbalanceupdated.addListener(this.handleUpdate);
     TellerManager.onlinkedtransactionsupdated.addListener(this.handleUpdate);
-    InvestmentCalculationManager.oninvestmentvaluecalculated.addListener(this.handleUpdate);
+    InvestmentManager.oninvestmentvaluecalculated.addListener(this.handleUpdate);
   }
 
   get endDate() {

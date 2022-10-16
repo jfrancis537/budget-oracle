@@ -3,8 +3,9 @@ import React from "react"
 import { Form } from "react-bootstrap";
 import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
 import { FrequencyType } from "../../Processing/Enums/FrequencyType";
+import { GroupType } from "../../Processing/Enums/GroupType";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
-import { GroupManager, GroupType } from "../../Processing/Managers/GroupManager";
+import { GroupManager } from "../../Processing/Managers/GroupManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { autobind } from "../../Utilities/Decorators";
 import { LoadingButton } from "./LoadingButton";

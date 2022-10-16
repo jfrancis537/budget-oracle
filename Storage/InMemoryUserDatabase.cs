@@ -95,6 +95,20 @@ namespace BudgetOracle.Storage
       }
     }
 
+    public async Task UpdateInvestmentGroups(string username, string groups)
+    {
+      var user = await GetUser(username);
+      if (user != null)
+      {
+        user.InvestmentGroupData = groups;
+        database[username] = user;
+      }
+      else
+      {
+        throw new InvalidOperationException("Can not update groups of user that does not exist");
+      }
+    }
+
     public Task SetTellerUserId(string username, string id)
     {
       var has = database.TryGetValue(username, out var user);
@@ -147,5 +161,6 @@ namespace BudgetOracle.Storage
       }
       return result;
     }
+
   }
 }

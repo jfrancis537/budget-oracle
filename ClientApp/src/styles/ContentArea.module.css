@@ -21,6 +21,10 @@
   display: none;
 }
 
+.grouped.hidden {
+  display: none;
+}
+
 .content-row {
   flex: 1;
   overflow: hidden;

@@ -1,6 +1,7 @@
 import React from "react"
 import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
+import { InvestmentGroupManager } from "../../Processing/Managers/InvestmentGroupManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { autobind } from "../../Utilities/Decorators";
 import { CurrencyInput } from "../Inputs/CurrencyInput";
@@ -10,6 +11,7 @@ import { LoadingButton } from "./LoadingButton";
 export interface IInvestmentPromptProps {
   editing: boolean;
   investmentToEdit?: string;
+  groupName: string;
 }
 
 interface IInvestmentPromptState {
@@ -112,10 +114,10 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
         this.state.symbol,
         this.state.costBasisPerShare,
         this.state.marginDebt,
-        this.state.marginInterestRate
+        this.state.marginInterestRate,
       );
     } else {
-      await AppStateManager.addInvestment(
+      let id = await AppStateManager.addInvestment(
         this.state.name,
         this.state.shares,
         this.state.symbol,
@@ -123,6 +125,7 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
         this.state.marginDebt,
         this.state.marginInterestRate
       );
+      await InvestmentGroupManager.addItemToGroup(id, this.props.groupName);
     }
     this.setState({
       isSaving: false

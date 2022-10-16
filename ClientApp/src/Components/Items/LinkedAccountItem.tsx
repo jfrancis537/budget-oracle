@@ -10,8 +10,6 @@ interface LinkedAccountItemProps {
   onValueUpdated?: (val: number) => void;
 }
 
-const doNothing = () => { };
-
 export const LinkedAccountItem: React.FC<LinkedAccountItemProps> = (props) => {
 
   const [balance, setBalance] = useState<number | undefined>(undefined);

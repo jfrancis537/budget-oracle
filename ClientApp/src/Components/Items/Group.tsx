@@ -1,80 +1,33 @@
 import React from "react";
 import { Button, ButtonGroup, Card } from "react-bootstrap";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
-import { GroupManager, GroupType } from "../../Processing/Managers/GroupManager";
+import { GroupManager } from "../../Processing/Managers/GroupManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { IValued } from "../../Processing/Models/Valued";
 import { autobind } from "../../Utilities/Decorators";
 import { ValueItem } from "./ValueItem";
 
 import groupStyles from '../../styles/Group.module.css';
+import { InvestmentItem } from "./InvestmentItem";
+import { InvestmentGroupManager } from "../../Processing/Managers/InvestmentGroupManager";
+import { GroupType } from "../../Processing/Enums/GroupType";
 
 interface IGroupProps {
-  type: GroupType;
   name: string;
   items: Set<string>;
 }
 
-export class Group extends React.Component<IGroupProps> {
+interface ICostGroupProps extends IGroupProps {
+  type: GroupType;
+}
 
-  @autobind
-  private renderItem(id: string) {
-    let result: JSX.Element | null;
-    let item: IValued | undefined;
-    if (this.props.type === GroupType.Bill) {
-      item = AppStateManager.getBill(id);
-    } else {
-      item = AppStateManager.getDebt(id);
-    }
+abstract class Group<P extends IGroupProps> extends React.Component<P> {
+  protected abstract renderItem(id: string): JSX.Element | null;
+  protected abstract add(): void;
+  protected abstract delete(): Promise<void>;
+  protected abstract get title(): string;
 
-    if (item) {
-      result = (
-        <ValueItem key={item.id} item={item} groupName={this.props.name} />
-      );
-    } else {
-      //throw new Error('Can not render item that does not exist.');
-      result = null;
-    }
-    return result;
-  }
-
-  @autobind
-  private add() {
-    if (this.props.type === GroupType.Bill) {
-      PromptManager.requestBillPrompt({
-        editing: false,
-        groupName: this.props.name
-      });
-    } else {
-      PromptManager.requestDebtPrompt({
-        editing: false,
-        groupName: this.props.name
-      });
-    }
-  }
-
-  @autobind
-  private async delete() {
-    let yes = window.confirm("Are you sure you want to delete " + this.props.name + "?");
-    if (yes) {
-      await GroupManager.deleteGroup(this.props.name, this.props.type);
-    }
-  }
-
-  private get title() {
-    if (this.props.type === GroupType.Debt) {
-      let sum = 0;
-      for (let id of this.props.items) {
-        let item = AppStateManager.getDebt(id);
-        sum += item?.amount ?? 0;
-      }
-      return `${this.props.name} : ${sum}`
-    } else {
-      return this.props.name;
-    }
-  }
-
-  render() {
+  public render() {
     return (
       <Card className={groupStyles['card']} bg='dark' text='light'>
         <Card.Header className={groupStyles['header']}>
@@ -96,4 +49,102 @@ export class Group extends React.Component<IGroupProps> {
       </Card>
     );
   }
+}
+
+
+export class CostGroup extends Group<ICostGroupProps> {
+
+  @autobind
+  protected renderItem(id: string) {
+    let result: JSX.Element | null;
+    let item: IValued | undefined;
+    if (this.props.type === GroupType.Bill) {
+      item = AppStateManager.getBill(id);
+    } else {
+      item = AppStateManager.getDebt(id);
+    }
+
+    if (item) {
+      result = (
+        <ValueItem key={item.id} item={item} groupName={this.props.name} />
+      );
+    } else {
+      //throw new Error('Can not render item that does not exist.');
+      result = null;
+    }
+    return result;
+  }
+
+  @autobind
+  protected add() {
+    if (this.props.type === GroupType.Bill) {
+      PromptManager.requestBillPrompt({
+        editing: false,
+        groupName: this.props.name
+      });
+    } else {
+      PromptManager.requestDebtPrompt({
+        editing: false,
+        groupName: this.props.name
+      });
+    }
+  }
+
+  @autobind
+  protected async delete() {
+    let yes = window.confirm("Are you sure you want to delete " + this.props.name + "?");
+    if (yes) {
+      await GroupManager.deleteGroup(this.props.name, this.props.type);
+    }
+  }
+
+  protected get title() {
+    if (this.props.type === GroupType.Debt) {
+      let sum = 0;
+      for (let id of this.props.items) {
+        let item = AppStateManager.getDebt(id);
+        sum += item?.amount ?? 0;
+      }
+      return `${this.props.name} : ${sum}`
+    } else {
+      return this.props.name;
+    }
+  }
+}
+
+export class InvestmentGroup extends Group<IGroupProps> {
+  
+  @autobind
+  protected renderItem(id: string): JSX.Element | null {
+    let result: JSX.Element | null;
+    const item = AppStateManager.getInvestment(id);
+    if(item)
+    {
+      result =  <InvestmentItem item={item} groupName={this.props.name}/>
+    } else {
+      result = null;
+    }
+    return result;
+  }
+
+  @autobind
+  protected add(): void {
+    PromptManager.requestInvestmentPrompt({
+      editing: false,
+      groupName: this.props.name
+    });
+  }
+
+  @autobind
+  protected async delete(): Promise<void> {
+    let yes = window.confirm("Are you sure you want to delete " + this.props.name + "?");
+    if (yes) {
+      InvestmentGroupManager.deleteGroup(this.props.name);
+    }
+  }
+  protected get title(): string {
+    return this.props.name;
+    //TODO add sum
+  }
+
 }

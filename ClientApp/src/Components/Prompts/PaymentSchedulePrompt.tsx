@@ -8,7 +8,6 @@ import { LoadingButton } from "./LoadingButton";
 
 import styles from "../../styles/PaymentSchedulePrompt.module.css";
 import { CurrencyInput } from "../Inputs/CurrencyInput";
-import { NumberInput } from "../Inputs/NumberInput";
 import { DatePicker } from "../Inputs/DatePicker";
 import moment from "moment";
 import { PaymentSchedule, ScheduledPayment, ScheduledPaymentOptions } from "../../Processing/Models/ScheduledPayment";

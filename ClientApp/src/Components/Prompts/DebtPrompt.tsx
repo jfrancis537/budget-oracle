@@ -1,7 +1,8 @@
 import React from "react"
 import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
+import { GroupType } from "../../Processing/Enums/GroupType";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
-import { GroupManager, GroupType } from "../../Processing/Managers/GroupManager";
+import { GroupManager } from "../../Processing/Managers/GroupManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { LoadingButton } from "./LoadingButton";
 

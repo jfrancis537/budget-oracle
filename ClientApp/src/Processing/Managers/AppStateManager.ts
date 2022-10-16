@@ -3,6 +3,7 @@ import { DataAPI } from "../../APIs/DataAPI";
 import { Action } from "../../Utilities/Action";
 import { AuthorizationError } from "../../Utilities/Errors/AuthorizationError";
 import { FrequencyType } from "../Enums/FrequencyType";
+import { GroupType } from "../Enums/GroupType";
 import { IncomeFrequency } from "../Enums/IncomeFrequency";
 import { Account, SerializedAccount } from "../Models/Account";
 import { Bill, SerializedBill } from "../Models/Bill";
@@ -11,7 +12,7 @@ import { IncomeSource, SerializedIncomeSource } from "../Models/IncomeSource";
 import { Investment, SerializedInvestment } from "../Models/Investment";
 import { PaymentSchedule, SerializedPaymentSchedule } from "../Models/ScheduledPayment";
 import { SerializedVestSchedule, VestSchedule } from "../Models/VestSchedule";
-import { GroupManager, GroupType } from "./GroupManager";
+import { GroupManager } from "./GroupManager";
 import { UserManager } from "./UserManager";
 
 interface StateData {
@@ -325,7 +326,7 @@ class AppStateManager {
     costBasisPerShare: number,
     marginDebt: number,
     marginInterestRate: number) {
-    await this.updateInvestment(undefined, name, shares, symbol, costBasisPerShare, marginDebt, marginInterestRate);
+    return await this.updateInvestment(undefined, name, shares, symbol, costBasisPerShare, marginDebt, marginInterestRate);
   }
 
   public async updateInvestment(id: string | undefined,
@@ -334,7 +335,7 @@ class AppStateManager {
     symbol: string,
     costBasisPerShare: number,
     marginDebt: number,
-    marginInterestRate: number,
+    marginInterestRate: number
   ) {
     const investment = new Investment({
       id,
@@ -350,6 +351,7 @@ class AppStateManager {
     this.oninvestmentsupdated.invoke(this.investments);
     this.onspecificinvestmentupdated.invoke(investment);
     await this.save();
+    return investment.id;
   }
   public hasInvestment(id: string) {
     return this._investments.has(id);

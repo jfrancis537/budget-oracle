@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ButtonGroup, Button } from "react-bootstrap";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { CalculationsManager } from "../../Processing/Managers/CalculationsManager";
-import { InvestmentCalculationManager } from "../../Processing/Managers/InvestmentCalculationManager";
+import { InvestmentManager } from "../../Processing/Managers/InvestmentManger";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { VestSchedule } from "../../Processing/Models/VestSchedule";
 
@@ -57,7 +57,7 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
   const [endDate, setEndDate] = useState(CalculationsManager.instance.endDate);
 
   useEffect(() => {
-    InvestmentCalculationManager.onsymbolvaluecalculated.addListener(onSymbolValueUpdated);
+    InvestmentManager.onsymbolvaluecalculated.addListener(onSymbolValueUpdated);
     CalculationsManager.instance.onenddatechanged.addListener(handleEndDateChanged);
     getSymbolValues(true)
       .then(values => {
@@ -67,7 +67,7 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
         throw new Error(err);
       });
     return () => {
-      InvestmentCalculationManager.onsymbolvaluecalculated.removeListener(onSymbolValueUpdated);
+      InvestmentManager.onsymbolvaluecalculated.removeListener(onSymbolValueUpdated);
       CalculationsManager.instance.onenddatechanged.removeListener(handleEndDateChanged);
     }
 
@@ -101,7 +101,7 @@ export const ScheduledVestItem: React.FC<IScheduledVestProps> = (props) => {
     for (let item of props.schedule.vests) {
       const symbolKey = item.symbol.toLowerCase();
       if (!result.has(symbolKey)) {
-        const price = await InvestmentCalculationManager.getStockPriceForSymbol(symbolKey, refresh);
+        const price = await InvestmentManager.getStockPriceForSymbol(symbolKey, refresh);
         if (price) {
           result.set(symbolKey, price);
         }

@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
-import { InvestmentCalculationManager } from "../../Processing/Managers/InvestmentCalculationManager";
+import { InvestmentManager } from "../../Processing/Managers/InvestmentManger";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { Investment } from "../../Processing/Models/Investment";
 import itemStyles from '../../styles/Item.module.css';
@@ -9,6 +9,7 @@ import { autobind } from "../../Utilities/Decorators";
 
 interface IInvestmentItemProps {
   item: Investment;
+  groupName: string;
 }
 
 interface IInvestmentItemState {
@@ -21,19 +22,19 @@ export class InvestmentItem extends React.Component<IInvestmentItemProps, IInves
   constructor(props: IInvestmentItemProps) {
     super(props);
     this.state = {
-      value: InvestmentCalculationManager.getExistingCalculation(props.item.id),
+      value: InvestmentManager.getExistingCalculation(props.item.id),
       mode: "total"
     }
   }
 
   componentDidMount() {
-    InvestmentCalculationManager.oninvestmentvaluecalculated.addListener(this.onInvestmentCalculated);
-    InvestmentCalculationManager.onsymbolvaluecalculated.addListener(this.handleSymbolPriceUpdated);
+    InvestmentManager.oninvestmentvaluecalculated.addListener(this.onInvestmentCalculated);
+    InvestmentManager.onsymbolvaluecalculated.addListener(this.handleSymbolPriceUpdated);
   }
 
   componentWillUnmount() {
-    InvestmentCalculationManager.oninvestmentvaluecalculated.removeListener(this.onInvestmentCalculated);
-    InvestmentCalculationManager.onsymbolvaluecalculated.removeListener(this.handleSymbolPriceUpdated);
+    InvestmentManager.oninvestmentvaluecalculated.removeListener(this.onInvestmentCalculated);
+    InvestmentManager.onsymbolvaluecalculated.removeListener(this.handleSymbolPriceUpdated);
   }
 
   @autobind
@@ -48,7 +49,8 @@ export class InvestmentItem extends React.Component<IInvestmentItemProps, IInves
   public edit() {
     PromptManager.requestInvestmentPrompt({
       editing: true,
-      investmentToEdit: this.props.item.id
+      investmentToEdit: this.props.item.id,
+      groupName: this.props.groupName
     });
   }
 
@@ -63,7 +65,7 @@ export class InvestmentItem extends React.Component<IInvestmentItemProps, IInves
       this.setState({
         value: undefined
       });
-      await InvestmentCalculationManager.refreshSymbol(this.props.item, false);
+      await InvestmentManager.refreshSymbol(this.props.item, false);
     }
   }
 
@@ -72,7 +74,7 @@ export class InvestmentItem extends React.Component<IInvestmentItemProps, IInves
     this.setState({
       value: undefined
     });
-    await InvestmentCalculationManager.refreshSymbol(this.props.item, true);
+    await InvestmentManager.refreshSymbol(this.props.item, true);
   }
 
   private get costBasis() {

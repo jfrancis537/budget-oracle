@@ -2,19 +2,19 @@ import React from "react";
 import { Row, Col, Container } from "react-bootstrap";
 import { Account } from "../Processing/Models/Account";
 import { AppStateManager } from "../Processing/Managers/AppStateManager";
-import { GroupManager, GroupsData, GroupType } from "../Processing/Managers/GroupManager";
+import { GroupManager, GroupsData } from "../Processing/Managers/GroupManager";
 import contentStyles from '../styles/ContentArea.module.css';
 import mobileStyles from '../styles/MobileHelper.module.css';
+import tabStyles from '../styles/DesktopTabs.module.css';
 import { IncomeSource } from "../Processing/Models/IncomeSource";
-import { Group } from "./Items/Group";
+import { CostGroup, InvestmentGroup } from "./Items/Group";
 import { Debt } from "../Processing/Models/Debt";
 import { Bill } from "../Processing/Models/Bill";
 import { ValueItem } from "./Items/ValueItem";
-import { BottomTabs } from "./BottomTabs";
+import { MobileContentTab, MobileTabs } from "./MobileTabs";
 import { Divider } from "./UIElements/Divider";
 import { Investment } from "../Processing/Models/Investment";
 import { autobind } from "../Utilities/Decorators";
-import { InvestmentItem } from "./Items/InvestmentItem";
 import { PaymentSchedule } from "../Processing/Models/ScheduledPayment";
 import { ScheduledPaymentItem } from "./Items/ScheduledPaymentItem";
 import { VestSchedule } from "../Processing/Models/VestSchedule";
@@ -24,16 +24,13 @@ import { LinkedAccountDetails } from "../APIs/TellerAPI";
 import { LinkedAccountItem } from "./Items/LinkedAccountItem";
 import { LinkedAccountGroup } from "./Items/LinkedAccountGroup";
 import { Modeler } from "./Modeler";
-
-export enum ContentTab {
-  Costs = "costs",
-  Reserves = "reserves",
-  Schedules = "schedules",
-  Modeler = "modeler"
-}
+import { LeftContentTab, LeftTabs, RightContentTab, RightTabs } from "./DesktopTabs";
+import { InvestmentGroupData, InvestmentGroupManager } from "../Processing/Managers/InvestmentGroupManager";
+import { GroupType } from "../Processing/Enums/GroupType";
 
 interface ContentAreaState {
-  groups?: GroupsData;
+  costGroups?: GroupsData;
+  investmentGroups?: InvestmentGroupData;
   accounts?: Account[];
   incomeSources?: IncomeSource[];
   debts?: Debt[];
@@ -42,7 +39,9 @@ interface ContentAreaState {
   paymentSchedules?: PaymentSchedule[];
   vestSchedules?: VestSchedule[];
   linkedAccounts?: LinkedAccountDetails[];
-  tab: ContentTab;
+  mobileTab: MobileContentTab;
+  leftTab: LeftContentTab;
+  rightTab: RightContentTab;
 }
 
 export class ContentArea extends React.Component<{}, ContentAreaState> {
@@ -51,18 +50,22 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     super(props);
 
     this.state = {
-      groups: GroupManager.groups,
+      costGroups: GroupManager.groups,
+      investmentGroups: InvestmentGroupManager.groups,
       accounts: [...AppStateManager.accounts],
       incomeSources: [...AppStateManager.incomeSources],
       investments: [...AppStateManager.investments],
       paymentSchedules: [...AppStateManager.paymentSchedules],
       vestSchedules: [...AppStateManager.vestSchedules],
-      tab: ContentTab.Costs
+      mobileTab: MobileContentTab.Costs,
+      leftTab: LeftContentTab.Costs,
+      rightTab: RightContentTab.Holdings
     }
   }
 
   componentDidMount() {
     GroupManager.ongroupsupdated.addListener(this.handleGroupsUpdated);
+    InvestmentGroupManager.ongroupsupdated.addListener(this.handleInvestmentGroupsUpdated);
     AppStateManager.onaccountsupdated.addListener(this.handleAccountsUpdated);
     AppStateManager.onincomesourcesupdated.addListener(this.handleIncomeSourcesUpdated);
     AppStateManager.ondebtsupdated.addListener(this.handleDebtsUpdated);
@@ -75,6 +78,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
 
   componentWillUnmount() {
     GroupManager.ongroupsupdated.removeListener(this.handleGroupsUpdated);
+    InvestmentGroupManager.ongroupsupdated.removeListener(this.handleInvestmentGroupsUpdated)
     AppStateManager.onaccountsupdated.removeListener(this.handleAccountsUpdated);
     AppStateManager.onincomesourcesupdated.removeListener(this.handleIncomeSourcesUpdated);
     AppStateManager.ondebtsupdated.removeListener(this.handleDebtsUpdated);
@@ -95,7 +99,15 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
   @autobind
   private handleGroupsUpdated(data: GroupsData) {
     this.setState({
-      groups: data
+      costGroups: data
+    });
+  }
+
+  @autobind
+  private handleInvestmentGroupsUpdated(data: InvestmentGroupData)
+  {
+    this.setState({
+      investmentGroups: data
     });
   }
 
@@ -148,20 +160,35 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     });
   }
 
-  private handleTabChanged(tab: ContentTab) {
+  @autobind
+  private handleMobileTabChanged(tab: MobileContentTab) {
     this.setState({
-      tab: tab
+      mobileTab: tab
+    });
+  }
+
+  @autobind
+  private handleLeftTabChanged(tab: LeftContentTab) {
+    this.setState({
+      leftTab: tab
+    });
+  }
+
+  @autobind
+  private handleRightTabChanged(tab: RightContentTab) {
+    this.setState({
+      rightTab: tab
     });
   }
 
   private renderGroups(): JSX.Element[] {
     const result: JSX.Element[] = [];
-    if (this.state.groups) {
-      let billsGroups = this.state.groups.billGroups;
-      let debtGroups = this.state.groups.debtGroups;
+    if (this.state.costGroups) {
+      let billsGroups = this.state.costGroups.billGroups;
+      let debtGroups = this.state.costGroups.debtGroups;
       for (let [name, ids] of billsGroups) {
         result.push(
-          <Group
+          <CostGroup
             key={`bill_group_${name}`}
             name={name}
             items={ids}
@@ -171,7 +198,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
       }
       for (let [name, ids] of debtGroups) {
         result.push(
-          <Group
+          <CostGroup
             key={`debt_group_${name}`}
             name={name}
             items={ids}
@@ -186,6 +213,24 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
             <LinkedAccountGroup key="linked_group" accounts={creditItems} name="Linked Cards" />
           )
         }
+      }
+    }
+    return result;
+  }
+
+  private renderInvestmentGroups(): JSX.Element[]
+  {
+    const result: JSX.Element[] = [];
+    if(this.state.investmentGroups)
+    {
+      for (let [name, ids] of this.state.investmentGroups) {
+        result.push(
+          <InvestmentGroup
+            key={`investment_group_${name}`}
+            name={name}
+            items={ids}
+          />
+        );
       }
     }
     return result;
@@ -230,18 +275,6 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     return result;
   }
 
-  private renderInvestments() {
-    const result: JSX.Element[] = [];
-    if (this.state.investments) {
-      for (let investment of this.state.investments) {
-        result.push(
-          <InvestmentItem item={investment} key={investment.id} />
-        );
-      }
-    }
-    return result;
-  }
-
   private renderUngroupedArea() {
     let sections: JSX.Element[] = [];
     if (this.state.accounts?.length || this.state.linkedAccounts?.length) {
@@ -255,13 +288,6 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
       sections.push(
         <div className={contentStyles['ungrouped-section']} key="income_section">
           {this.renderIncomeSources()}
-        </div>
-      );
-    }
-    if (this.state.investments?.length) {
-      sections.push(
-        <div className={contentStyles['ungrouped-section']} key="invest_section">
-          {this.renderInvestments()}
         </div>
       );
     }
@@ -299,55 +325,131 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     )
   }
 
+  private renderMobile() {
+    return (
+      <Row className={`${contentStyles['content-row']} ${mobileStyles['mobile-only']}`}>
+        <Col
+          className={[
+            contentStyles['content-col'],
+            contentStyles['grouped'],
+            this.state.mobileTab === MobileContentTab.Costs ? '' : contentStyles["hidden"]
+          ].join(" ")}
+        >
+          {this.renderGroups()}
+        </Col>
+        <Col
+          className={[
+            contentStyles['content-col'],
+            contentStyles['grouped'],
+            this.state.mobileTab === MobileContentTab.Investments ? '' : contentStyles["hidden"]
+          ].join(" ")}
+        >
+          {this.renderInvestmentGroups()}
+        </Col>
+        <Col xs sm={2}
+          className={[
+            contentStyles['content-col'],
+            contentStyles['ungrouped'],
+            this.state.mobileTab === MobileContentTab.Reserves ? '' : contentStyles["hidden"]
+          ].join(" ")
+          }>
+          {this.renderUngroupedArea()}
+        </Col>
+        <Col xs sm={2} md={3}
+          className={[
+            contentStyles['content-col'],
+            contentStyles['ungrouped'],
+            this.state.mobileTab === MobileContentTab.Schedules ? '' : contentStyles["hidden"]
+          ].join(" ")
+          }>
+          {this.renderSchedules()}
+        </Col>
+        <Col xs sm={2} md={3}
+          className={[
+            contentStyles['content-col'],
+            contentStyles['ungrouped'],
+            mobileStyles["mobile-only"],
+            this.state.mobileTab === MobileContentTab.Modeler ? '' : contentStyles["hidden"]
+          ].join(" ")
+          }>
+          {<Modeler visible={this.state.mobileTab === MobileContentTab.Modeler} />}
+        </Col>
+      </Row>
+    )
+  }
+
+  private renderDesktop() {
+    return (
+      <Row className={`${contentStyles['content-row']} ${mobileStyles['desktop-only']}`}>
+        <Col
+          className={[
+            contentStyles['content-col'],
+            contentStyles['grouped'],
+            this.state.leftTab === LeftContentTab.Costs ? '' : contentStyles['hidden']
+          ].join(" ")}
+        >
+          {this.renderGroups()}
+        </Col>
+        <Col
+          className={[
+            contentStyles['content-col'],
+            contentStyles['grouped'],
+            this.state.leftTab === LeftContentTab.Investments ? '' : contentStyles['hidden']
+          ].join(" ")}
+        >
+          {this.renderInvestmentGroups()}
+        </Col>
+        <Col xs sm={2}
+          className={[
+            contentStyles['content-col'],
+            contentStyles['ungrouped'],
+            this.state.rightTab === RightContentTab.Holdings ? '' : contentStyles['hidden']
+          ].join(" ")
+          }>
+          {this.renderUngroupedArea()}
+        </Col>
+        <Col xs sm={2} md={3}
+          className={[
+            contentStyles['content-col'],
+            contentStyles['ungrouped'],
+            this.state.rightTab === RightContentTab.Holdings ? '' : contentStyles['hidden']
+          ].join(" ")
+          }>
+          {this.renderSchedules()}
+        </Col>
+        <Col xs sm={4} md={5}
+          className={[
+            contentStyles['content-col'],
+            contentStyles['ungrouped'],
+            this.state.rightTab === RightContentTab.Modeler ? '' : contentStyles['hidden']
+          ].join(" ")
+          }>
+          {<Modeler visible={this.state.rightTab === RightContentTab.Modeler} />}
+        </Col>
+      </Row>
+    )
+  }
+
   render() {
     return (
       <>
         <Row className={contentStyles['content-area-body']}>
           <Container fluid className={contentStyles['content-container']}>
-            <Row className={contentStyles['content-row']}>
-              <Col
-                className={[
-                  contentStyles['content-col'],
-                  contentStyles['grouped'],
-                  this.state.tab === ContentTab.Costs ? '' : mobileStyles["desktop-only"]
-                ].join(" ")}
-              >
-                {this.renderGroups()}
+            {this.renderMobile()}
+            {this.renderDesktop()}
+            <Row className={`${mobileStyles["desktop-only"]} ${tabStyles['row']}`}>
+              <Col className={`${tabStyles['col']} ${tabStyles['left']}`}>
+                <LeftTabs onChange={this.handleLeftTabChanged} currentTab={this.state.leftTab} />
               </Col>
-              <Col xs sm={2}
-                className={[
-                  contentStyles['content-col'],
-                  contentStyles['ungrouped'],
-                  this.state.tab === ContentTab.Reserves ? '' : mobileStyles["desktop-only"]
-                ].join(" ")
-                }>
-                {this.renderUngroupedArea()}
-              </Col>
-              <Col xs sm={2} md={3}
-                className={[
-                  contentStyles['content-col'],
-                  contentStyles['ungrouped'],
-                  this.state.tab === ContentTab.Schedules ? '' : mobileStyles["desktop-only"]
-                ].join(" ")
-                }>
-                {this.renderSchedules()}
-              </Col>
-              <Col xs sm={2} md={3}
-                className={[
-                  contentStyles['content-col'],
-                  contentStyles['ungrouped'],
-                  mobileStyles["mobile-only"],
-                  this.state.tab === ContentTab.Modeler ? '' : contentStyles["hidden"]
-                ].join(" ")
-                }>
-                {<Modeler visible={this.state.tab === ContentTab.Modeler}/>}
+              <Col xs sm={4} md={5} className={`${tabStyles['col']} ${tabStyles['right']}`}>
+                <RightTabs onChange={this.handleRightTabChanged} currentTab={this.state.rightTab} />
               </Col>
             </Row>
           </Container>
         </Row>
-        <BottomTabs
-          onChange={(tab) => this.handleTabChanged(tab)}
-          currentTab={this.state.tab}
+        <MobileTabs
+          onChange={this.handleMobileTabChanged}
+          currentTab={this.state.mobileTab}
           className={[mobileStyles["mobile-only"], contentStyles["reverse-padding"]].join(" ")}
         />
       </>

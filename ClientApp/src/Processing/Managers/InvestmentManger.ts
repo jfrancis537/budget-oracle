@@ -4,16 +4,18 @@ import { autobind } from "../../Utilities/Decorators";
 import { Investment } from "../Models/Investment";
 import { AppStateManager } from "./AppStateManager";
 
-class InvestmentCalculationManager {
+class InvestmentManager {
   public readonly oninvestmentvaluecalculated: Action<{ id: string, value: number }>
   public readonly onsymbolvaluecalculated: Action<{ symbol: string, value: number }>
   private readonly calculations: Map<string, number>;
   private readonly symbolPrices: Map<string, number>;
+
   private didInitalCalculations: boolean;
 
   constructor() {
     this.oninvestmentvaluecalculated = new Action();
     this.onsymbolvaluecalculated = new Action();
+
     this.calculations = new Map();
     this.symbolPrices = new Map();
     this.didInitalCalculations = false;
@@ -42,6 +44,7 @@ class InvestmentCalculationManager {
     await this.calculateInvestment(investment, force);
   }
 
+
   public async getStockPriceForSymbol(symbol: string, refresh = false) {
     const symbolKey = symbol.toLowerCase();
     if (!this.symbolPrices.has(symbolKey) || refresh) {
@@ -68,5 +71,6 @@ class InvestmentCalculationManager {
   }
 
 }
-let instance = new InvestmentCalculationManager();
-export { instance as InvestmentCalculationManager }
+
+const instance = new InvestmentManager();
+export { instance as InvestmentManager }
