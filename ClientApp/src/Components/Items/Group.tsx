@@ -172,7 +172,7 @@ export class InvestmentGroup extends Group<IGroupProps> {
         totalValue += InvestmentManager.getExistingCalculation(id) ?? 0;
       }
     }
-    return `${this.props.name} : ${totalValue}`;
+    return `${this.props.name} : ${totalValue.toFixed(2)}`;
   }
 
 }
