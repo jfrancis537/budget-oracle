@@ -184,6 +184,11 @@ export class InvestmentGroup extends Group<IGroupProps, IInvestmentGroupState> {
     }
   }
 
+  @autobind
+  private changeMode() {
+    this.setState({ mode: this.state.mode === 'change' ? 'value' : 'change' });
+  }
+
   protected renderTitle(): JSX.Element {
 
     const colors = ['#e76d6d', 'unset', 'lime'];
@@ -210,7 +215,7 @@ export class InvestmentGroup extends Group<IGroupProps, IInvestmentGroupState> {
     return (
       <>
         <span>{this.props.name}&nbsp;:&nbsp;</span>
-        <span style={{color: color}}>{valueStr}</span>
+        <span style={{ color: color }} onClick={this.changeMode}>{valueStr}</span>
       </>
     );
   }
