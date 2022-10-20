@@ -22,17 +22,19 @@ interface ICostGroupProps extends IGroupProps {
   type: GroupType;
 }
 
-abstract class Group<P extends IGroupProps> extends React.Component<P> {
+abstract class Group<P extends IGroupProps, S = {}> extends React.Component<P, S> {
   protected abstract renderItem(id: string): JSX.Element | null;
   protected abstract add(): void;
   protected abstract delete(): Promise<void>;
-  protected abstract get title(): string;
+  protected abstract renderTitle(): JSX.Element | string;
+
+  protected renderAdditionalButtons(): JSX.Element | null { return null; }
 
   public render() {
     return (
       <Card className={groupStyles['card']} bg='dark' text='light'>
         <Card.Header className={groupStyles['header']}>
-          <div className={groupStyles['group-title']}>{this.title}</div>
+          <div className={groupStyles['group-title']}>{this.renderTitle()}</div>
           <div className={groupStyles['button-group']}>
             <ButtonGroup className="mr-2" size='sm'>
               <Button onClick={this.add}>
@@ -41,6 +43,7 @@ abstract class Group<P extends IGroupProps> extends React.Component<P> {
               <Button onClick={this.delete} variant='secondary'>
                 <i className="bi bi-trash"></i>
               </Button>
+              {this.renderAdditionalButtons()}
             </ButtonGroup>
           </div>
         </Card.Header>
@@ -99,7 +102,7 @@ export class CostGroup extends Group<ICostGroupProps> {
     }
   }
 
-  protected get title() {
+  protected renderTitle() {
     if (this.props.type === GroupType.Debt) {
       let sum = 0;
       for (let id of this.props.items) {
@@ -113,12 +116,19 @@ export class CostGroup extends Group<ICostGroupProps> {
   }
 }
 
-export class InvestmentGroup extends Group<IGroupProps> {
+interface IInvestmentGroupState {
+  mode: 'value' | 'change'
+}
+
+export class InvestmentGroup extends Group<IGroupProps, IInvestmentGroupState> {
 
   constructor(props: IGroupProps) {
     super(props);
     InvestmentManager.oninvestmentvaluecalculated.addListener(this.handleInvestmentCalculated);
     AppStateManager.oninvestmentsupdated.addListener(this.handleInvestmentsUpdated);
+    this.state = {
+      mode: 'value'
+    };
   }
 
   @autobind
@@ -134,15 +144,28 @@ export class InvestmentGroup extends Group<IGroupProps> {
   }
 
   @autobind
+  private refresh() {
+    InvestmentManager.refreshSymbols(this.props.items);
+  }
+
+  @autobind
   protected renderItem(id: string): JSX.Element | null {
     let result: JSX.Element | null;
     const item = AppStateManager.getInvestment(id);
     if (item) {
-      result = <InvestmentItem item={item} groupName={this.props.name} key={`${item.symbol}`}/>
+      result = <InvestmentItem item={item} groupName={this.props.name} key={`${item.symbol}`} />
     } else {
       result = null;
     }
     return result;
+  }
+
+  protected renderAdditionalButtons(): JSX.Element | null {
+    return (
+      <Button onClick={this.refresh} variant='secondary'>
+        <i className="bi bi-arrow-clockwise"></i>
+      </Button>
+    )
   }
 
   @autobind
@@ -161,18 +184,35 @@ export class InvestmentGroup extends Group<IGroupProps> {
     }
   }
 
-  protected get title(): string {
+  protected renderTitle(): JSX.Element {
+
+    const colors = ['#e76d6d', 'unset', 'lime'];
+
+    let valueStr = "---";
     let costBasisTotal = 0;
     let totalValue = 0;
+    let investmentsCalculated = 0;
+    let gainColorIndex = 1;
     for (const id of this.props.items) {
       const investment = AppStateManager.getInvestment(id);
-      if(investment)
-      {
+      if (investment) {
+        investmentsCalculated++;
         costBasisTotal += investment.costBasisPerShare * investment.shares;
         totalValue += InvestmentManager.getExistingCalculation(id) ?? 0;
       }
     }
-    return `${this.props.name} : ${totalValue.toFixed(2)}`;
+    if (investmentsCalculated > 0) {
+      const change = totalValue - costBasisTotal;
+      gainColorIndex = change > 0 ? 2 : (change < 0 ? 0 : 1);
+      valueStr = this.state.mode === 'value' ? totalValue.toFixed(2) : change.toFixed(2);
+    }
+    const color = colors[gainColorIndex];
+    return (
+      <>
+        <span>{this.props.name}&nbsp;:&nbsp;</span>
+        <span style={{color: color}}>{valueStr}</span>
+      </>
+    );
   }
 
 }

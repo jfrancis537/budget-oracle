@@ -20,7 +20,8 @@ export interface TransactionData {
   id: string,
   status: "pending" | "posted"
   type: "transaction" | "card_payment" | "ach" | "atm",
-  amount: number
+  amount: number,
+  date: string
 }
 
 export namespace TellerAPI {

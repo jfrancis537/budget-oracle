@@ -44,6 +44,17 @@ class InvestmentManager {
     await this.calculateInvestment(investment, force);
   }
 
+  public async refreshSymbols(investments: Iterable<string>) {
+    const promises: Promise<void>[] = [];
+    for (const id of investments) {
+      const item = AppStateManager.getInvestment(id);
+      if (item) {
+        promises.push(this.refreshSymbol(item, true));
+      }
+    }
+    await Promise.all(promises);
+  }
+
 
   public async getStockPriceForSymbol(symbol: string, refresh = false) {
     const symbolKey = symbol.toLowerCase();

@@ -15,11 +15,14 @@ class TellerManager {
   private accounts: Map<string, LinkedAccountDetails>;
   private balances: Map<string, BalanceData>;
   private transactions: Map<string, TransactionData[]>;
+  /** Maps the transaction id to the category */
+  private categorizedTransactions: Map<string,any>;
 
   constructor() {
     this.onlinkedbalanceupdated = new Action();
     this.onlinkedaccountsupdated = new Action();
     this.onlinkedtransactionsupdated = new Action();
+    this.categorizedTransactions = new Map();
     this.accounts = new Map();
     this.balances = new Map();
     this.transactions = new Map();
