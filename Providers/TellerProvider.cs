@@ -91,7 +91,9 @@ namespace BudgetOracle.Providers
             Status = transactionJson["status"].ToString(),
             Amount = double.Parse(transactionJson["amount"].ToString()),
             Type = transactionJson["type"].ToString(),
-            Date = transactionJson["date"].ToString()
+            Date = transactionJson["date"].ToString(),
+            Description = transactionJson["description"].ToString(),
+            Category = transactionJson["details"]["category"].ToString()
           });
         };
         return result;
