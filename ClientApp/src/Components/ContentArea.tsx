@@ -3,9 +3,6 @@ import { Row, Col, Container } from "react-bootstrap";
 import { Account } from "../Processing/Models/Account";
 import { AppStateManager } from "../Processing/Managers/AppStateManager";
 import { GroupManager, GroupsData } from "../Processing/Managers/GroupManager";
-import contentStyles from '../styles/ContentArea.module.css';
-import mobileStyles from '../styles/MobileHelper.module.css';
-import tabStyles from '../styles/DesktopTabs.module.css';
 import { IncomeSource } from "../Processing/Models/IncomeSource";
 import { CostGroup, InvestmentGroup } from "./Items/Group";
 import { Debt } from "../Processing/Models/Debt";
@@ -27,6 +24,11 @@ import { Modeler } from "./Modeler";
 import { LeftContentTab, LeftTabs, RightContentTab, RightTabs } from "./DesktopTabs";
 import { InvestmentGroupData, InvestmentGroupManager } from "../Processing/Managers/InvestmentGroupManager";
 import { GroupType } from "../Processing/Enums/GroupType";
+
+import contentStyles from '../styles/ContentArea.module.css';
+import mobileStyles from '../styles/MobileHelper.module.css';
+import tabStyles from '../styles/DesktopTabs.module.css';
+import groupStyles from '../styles/Group.module.css';
 
 interface ContentAreaState {
   costGroups?: GroupsData;
@@ -104,8 +106,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
   }
 
   @autobind
-  private handleInvestmentGroupsUpdated(data: InvestmentGroupData)
-  {
+  private handleInvestmentGroupsUpdated(data: InvestmentGroupData) {
     this.setState({
       investmentGroups: data
     });
@@ -218,11 +219,9 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     return result;
   }
 
-  private renderInvestmentGroups(): JSX.Element[]
-  {
+  private renderInvestmentGroups(): JSX.Element[] {
     const result: JSX.Element[] = [];
-    if(this.state.investmentGroups)
-    {
+    if (this.state.investmentGroups) {
       for (let [name, ids] of this.state.investmentGroups) {
         result.push(
           <InvestmentGroup
@@ -234,6 +233,12 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
       }
     }
     return result;
+  }
+
+  private renderReports(): JSX.Element {
+    return (
+      <div></div>
+    );
   }
 
   private renderAccounts() {
@@ -331,6 +336,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
         <Col
           className={[
             contentStyles['content-col'],
+            groupStyles['grid'],
             contentStyles['grouped'],
             this.state.mobileTab === MobileContentTab.Costs ? '' : contentStyles["hidden"]
           ].join(" ")}
@@ -340,11 +346,21 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
         <Col
           className={[
             contentStyles['content-col'],
+            groupStyles['grid'],
             contentStyles['grouped'],
             this.state.mobileTab === MobileContentTab.Investments ? '' : contentStyles["hidden"]
           ].join(" ")}
         >
           {this.renderInvestmentGroups()}
+        </Col>
+        <Col
+          className={[
+            contentStyles['content-col'],
+            contentStyles['grouped'],
+            this.state.mobileTab === MobileContentTab.Reports ? '' : contentStyles["hidden"]
+          ].join(" ")}
+        >
+          {this.renderReports()}
         </Col>
         <Col xs sm={2}
           className={[
@@ -384,6 +400,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
         <Col
           className={[
             contentStyles['content-col'],
+            groupStyles['grid'],
             contentStyles['grouped'],
             this.state.leftTab === LeftContentTab.Costs ? '' : contentStyles['hidden']
           ].join(" ")}
@@ -393,11 +410,21 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
         <Col
           className={[
             contentStyles['content-col'],
+            groupStyles['grid'],
             contentStyles['grouped'],
             this.state.leftTab === LeftContentTab.Investments ? '' : contentStyles['hidden']
           ].join(" ")}
         >
           {this.renderInvestmentGroups()}
+        </Col>
+        <Col
+          className={[
+            contentStyles['content-col'],
+            contentStyles['grouped'],
+            this.state.leftTab === LeftContentTab.Reports ? '' : contentStyles['hidden']
+          ].join(" ")}
+        >
+          {this.renderReports()}
         </Col>
         <Col xs sm={2}
           className={[

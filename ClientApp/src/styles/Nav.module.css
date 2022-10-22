@@ -1,5 +1,7 @@
-.navbar {
+nav.navbar {
   flex: 1;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .right-collapse {

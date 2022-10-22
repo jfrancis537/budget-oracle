@@ -16,7 +16,7 @@ class TellerManager {
   private balances: Map<string, BalanceData>;
   private transactions: Map<string, TransactionData[]>;
   /** Maps the transaction id to the category */
-  private categorizedTransactions: Map<string,any>;
+  private categorizedTransactions: Map<string,string>;
 
   constructor() {
     this.onlinkedbalanceupdated = new Action();
@@ -28,6 +28,11 @@ class TellerManager {
     this.transactions = new Map();
     UserManager.onuserloggedin.addListener(this.getSavedAccounts);
     UserManager.onuserloggedout.addListener(this.clear);
+  }
+
+  public async categorizeTransaction(id: string, category: string)
+  {
+    this.categorizedTransactions.set(id,category);
   }
 
   public async linkNewAccounts(): Promise<LinkedAccountDetails[]> {

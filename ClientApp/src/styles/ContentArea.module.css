@@ -34,7 +34,6 @@
   background-color: rgb(68, 68, 68);
   padding-top: 10px;
   padding-bottom: 10px;
-  display: flex;
   flex-flow: wrap;
 }
 

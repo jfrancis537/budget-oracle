@@ -31,7 +31,8 @@ abstract class DesktopTabs<T extends string> extends React.Component<IDesktopTab
 
 export enum LeftContentTab {
   Costs = 'costs',
-  Investments = 'investments'
+  Investments = 'investments',
+  Reports = 'reports'
 }
 
 export class LeftTabs extends DesktopTabs<LeftContentTab> {
@@ -44,10 +45,20 @@ export class LeftTabs extends DesktopTabs<LeftContentTab> {
             eventKey={LeftContentTab.Costs}
           >
             <span style={{ color: '#f66c6c' }}>
-              <i className="bi bi-receipt" />
+              <i className="bi bi-cash-coin" />
             </span>
           </Nav.Link>
         </Nav.Item>
+        {/* <Nav.Item>
+          <Nav.Link
+            onClick={() => this.handleChange(LeftContentTab.Reports)}
+            eventKey={LeftContentTab.Reports}
+          >
+            <span style={{ color: 'rgb(74 196 255)' }}>
+              <i className="bi bi-receipt-cutoff" />
+            </span>
+          </Nav.Link>
+        </Nav.Item> */}
         <Nav.Item>
           <Nav.Link
             onClick={() => this.handleChange(LeftContentTab.Investments)}

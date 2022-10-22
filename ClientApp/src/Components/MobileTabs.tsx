@@ -6,7 +6,8 @@ export enum MobileContentTab {
   Reserves = "reserves",
   Schedules = "schedules",
   Modeler = "modeler",
-  Investments = 'investments'
+  Investments = 'investments',
+  Reports = 'reports'
 }
 
 interface IMobileTabProps {
@@ -37,6 +38,16 @@ export class MobileTabs extends React.Component<IMobileTabProps> {
               </span>
             </Nav.Link>
           </Nav.Item>
+          {/* <Nav.Item>
+            <Nav.Link
+              onClick={() => this.handleChange(MobileContentTab.Reports)}
+              eventKey={MobileContentTab.Reports}
+            >
+              <span style={{ color: 'rgb(74 196 255)' }}>
+                <i className="bi bi-receipt-cutoff" />
+              </span>
+            </Nav.Link>
+          </Nav.Item> */}
           <Nav.Item>
             <Nav.Link
               onClick={() => this.handleChange(MobileContentTab.Investments)}
