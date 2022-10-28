@@ -147,6 +147,25 @@ namespace BudgetOracle_.Controllers
       }
     }
 
+    [HttpPut]
+    [Route("updateCategoryData")]
+    [Authorize]
+    public async Task<IActionResult> UpdateCategoryData(JObject data)
+    {
+      var usernameClaim = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name);
+      var username = usernameClaim.Value;
+      try
+      {
+        var groups = data["categoryData"].ToString();
+        await userDatabase.UpdateCategoryData(username, groups);
+        return Ok();
+      }
+      catch
+      {
+        return BadRequest();
+      }
+    }
+
 
 
 
