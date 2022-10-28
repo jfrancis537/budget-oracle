@@ -82,7 +82,7 @@ namespace BudgetOracle_.Controllers
       var user = await userDatabase.GetUser(username);
       if (user != null)
       {
-        return Ok(user.InvestmentGroupData);
+        return Ok(user.CategoryData);
       }
       else
       {

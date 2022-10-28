@@ -5,5 +5,7 @@ import moment from "moment";
  */
 export function getMonthNameFromNumber(month: number)
 {
-  return moment(month.toString(), 'M').format('MMMM');
+  const date = moment(month.toString(), 'M');
+  console.log(date);
+  return date.format('MMMM');
 }
