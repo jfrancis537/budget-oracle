@@ -1,11 +1,12 @@
 import moment from "moment";
 
 /**
- * 0 indexed
+ * 
+ * @param month Zero indexed
+ * @returns 
  */
 export function getMonthNameFromNumber(month: number)
 {
-  const date = moment(month.toString(), 'M');
-  console.log(date);
+  const date = moment((month + 1).toString(), 'M');
   return date.format('MMMM');
 }
