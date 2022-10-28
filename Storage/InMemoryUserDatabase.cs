@@ -109,6 +109,20 @@ namespace BudgetOracle.Storage
       }
     }
 
+    public async Task UpdateCategoryData(string username, string data)
+    {
+      var user = await GetUser(username);
+      if (user != null)
+      {
+        user.CategoryData = data;
+        database[username] = user;
+      }
+      else
+      {
+        throw new InvalidOperationException("Can not update groups of user that does not exist");
+      }
+    }
+
     public Task SetTellerUserId(string username, string id)
     {
       var has = database.TryGetValue(username, out var user);

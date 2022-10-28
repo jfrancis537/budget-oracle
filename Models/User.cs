@@ -23,5 +23,7 @@ namespace BudgetOracle.Models
     public string GroupData { get; set; }
     [Column("investment_group_data")]
     public string InvestmentGroupData { get; set; }
+    [Column("category_data")]
+    public string CategoryData { get; set; }
   }
 }

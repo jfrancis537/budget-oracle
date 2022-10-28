@@ -44,7 +44,7 @@ export const LinkedAccountItem: React.FC<LinkedAccountItemProps> = (props) => {
   }
 
   function handleTransactionsUpdated(transactionData: TransactionData[]) {
-    if (transactionData.length > 0 && props.account.id === transactionData[0].id) {
+    if (transactionData.length > 0 && props.account.id === transactionData[0].accountId) {
       setTransactions(transactionData);
     }
   }

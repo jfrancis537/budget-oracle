@@ -1,38 +1,74 @@
+import { DataAPI } from "../../APIs/DataAPI";
 import { BalanceData, LinkedAccountDetails, TellerAPI, TransactionData } from "../../APIs/TellerAPI";
 import { TellerSetupArgs } from "../../Types/Teller";
 import { Action } from "../../Utilities/Action";
 import { autobind } from "../../Utilities/Decorators";
+import { AuthorizationError } from "../../Utilities/Errors/AuthorizationError";
 import { LinkedAccountCalculation } from "./CalculationsManager";
 import { UserManager } from "./UserManager";
 
 const applicationId = "app_o20o86tki9q1nfvons000";
+
+interface ISerializedCategoryData {
+  categories: string[]
+  categorizedTransactions: [string, string][];
+}
 
 class TellerManager {
 
   public onlinkedbalanceupdated: Action<BalanceData>;
   public onlinkedtransactionsupdated: Action<TransactionData[]>;
   public onlinkedaccountsupdated: Action<LinkedAccountDetails[]>;
+  public oncategorynamesupdated: Action<Set<string>>;
+  public ontransactioncategorized: Action<string>; // Sends the id of the transaction
   private accounts: Map<string, LinkedAccountDetails>;
   private balances: Map<string, BalanceData>;
   private transactions: Map<string, TransactionData[]>;
   /** Maps the transaction id to the category */
-  private categorizedTransactions: Map<string,string>;
+  private categorizedTransactions: Map<string, string>;
+  private categories: Set<string>;
 
   constructor() {
     this.onlinkedbalanceupdated = new Action();
     this.onlinkedaccountsupdated = new Action();
     this.onlinkedtransactionsupdated = new Action();
+    this.oncategorynamesupdated = new Action();
+    this.ontransactioncategorized = new Action();
     this.categorizedTransactions = new Map();
     this.accounts = new Map();
     this.balances = new Map();
     this.transactions = new Map();
-    UserManager.onuserloggedin.addListener(this.getSavedAccounts);
+    this.categories = new Set();
+    UserManager.onuserloggedin.addListener(this.onLogin);
     UserManager.onuserloggedout.addListener(this.clear);
   }
 
-  public async categorizeTransaction(id: string, category: string)
-  {
-    this.categorizedTransactions.set(id,category);
+  public async categorizeTransaction(id: string, category: string) {
+    this.categorizedTransactions.set(id, category);
+    this.ontransactioncategorized.invoke(id);
+    await this.save();
+  }
+
+  public getTransactionCategory(id: string): string | undefined {
+    return this.categorizedTransactions.get(id);
+  }
+
+  public async addTransactionCategory(name: string) {
+    let result = false;
+    if (!this.categories.has(name)) {
+      this.categories.add(name);
+      this.oncategorynamesupdated.invoke(this.categories);
+    }
+    await this.save();
+    return result;
+  }
+
+  public hasTransactionCategory(name: string) {
+    return this.categories.has(name);
+  }
+
+  public get categoryNames() {
+    return [...this.categories];
   }
 
   public async linkNewAccounts(): Promise<LinkedAccountDetails[]> {
@@ -113,6 +149,13 @@ class TellerManager {
   }
 
   @autobind
+  private async onLogin()
+  {
+    await this.getSavedAccounts();
+    await this.load();
+  }
+
+  @autobind
   private handleError(err: Error) {
     console.warn(err);
   }
@@ -161,6 +204,57 @@ class TellerManager {
     return result;
   }
 
+  private async save()
+  {
+    const result = [...this.categorizedTransactions.entries()];
+    const data: ISerializedCategoryData = {
+      categories: [...this.categories],
+      categorizedTransactions: result.map(mapper)
+    }
+
+    let serialized = JSON.stringify(data);
+    if (UserManager.isLoggedIn) {
+      try {
+        await DataAPI.updateCategoryData(serialized);
+      } catch (err) {
+        if (err instanceof AuthorizationError) {
+          await UserManager.logout();
+        }
+      }
+
+    }
+  }
+
+  private async load()
+  {
+    let state: string | null;
+    if(UserManager.isLoggedIn)
+    {
+      try {
+        state = await DataAPI.getCategoryData();
+      } catch {
+        state = null;
+      }
+    } else {
+      state = null;
+    }
+    if(state)
+    {
+      const data: ISerializedCategoryData = JSON.parse(state);
+      this.categories = new Set(data.categories);
+      this.oncategorynamesupdated.invoke(this.categories);
+      for(const [id,category] of data.categorizedTransactions)
+      {
+        this.categorizedTransactions.set(id,category);
+        this.ontransactioncategorized.invoke(id);
+      }
+    }
+  }
+
+}
+
+function mapper(kvp: [string, string]): [string, string] {
+  return [kvp[0], kvp[1]];
 }
 
 const instance = new TellerManager();

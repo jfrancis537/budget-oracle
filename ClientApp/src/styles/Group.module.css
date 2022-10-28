@@ -1,6 +1,7 @@
 .card {
   min-width: 180px !important;
   margin: 10px;
+  max-height: 350px;
 }
 
 .group-title {
@@ -83,7 +84,7 @@
 
 
   .grid {
-    grid-template-columns: repeat(1, auto);
+    grid-template-columns: repeat(1, 100%);
   }
 
 }
@@ -112,7 +113,7 @@
 @media (min-width: 576px) {
 
   .grid {
-    grid-template-columns: repeat(2, auto);
+    grid-template-columns: repeat(2, 50%);
   }
 
 }
@@ -128,7 +129,7 @@
 @media (min-width: 768px) {
 
   .grid {
-    grid-template-columns: repeat(1, auto);
+    grid-template-columns: repeat(1, 100%);
   }
 }
 
@@ -140,7 +141,7 @@
 
 @media (min-width: 992px) {
   .grid {
-    grid-template-columns: repeat(2, auto);
+    grid-template-columns: repeat(2, 50%);
   }
 }
 
@@ -159,7 +160,7 @@
 
 @media (min-width: 1400px) {
   .grid {
-    grid-template-columns: repeat(3, auto);
+    grid-template-columns: repeat(3, calc(100% / 3));
   }
 }
 
@@ -167,6 +168,6 @@
 
 @media (min-width: 2000px) {
   .grid {
-    grid-template-columns: repeat(4, auto);
+    grid-template-columns: repeat(4, 25%);
   }
 }

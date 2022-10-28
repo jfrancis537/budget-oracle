@@ -29,6 +29,7 @@ import contentStyles from '../styles/ContentArea.module.css';
 import mobileStyles from '../styles/MobileHelper.module.css';
 import tabStyles from '../styles/DesktopTabs.module.css';
 import groupStyles from '../styles/Group.module.css';
+import { TransactionArea } from "./TransactionArea";
 
 interface ContentAreaState {
   costGroups?: GroupsData;
@@ -235,12 +236,6 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     return result;
   }
 
-  private renderReports(): JSX.Element {
-    return (
-      <div></div>
-    );
-  }
-
   private renderAccounts() {
     const result: JSX.Element[] = [];
     if (this.state.accounts) {
@@ -360,7 +355,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
             this.state.mobileTab === MobileContentTab.Reports ? '' : contentStyles["hidden"]
           ].join(" ")}
         >
-          {this.renderReports()}
+          <TransactionArea />
         </Col>
         <Col xs sm={2}
           className={[
@@ -424,7 +419,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
             this.state.leftTab === LeftContentTab.Reports ? '' : contentStyles['hidden']
           ].join(" ")}
         >
-          {this.renderReports()}
+          <TransactionArea />
         </Col>
         <Col xs sm={2}
           className={[

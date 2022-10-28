@@ -72,6 +72,24 @@ namespace BudgetOracle_.Controllers
       }
     }
 
+    [HttpGet]
+    [Route("getCategoryData")]
+    [Authorize]
+    public async Task<IActionResult> GetCategoryData()
+    {
+      var usernameClaim = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name);
+      var username = usernameClaim.Value;
+      var user = await userDatabase.GetUser(username);
+      if (user != null)
+      {
+        return Ok(user.InvestmentGroupData);
+      }
+      else
+      {
+        return BadRequest();
+      }
+    }
+
     [HttpPut]
     [Route("updateState")]
     [Authorize]
@@ -128,6 +146,8 @@ namespace BudgetOracle_.Controllers
         return BadRequest();
       }
     }
+
+
 
 
   }

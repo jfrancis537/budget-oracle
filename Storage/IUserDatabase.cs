@@ -11,6 +11,7 @@ namespace BudgetOracle.Storage
     Task UpdateState(string username, string data);
     Task UpdateGroups(string username, string data);
     Task UpdateInvestmentGroups(string username, string data);
+    Task UpdateCategoryData(string username, string data);
     Task SetPassword(string username, string password);
     Task<bool> ContainsUser(string username);
     Task SetTellerUserId(string username, string id);

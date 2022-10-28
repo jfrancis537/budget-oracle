@@ -3,7 +3,8 @@ import { AuthorizationError } from "../Utilities/Errors/AuthorizationError";
 export interface BudgetData {
   stateData: string,
   groupData: string,
-  investmentGroupData: string
+  investmentGroupData: string,
+  categoryData: string
 }
 
 export namespace DataAPI {
@@ -34,6 +35,18 @@ export namespace DataAPI {
 
   export async function getInvestmentGroupData(): Promise<BudgetData["investmentGroupData"]> {
     let url = `${baseUrl}/getInvestmentGroups`;
+    let response = await fetch(url, {
+      method: "GET"
+    });
+    if (response.ok) {
+      return await response.text();
+    } else {
+      throw new Error("Failed to get data.");
+    }
+  }
+
+  export async function getCategoryData(): Promise<BudgetData["investmentGroupData"]> {
+    let url = `${baseUrl}/getCategoryData`;
     let response = await fetch(url, {
       method: "GET"
     });
@@ -106,4 +119,25 @@ export namespace DataAPI {
       throw new Error("Failed to update data!");
     }
   }
+
+  export async function updateCategoryData(categoryData: string)
+  {
+    let url = `${baseUrl}/updateCategoryData`;
+    let response = await fetch(url, {
+      method: "PUT",
+      body: JSON.stringify({ categoryData: categoryData }),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+    if (response.status === 400) {
+      //Some weird error
+    } else if (response.status === 401) {
+      throw new AuthorizationError("You are probably not logged in anymore");
+    }
+    else if (!response.ok) {
+      throw new Error("Failed to update data!");
+    }
+  }
+
 }

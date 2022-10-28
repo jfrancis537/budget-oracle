@@ -17,6 +17,7 @@ export interface BalanceData {
 }
 
 export interface TransactionData {
+  accountId: string,
   id: string,
   status: "pending" | "posted"
   type: "transaction" | "card_payment" | "ach" | "atm",

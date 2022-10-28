@@ -13,3 +13,10 @@ export function ArrayEquals<T>(a: ArrayLike<T>, b: ArrayLike<T>) {
   }
   return result;
 }
+
+export namespace Sorting {
+  export function num(a: number,b:number)
+  {
+    return a - b;
+  }
+}

@@ -87,7 +87,8 @@ namespace BudgetOracle.Providers
         {
           result.Add(new TransactionData()
           {
-            Id = transactionJson["account_id"].ToString(),
+            AccountId = transactionJson["account_id"].ToString(),
+            Id = transactionJson["id"].ToString(),
             Status = transactionJson["status"].ToString(),
             Amount = double.Parse(transactionJson["amount"].ToString()),
             Type = transactionJson["type"].ToString(),

@@ -38,7 +38,7 @@ export class MobileTabs extends React.Component<IMobileTabProps> {
               </span>
             </Nav.Link>
           </Nav.Item>
-          {/* <Nav.Item>
+          <Nav.Item>
             <Nav.Link
               onClick={() => this.handleChange(MobileContentTab.Reports)}
               eventKey={MobileContentTab.Reports}
@@ -47,7 +47,7 @@ export class MobileTabs extends React.Component<IMobileTabProps> {
                 <i className="bi bi-receipt-cutoff" />
               </span>
             </Nav.Link>
-          </Nav.Item> */}
+          </Nav.Item>
           <Nav.Item>
             <Nav.Link
               onClick={() => this.handleChange(MobileContentTab.Investments)}

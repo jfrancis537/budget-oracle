@@ -1,0 +1,69 @@
+.container {
+  display: flex;
+  padding: 0px 10px;
+}
+
+.container>div {
+  margin-right: 2rem;
+}
+
+.transactions-container {
+  display: grid;
+  grid-template-columns: repeat(2,50%);
+  justify-content: center;
+  margin-top: 1rem;
+  color: white;
+}
+
+.transaction-body {
+  display: contents;
+}
+
+.transaction-body div:first-child {
+  border-top-left-radius: .5rem;
+}
+
+.transaction-body div:nth-child(2)
+{
+  border-top-right-radius: .5rem;
+}
+
+.transaction-body div:nth-child(3)
+{
+  border-bottom-left-radius: .5rem;
+  margin-bottom: 1rem;
+}
+
+.transaction-body div.category-container:last-child {
+  border-bottom-right-radius: .5rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.transaction-body > div {
+  background-color: #212529;
+  padding: 4px 1rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+}
+
+.transaction-body div.category-container {
+  overflow: visible;
+}
+
+.transaction-body div.category-container > div{
+  width: 100%;
+}
+
+.category-container button{
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0px .5rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

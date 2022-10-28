@@ -49,7 +49,7 @@ export class LeftTabs extends DesktopTabs<LeftContentTab> {
             </span>
           </Nav.Link>
         </Nav.Item>
-        {/* <Nav.Item>
+        <Nav.Item>
           <Nav.Link
             onClick={() => this.handleChange(LeftContentTab.Reports)}
             eventKey={LeftContentTab.Reports}
@@ -58,7 +58,7 @@ export class LeftTabs extends DesktopTabs<LeftContentTab> {
               <i className="bi bi-receipt-cutoff" />
             </span>
           </Nav.Link>
-        </Nav.Item> */}
+        </Nav.Item>
         <Nav.Item>
           <Nav.Link
             onClick={() => this.handleChange(LeftContentTab.Investments)}
