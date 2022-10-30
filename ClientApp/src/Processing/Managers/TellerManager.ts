@@ -71,6 +71,11 @@ class TellerManager {
     return [...this.categories];
   }
 
+  public getTransactions()
+  {
+    return [...this.transactions.values()].flat();
+  }
+
   public async linkNewAccounts(): Promise<LinkedAccountDetails[]> {
     const userId = await TellerAPI.getUserId();
     return new Promise((resolve, reject) => {

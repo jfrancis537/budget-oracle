@@ -93,8 +93,8 @@ export const TransactionArea: React.FC = () => {
     }
   }, []);
 
-  function onTransactionsUpdated(data: TransactionData[]) {
-    setTransactions(data);
+  function onTransactionsUpdated() {
+    setTransactions(TellerManager.getTransactions());
   }
 
   function onAccountsUpdated(accounts: LinkedAccountDetails[]) {
