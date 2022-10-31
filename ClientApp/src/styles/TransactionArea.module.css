@@ -1,10 +1,9 @@
 .container {
   display: flex;
-  padding: 0px 10px;
 }
 
 .container>div {
-  margin-right: 2rem;
+  margin-right: .5rem;
 }
 
 .transactions-container {
@@ -15,17 +14,53 @@
   color: white;
 }
 
+.transaction-stats {
+  display: contents;
+}
+
+.transaction-stats div:first-child {
+  border-top-left-radius: .5rem;
+  border-bottom-left-radius: .5rem;
+  width: 100%;
+  margin-bottom: .5rem;
+}
+
+.transaction-stats div:nth-child(2)
+{
+  border-top-right-radius: .5rem;
+  border-bottom-right-radius: .5rem;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  margin-bottom: .5rem;
+}
+
+.transaction-stats > div {
+  background-color: #212529;
+  padding: 4px 1rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  align-items: center;
+}
+
 .transaction-body {
   display: contents;
 }
 
+
 .transaction-body div:first-child {
   border-top-left-radius: .5rem;
+  width: 100%;
 }
 
 .transaction-body div:nth-child(2)
 {
   border-top-right-radius: .5rem;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  flex-flow: column;
 }
 
 .transaction-body div:nth-child(3)
@@ -46,7 +81,6 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  display: flex;
   align-items: center;
 }
 
