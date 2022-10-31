@@ -164,6 +164,11 @@ export const TransactionArea: React.FC = () => {
       months.add(date.month());
       years.add(Number(date.format("YYYY")));
     }
+    const categoryFilters: (string|null)[] = [...categories];
+    if(categoryFilter !== null)
+    {
+      categoryFilters.push(null);
+    }
     return (
       <>
         <div className={styles['container']}>
@@ -184,7 +189,7 @@ export const TransactionArea: React.FC = () => {
           <DropdownButton title={categoryFilter ?? 'Categories'}>
             {[null, ...categories].map(name => (
               <Dropdown.Item key={name ?? 'none'} active={categoryFilter === name} onSelect={() => setCategoryFilter(name)}>
-                {name ?? 'None'}
+                {name ?? 'Clear Filter...'}
               </Dropdown.Item>
             ))}
           </DropdownButton>
