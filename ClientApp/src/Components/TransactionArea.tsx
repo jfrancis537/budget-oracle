@@ -2,7 +2,7 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { Dropdown, DropdownButton, Button } from 'react-bootstrap';
 import { LinkedAccountDetails, TransactionData } from '../APIs/TellerAPI';
-import { TellerManager } from '../Processing/Managers/TellerManager';
+import { IGNORED_TRANSACTION_CATEGORY, TellerManager } from '../Processing/Managers/TellerManager';
 import { Sorting } from '../Utilities/ArrayUtils';
 import { getMonthNameFromNumber } from '../Utilities/DateTools';
 
@@ -11,6 +11,13 @@ import styles from '../styles/TransactionArea.module.css';
 interface ITransactionItemProps {
   transaction: TransactionData;
   accounts: LinkedAccountDetails[] | null;
+}
+
+enum SortMode {
+  PriceHighestFirst = "Price (Highest First)",
+  PriceLowestFirst = "Price (Lowest First)",
+  MostRecent = "Most Recent",
+  Oldest = "Oldest"
 }
 
 const TransactionItem: React.FC<ITransactionItemProps> = props => {
@@ -69,9 +76,9 @@ const TransactionItem: React.FC<ITransactionItemProps> = props => {
         <div>{t.date}</div>
         <div className={styles['category-container']}>
           <DropdownButton title={title} >
-            {[...categories].map((name, index) => (
+            {[null, ...categories].map((name, index) => (
               <Dropdown.Item key={index} onClick={() => TellerManager.categorizeTransaction(t.id, name)}>
-                {name}
+                {name ?? "Uncategorized"}
               </Dropdown.Item>
             ))}
             <Dropdown.Item onSelect={addCategory}>
@@ -94,6 +101,7 @@ export const TransactionArea: React.FC = () => {
   const [year, setYear] = useState<number>(-1);
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>(TellerManager.categoryNames);
+  const [sortMode, setSortMode] = useState<SortMode>(SortMode.MostRecent);
 
   useEffect(() => {
     TellerManager.onlinkedtransactionsupdated.addListener(onTransactionsUpdated);
@@ -128,10 +136,16 @@ export const TransactionArea: React.FC = () => {
       return prev + value;
     }, 0);
     return (
-      <div className={styles['transaction-stats']}>
-        <div>Total:</div>
-        <div style={{ color: total > 0 ? 'lime' : '#e76d6d' }}>${Math.abs(total).toFixed(2)}</div>
-      </div>
+      <>
+        <div className={styles['transaction-stats']}>
+          <div>Total:</div>
+          <div style={{ color: total > 0 ? 'lime' : '#e76d6d' }}>${Math.abs(total).toFixed(2)}</div>
+        </div>
+        <div className={styles['transaction-stats']}>
+          <div>Transactions:</div>
+          <div>{filtered.length}</div>
+        </div>
+      </>
     )
   }
 
@@ -175,14 +189,47 @@ export const TransactionArea: React.FC = () => {
     )
   }
 
+  function sortTransactions(transactions: TransactionData[]) {
+    switch (sortMode) {
+      case SortMode.MostRecent:
+        transactions.sort((a, b) => {
+          return Sorting.dateString(a.date, b.date);
+        });
+        break;
+      case SortMode.Oldest:
+        transactions.sort((a, b) => {
+          return Sorting.dateString(a.date, b.date, false);
+        });
+        break;
+      case SortMode.PriceHighestFirst:
+        transactions.sort((a,b) => {
+          return Sorting.num(a.amount,b.amount,false);
+        });
+        break;
+      case SortMode.PriceLowestFirst:
+        transactions.sort((a,b) => {
+          return Sorting.num(a.amount,b.amount);
+        });
+        break;
+    }
+  }
+
   function renderTransactions() {
     if (month > 0 && year > 0) {
       const filteredTransactions = transactions!.filter(t => {
         const category = TellerManager.getTransactionCategory(t.id);
         const date = moment(t.date);
-
-        return (date.month() === month && date.year() === year) && (categoryFilter === null || category === categoryFilter)
+        if (categoryFilter === IGNORED_TRANSACTION_CATEGORY) {
+          return category === IGNORED_TRANSACTION_CATEGORY;
+        } else {
+          return (
+            (date.month() === month && date.year() === year) &&
+            (categoryFilter === null || category === categoryFilter) &&
+            (category !== IGNORED_TRANSACTION_CATEGORY)
+          )
+        }
       });
+      sortTransactions(filteredTransactions);
       return (
         <>
           {renderStats(filteredTransactions)}

@@ -1,3 +1,5 @@
+import moment, { Moment } from "moment";
+
 export function ArrayEquals<T>(a: ArrayLike<T>, b: ArrayLike<T>) {
   let result = false;
   if (a.length === b.length) {
@@ -15,8 +17,26 @@ export function ArrayEquals<T>(a: ArrayLike<T>, b: ArrayLike<T>) {
 }
 
 export namespace Sorting {
-  export function num(a: number,b:number)
-  {
-    return a - b;
+  export function num(a: number, b: number, ascending = true) {
+    if (ascending) {
+      return a - b;
+    } else {
+      return b - a;
+    }
+  }
+
+  export function dateString(a: string, b: string, ascending = true) {
+    const aDate = moment(a);
+    const bDate = moment(b);
+    return date(aDate, bDate, ascending);
+  }
+
+  export function date(a: Moment, b: Moment, ascending = true) {
+    if(ascending)
+    {
+      return a.diff(b);
+    } else {
+      return b.diff(a);
+    }
   }
 }

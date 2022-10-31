@@ -9,6 +9,8 @@ import { UserManager } from "./UserManager";
 
 const applicationId = "app_o20o86tki9q1nfvons000";
 
+export const IGNORED_TRANSACTION_CATEGORY = 'Ignored';
+
 interface ISerializedCategoryData {
   categories: string[]
   categorizedTransactions: [string, string][];
@@ -43,9 +45,14 @@ class TellerManager {
     UserManager.onuserloggedout.addListener(this.clear);
   }
 
-  public async categorizeTransaction(id: string, category: string) {
-    this.categorizedTransactions.set(id, category);
-    this.ontransactioncategorized.invoke(id);
+  public async categorizeTransaction(id: string, category: string | null) {
+    if (category) {
+      this.categorizedTransactions.set(id, category);
+      this.ontransactioncategorized.invoke(id);
+    } else {
+      this.categorizedTransactions.delete(id);
+      this.ontransactioncategorized.invoke(id);
+    }
     await this.save();
   }
 
@@ -64,15 +71,14 @@ class TellerManager {
   }
 
   public hasTransactionCategory(name: string) {
-    return this.categories.has(name);
+    return this.categories.has(name) || this.categories.has(name.toLowerCase());
   }
 
   public get categoryNames() {
     return [...this.categories];
   }
 
-  public getTransactions()
-  {
+  public getTransactions() {
     return [...this.transactions.values()].flat();
   }
 
@@ -154,8 +160,7 @@ class TellerManager {
   }
 
   @autobind
-  private async onLogin()
-  {
+  private async onLogin() {
     await this.getSavedAccounts();
     await this.load();
   }
@@ -209,8 +214,7 @@ class TellerManager {
     return result;
   }
 
-  private async save()
-  {
+  private async save() {
     const result = [...this.categorizedTransactions.entries()];
     const data: ISerializedCategoryData = {
       categories: [...this.categories],
@@ -230,11 +234,9 @@ class TellerManager {
     }
   }
 
-  private async load()
-  {
+  private async load() {
     let state: string | null;
-    if(UserManager.isLoggedIn)
-    {
+    if (UserManager.isLoggedIn) {
       try {
         state = await DataAPI.getCategoryData();
       } catch {
@@ -243,14 +245,15 @@ class TellerManager {
     } else {
       state = null;
     }
-    if(state)
-    {
+    if (state) {
       const data: ISerializedCategoryData = JSON.parse(state);
       this.categories = new Set(data.categories);
+      if (!this.categories.has(IGNORED_TRANSACTION_CATEGORY)) {
+        this.categories.add(IGNORED_TRANSACTION_CATEGORY);
+      }
       this.oncategorynamesupdated.invoke(this.categories);
-      for(const [id,category] of data.categorizedTransactions)
-      {
-        this.categorizedTransactions.set(id,category);
+      for (const [id, category] of data.categorizedTransactions) {
+        this.categorizedTransactions.set(id, category);
         this.ontransactioncategorized.invoke(id);
       }
     }
