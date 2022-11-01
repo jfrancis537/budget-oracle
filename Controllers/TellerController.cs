@@ -12,6 +12,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
+#if !DEBUG
 namespace BudgetOracle.Controllers
 {
   [Route("api/teller")]
@@ -190,3 +191,4 @@ namespace BudgetOracle.Controllers
     }
   }
 }
+#endif

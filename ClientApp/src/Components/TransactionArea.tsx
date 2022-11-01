@@ -76,11 +76,16 @@ const TransactionItem: React.FC<ITransactionItemProps> = props => {
         <div>{t.date}</div>
         <div className={styles['category-container']}>
           <DropdownButton title={title} >
-            {[null, ...categories].map((name, index) => (
-              <Dropdown.Item key={index} onClick={() => TellerManager.categorizeTransaction(t.id, name)}>
-                {name ?? "Uncategorized"}
-              </Dropdown.Item>
-            ))}
+            {[null, ...categories].reduce((filteredItems: JSX.Element[], category, index) => {
+              if (/*TODO MOVE UNCATEGORIZE category !== IGNORED_TRANSACTION_CATEGORY &&*/ category !== title) {
+                filteredItems?.push(
+                  <Dropdown.Item key={index} onClick={() => TellerManager.categorizeTransaction(t.id, category)}>
+                    {category ?? "Uncategorized"}
+                  </Dropdown.Item>
+                );
+              }
+              return filteredItems;
+            }, [])}
             <Dropdown.Item onSelect={addCategory}>
               Add Category
             </Dropdown.Item>
@@ -128,8 +133,7 @@ export const TransactionArea: React.FC = () => {
     setCategories([...categories]);
   }
 
-  function onTransactionCategorized()
-  {
+  function onTransactionCategorized() {
     setTransactions(TellerManager.getTransactions());
   }
 
@@ -164,11 +168,6 @@ export const TransactionArea: React.FC = () => {
       months.add(date.month());
       years.add(Number(date.format("YYYY")));
     }
-    const categoryFilters: (string|null)[] = [...categories];
-    if(categoryFilter !== null)
-    {
-      categoryFilters.push(null);
-    }
     return (
       <>
         <div className={styles['container']}>
@@ -186,12 +185,17 @@ export const TransactionArea: React.FC = () => {
               </Dropdown.Item>
             ))}
           </DropdownButton>
-          <DropdownButton title={categoryFilter ?? 'Categories'}>
-            {[null, ...categories].map(name => (
-              <Dropdown.Item key={name ?? 'none'} active={categoryFilter === name} onSelect={() => setCategoryFilter(name)}>
-                {name ?? 'Clear Filter...'}
-              </Dropdown.Item>
-            ))}
+          <DropdownButton title={categoryFilter ?? 'Categories'} disabled={categoryFilter === null && categories.length === 0}>
+            {[null, ...categories].reduce((elems: JSX.Element[], category, index) => {
+              if (category || categoryFilter !== null) {
+                elems.push(
+                  <Dropdown.Item key={index} active={categoryFilter === category} onSelect={() => setCategoryFilter(category)}>
+                    {category ?? 'Clear Filter...'}
+                  </Dropdown.Item>
+                );
+              }
+              return elems;
+            }, [])}
           </DropdownButton>
           <Button disabled>
             <i className="bi bi-save"></i>
@@ -214,13 +218,13 @@ export const TransactionArea: React.FC = () => {
         });
         break;
       case SortMode.PriceHighestFirst:
-        transactions.sort((a,b) => {
-          return Sorting.num(a.amount,b.amount,false);
+        transactions.sort((a, b) => {
+          return Sorting.num(a.amount, b.amount, false);
         });
         break;
       case SortMode.PriceLowestFirst:
-        transactions.sort((a,b) => {
-          return Sorting.num(a.amount,b.amount);
+        transactions.sort((a, b) => {
+          return Sorting.num(a.amount, b.amount);
         });
         break;
     }

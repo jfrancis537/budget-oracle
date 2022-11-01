@@ -40,23 +40,21 @@ namespace BudgetOracle
     public void ConfigureServices(IServiceCollection services)
     {
       services.Configure<PushNotificationConfiguration>(Configuration.GetSection("Credentials"));
-
       var password = Configuration.GetSection("Credentials:PostgresPassword").Get<string>();
       services.AddControllers().AddNewtonsoftJson();
       services.AddDbContext<PostgresUserDbContext>(options =>
       {
-
         options
         .UseNpgsql($"Host=localhost;Database=budget_oracle;Username=www-data;Password={password}")
         .UseSnakeCaseNamingConvention();
       });
+
       if (Environment.IsDevelopment())
       {
         services.AddSingleton<IUserDatabase, InMemoryUserDatabase>();
       }
       else
       {
-        //services.AddSingleton<IUserDatabase, MongoUserDatabase>();
         services.AddScoped<IUserDatabase, PostgresUserDatabase>();
       }
       services.Configure<TellerConfiguration>(Configuration.GetSection("Teller"));

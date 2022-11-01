@@ -172,13 +172,13 @@ class TellerManager {
 
   private loadAccountData(id: string) {
     TellerAPI.getAccountBalance(id).then(balance => {
-      this.onlinkedbalanceupdated.invoke(balance);
       this.balances.set(id, balance);
+      this.onlinkedbalanceupdated.invoke(balance);
     }).catch(this.handleError);
 
     TellerAPI.getAccountTransactions(id).then(transactions => {
-      this.onlinkedtransactionsupdated.invoke(transactions);
       this.transactions.set(id, transactions);
+      this.onlinkedtransactionsupdated.invoke(transactions);
     }).catch(this.handleError);
     // const [balance, transactions] = await Promise.all([TellerAPI.getAccountBalance(id), TellerAPI.getAccountTransactions(id)]);
     // this.onlinkedbalanceupdated.invoke(balance);
