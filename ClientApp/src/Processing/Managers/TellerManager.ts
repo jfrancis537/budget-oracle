@@ -6,7 +6,6 @@ import { autobind } from "../../Utilities/Decorators";
 import { AuthorizationError } from "../../Utilities/Errors/AuthorizationError";
 import { download } from "../../Utilities/FileUtils";
 import { LinkedAccountCalculation } from "./CalculationsManager";
-import { FileManager } from "./FileManager";
 import { UserManager } from "./UserManager";
 
 const applicationId = "app_o20o86tki9q1nfvons000";
