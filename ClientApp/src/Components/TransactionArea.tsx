@@ -160,7 +160,11 @@ export const TransactionArea: React.FC = () => {
     )
   }
 
-  function renderMonthPicker() {
+  function exportReport(data: TransactionData[]) {
+    TellerManager.exportReport(data);
+  }
+
+  function renderControls(filteredTransactions: TransactionData[]) {
     const months = new Set<number>();
     const years = new Set<number>();
     for (const t of transactions!) {
@@ -197,7 +201,7 @@ export const TransactionArea: React.FC = () => {
               return elems;
             }, [])}
           </DropdownButton>
-          <Button disabled>
+          <Button disabled={filteredTransactions.length <= 0} onClick={() => exportReport(filteredTransactions)}>
             <i className="bi bi-save"></i>
           </Button>
         </div>
@@ -230,22 +234,39 @@ export const TransactionArea: React.FC = () => {
     }
   }
 
-  function renderTransactions() {
-    if (month > 0 && year > 0) {
-      const filteredTransactions = transactions!.filter(t => {
-        const category = TellerManager.getTransactionCategory(t.id);
-        const date = moment(t.date);
-        if (categoryFilter === IGNORED_TRANSACTION_CATEGORY) {
-          return category === IGNORED_TRANSACTION_CATEGORY;
-        } else {
-          return (
-            (date.month() === month && date.year() === year) &&
-            (categoryFilter === null || category === categoryFilter) &&
-            (category !== IGNORED_TRANSACTION_CATEGORY)
-          )
+  function processTransactions(): [TransactionData[],Map<string,Set<TransactionData>>] {
+    const transactionsPerAccount = new Map<string, Set<TransactionData>>();
+    const filteredTransactions = transactions!.filter(t => {
+      const category = TellerManager.getTransactionCategory(t.id);
+      const date = moment(t.date);
+      if (categoryFilter === IGNORED_TRANSACTION_CATEGORY) {
+        if (category === IGNORED_TRANSACTION_CATEGORY) {
+          //Add to the map
+          if (!transactionsPerAccount.has(t.accountId)) {
+            transactionsPerAccount.set(t.accountId, new Set());
+          }
+          transactionsPerAccount.get(t.accountId)!.add(t);
+          return true;
         }
-      });
-      sortTransactions(filteredTransactions);
+      } else {
+        if ((date.month() === month && date.year() === year) &&
+          (categoryFilter === null || category === categoryFilter) &&
+          (category !== IGNORED_TRANSACTION_CATEGORY)) {
+
+          if (!transactionsPerAccount.has(t.accountId)) {
+            transactionsPerAccount.set(t.accountId, new Set());
+          }
+          transactionsPerAccount.get(t.accountId)!.add(t);
+          return true;
+        }
+      }
+    });
+    sortTransactions(filteredTransactions);
+    return [filteredTransactions,transactionsPerAccount];
+  }
+
+  function renderTransactions(filteredTransactions: TransactionData[]) {
+    if (month > 0 && year > 0) {
       return (
         <>
           {renderStats(filteredTransactions)}
@@ -259,18 +280,12 @@ export const TransactionArea: React.FC = () => {
 
   function render(): JSX.Element | null {
     if (transactions && accounts) {
-      const transactionsPerAccount = new Map<string, Set<TransactionData>>();
-      for (const transaction of transactions) {
-        if (!transactionsPerAccount.has(transaction.accountId)) {
-          transactionsPerAccount.set(transaction.accountId, new Set());
-        }
-        transactionsPerAccount.get(transaction.accountId)!.add(transaction);
-      }
+      const [filteredTransactions,_] = processTransactions();
       return (
         <>
-          {renderMonthPicker()}
+          {renderControls(filteredTransactions)}
           <div className={styles['transactions-container']}>
-            {renderTransactions()}
+            {renderTransactions(filteredTransactions)}
           </div>
         </>
       )

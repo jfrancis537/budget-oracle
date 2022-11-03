@@ -2,9 +2,10 @@
   "name": "budgetoracle",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLISCENSED",
   "dependencies": {
     "@craco/craco": "^6.4.3",
-    "@testing-library/jest-dom": "^5.11.9",
+    "@testing-library/jest-dom": "^5. 11.9",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.8.3",
     "@types/bootstrap": "^5.0.9",
