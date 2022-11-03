@@ -234,35 +234,24 @@ export const TransactionArea: React.FC = () => {
     }
   }
 
-  function processTransactions(): [TransactionData[],Map<string,Set<TransactionData>>] {
-    const transactionsPerAccount = new Map<string, Set<TransactionData>>();
+  function processTransactions() {
     const filteredTransactions = transactions!.filter(t => {
       const category = TellerManager.getTransactionCategory(t.id);
       const date = moment(t.date);
       if (categoryFilter === IGNORED_TRANSACTION_CATEGORY) {
         if (category === IGNORED_TRANSACTION_CATEGORY) {
-          //Add to the map
-          if (!transactionsPerAccount.has(t.accountId)) {
-            transactionsPerAccount.set(t.accountId, new Set());
-          }
-          transactionsPerAccount.get(t.accountId)!.add(t);
           return true;
         }
       } else {
         if ((date.month() === month && date.year() === year) &&
           (categoryFilter === null || category === categoryFilter) &&
           (category !== IGNORED_TRANSACTION_CATEGORY)) {
-
-          if (!transactionsPerAccount.has(t.accountId)) {
-            transactionsPerAccount.set(t.accountId, new Set());
-          }
-          transactionsPerAccount.get(t.accountId)!.add(t);
           return true;
         }
       }
     });
     sortTransactions(filteredTransactions);
-    return [filteredTransactions,transactionsPerAccount];
+    return filteredTransactions;
   }
 
   function renderTransactions(filteredTransactions: TransactionData[]) {
@@ -280,7 +269,7 @@ export const TransactionArea: React.FC = () => {
 
   function render(): JSX.Element | null {
     if (transactions && accounts) {
-      const [filteredTransactions,_] = processTransactions();
+      const filteredTransactions = processTransactions();
       return (
         <>
           {renderControls(filteredTransactions)}

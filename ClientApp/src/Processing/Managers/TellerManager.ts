@@ -142,11 +142,12 @@ class TellerManager {
 
   public exportReport(data: TransactionData[])
   {
-    const report = data.map(t => {
+    let report = data.map(t => {
       const category = this.getTransactionCategory(t.id);
-      [t.description,`$${t.amount}`,category ?? 'uncategorized'].join(',');
+      return [t.description,`$${t.amount}`,category ?? 'uncategorized'].join(';');
     }).join("\n");
-    download(`spending_report_${(new Date()).toLocaleString().replace(", ", "-")}.json`,report);
+    report = `sep=;\n${report}`;
+    download(`spending_report_${(new Date()).toLocaleString().replace(", ", "-")}.csv`,report);
   }
 
   public getCurrentAccountBalance(id: string) {
