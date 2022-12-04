@@ -137,7 +137,11 @@ class TellerManager {
   public clear() {
     this.accounts.clear();
     this.balances.clear();
+    this.transactions.clear();
+    this.categorizedTransactions.clear();
+    this.categories.clear();
     this.onlinkedaccountsupdated.invoke([]);
+    this.onlinkedtransactionsupdated.invoke([]);
   }
 
   public exportReport(data: TransactionData[])

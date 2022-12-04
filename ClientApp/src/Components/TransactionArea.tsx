@@ -239,7 +239,8 @@ export const TransactionArea: React.FC = () => {
       const category = TellerManager.getTransactionCategory(t.id);
       const date = moment(t.date);
       if (categoryFilter === IGNORED_TRANSACTION_CATEGORY) {
-        if (category === IGNORED_TRANSACTION_CATEGORY) {
+        if (category === IGNORED_TRANSACTION_CATEGORY && 
+          (date.month() === month && date.year() === year)) {
           return true;
         }
       } else {
