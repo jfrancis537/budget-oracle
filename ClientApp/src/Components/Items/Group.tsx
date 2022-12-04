@@ -27,6 +27,7 @@ abstract class Group<P extends IGroupProps, S = {}> extends React.Component<P, S
   protected abstract add(): void;
   protected abstract delete(): Promise<void>;
   protected abstract renderTitle(): JSX.Element | string;
+  protected abstract getItems(): string[]
 
   protected renderAdditionalButtons(): JSX.Element | null { return null; }
 
@@ -48,7 +49,7 @@ abstract class Group<P extends IGroupProps, S = {}> extends React.Component<P, S
           </div>
         </Card.Header>
         <Card.Body className={groupStyles['items']}>
-          {[...this.props.items].map(this.renderItem)}
+          {this.getItems().map(this.renderItem)}
         </Card.Body>
       </Card>
     );
@@ -77,6 +78,10 @@ export class CostGroup extends Group<ICostGroupProps> {
       result = null;
     }
     return result;
+  }
+
+  protected getItems(): string[] {
+    return [...this.props.items];
   }
 
   @autobind
@@ -166,6 +171,23 @@ export class InvestmentGroup extends Group<IGroupProps, IInvestmentGroupState> {
         <i className="bi bi-arrow-clockwise"></i>
       </Button>
     )
+  }
+
+  protected getItems(): string[] {
+    return [...this.props.items].sort((a, b) => {
+      const itemA = AppStateManager.getInvestment(a);
+      const itemB = AppStateManager.getInvestment(b);
+      if (itemA && itemB) {
+        return itemA.symbol.localeCompare(itemB.symbol);
+      } else if (!itemA) {
+        return -1;
+      } else if (!itemB) {
+        return 1;
+      }
+      else {
+        return 0;
+      }
+    });
   }
 
   @autobind
