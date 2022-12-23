@@ -5,6 +5,7 @@ import { autobind } from "../Utilities/Decorators";
 import { Tabs } from "./Tabs";
 
 import styles from "../styles/DetailedResults.module.css";
+import { Currency } from "./Currency";
 
 enum DetailedResultsPage {
   Expenses = "expenses",
@@ -82,14 +83,14 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
           unavoidable.push(
             <div key={bill.id}>
               <label>{bill.name}:&nbsp;</label>
-              <span>${cost}</span>
+              <Currency amount={cost}/>
             </div>
           );
         } else {
           avoidable.push(
             <div key={bill.id}>
               <label>{bill.name}:&nbsp;</label>
-              <span>${cost}</span>
+              <Currency amount={cost}/>
             </div>
           );
         }
@@ -98,7 +99,7 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
       unavoidable.push(
         <div key='Investment Margin Interest'>
           <label>{"Margin Interest"}:&nbsp;</label>
-          <span>${this.props.calculations.investmentResults.totalInterestOwed.toFixed(2)}</span>
+          <Currency amount={this.props.calculations.investmentResults.totalInterestOwed}/>
         </div>
       );
       return (

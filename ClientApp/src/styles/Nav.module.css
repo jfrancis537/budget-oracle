@@ -17,5 +17,5 @@ nav.navbar {
 }
 
 .date-picker::-webkit-calendar-picker-indicator {
-  filter: invert();
+  margin-left: 1rem;
 }

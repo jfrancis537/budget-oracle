@@ -12,6 +12,7 @@ import { InvestmentItem } from "./InvestmentItem";
 import { InvestmentGroupManager } from "../../Processing/Managers/InvestmentGroupManager";
 import { GroupType } from "../../Processing/Enums/GroupType";
 import { InvestmentManager } from "../../Processing/Managers/InvestmentManger";
+import { Currency } from "../Currency";
 
 interface IGroupProps {
   name: string;
@@ -33,7 +34,7 @@ abstract class Group<P extends IGroupProps, S = {}> extends React.Component<P, S
 
   public render() {
     return (
-      <Card className={groupStyles['card']} bg='dark' text='light'>
+      <Card className={groupStyles['card']}  text='light'>
         <Card.Header className={groupStyles['header']}>
           <div className={groupStyles['group-title']}>{this.renderTitle()}</div>
           <div className={groupStyles['button-group']}>
@@ -48,7 +49,7 @@ abstract class Group<P extends IGroupProps, S = {}> extends React.Component<P, S
             </ButtonGroup>
           </div>
         </Card.Header>
-        <Card.Body className={groupStyles['items']}>
+        <Card.Body className={groupStyles['items']} >
           {this.getItems().map(this.renderItem)}
         </Card.Body>
       </Card>
@@ -213,13 +214,12 @@ export class InvestmentGroup extends Group<IGroupProps, IInvestmentGroupState> {
 
   protected renderTitle(): JSX.Element {
 
-    const colors = ['#e76d6d', 'unset', 'lime'];
-
-    let valueStr = "---";
+    let valueReady = false;
     let costBasisTotal = 0;
     let totalValue = 0;
     let investmentsCalculated = 0;
     let gainColorIndex = 1;
+    let value = 0;
     for (const id of this.props.items) {
       const investment = AppStateManager.getInvestment(id);
       if (investment) {
@@ -231,13 +231,13 @@ export class InvestmentGroup extends Group<IGroupProps, IInvestmentGroupState> {
     if (investmentsCalculated > 0) {
       const change = totalValue - costBasisTotal;
       gainColorIndex = change > 0 ? 2 : (change < 0 ? 0 : 1);
-      valueStr = this.state.mode === 'value' ? totalValue.toFixed(2) : change.toFixed(2);
+      valueReady = true;
+      value = this.state.mode === 'value' ? totalValue : change;
     }
-    const color = colors[gainColorIndex];
     return (
       <>
         <span>{this.props.name}&nbsp;:&nbsp;</span>
-        <span style={{ color: color }} onClick={this.changeMode}>{valueStr}</span>
+        {valueReady ? <Currency amount={value} tag='span' onclick={this.changeMode}/> : <span>---</span>}
       </>
     );
   }

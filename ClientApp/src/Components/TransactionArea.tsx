@@ -7,6 +7,7 @@ import { Sorting } from '../Utilities/ArrayUtils';
 import { getMonthNameFromNumber } from '../Utilities/DateTools';
 
 import styles from '../styles/TransactionArea.module.css';
+import { Currency } from './Currency';
 
 interface ITransactionItemProps {
   transaction: TransactionData;
@@ -18,6 +19,11 @@ enum SortMode {
   PriceLowestFirst = "Price (Lowest First)",
   MostRecent = "Most Recent",
   Oldest = "Oldest"
+}
+
+enum ViewMode {
+  Summary,
+  Transaction
 }
 
 const TransactionItem: React.FC<ITransactionItemProps> = props => {
@@ -35,7 +41,9 @@ const TransactionItem: React.FC<ITransactionItemProps> = props => {
   const [title, setTitle] = useState<string>(TellerManager.getTransactionCategory(t.id) ?? 'Uncategorized')
 
   function onCategoriesUpdated(names: Set<string>) {
-    setCategories([...names]);
+    const categories = [...names];
+    categories.sort();
+    setCategories(categories);
   }
 
   async function addCategory() {
@@ -72,7 +80,7 @@ const TransactionItem: React.FC<ITransactionItemProps> = props => {
     return (
       <div className={styles['transaction-body']}>
         <div>{t.description}</div>
-        <div style={{ color: value > 0 ? 'lime' : '#e76d6d' }}>${Math.abs(t.amount).toFixed(2)}</div>
+        <Currency amount={t.amount} />
         <div>{t.date}</div>
         <div className={styles['category-container']}>
           <DropdownButton title={title} >
@@ -107,6 +115,7 @@ export const TransactionArea: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>(TellerManager.categoryNames);
   const [sortMode, setSortMode] = useState<SortMode>(SortMode.MostRecent);
+  const [view, setView] = useState<ViewMode>(ViewMode.Transaction);
 
   useEffect(() => {
     TellerManager.onlinkedtransactionsupdated.addListener(onTransactionsUpdated);
@@ -130,7 +139,9 @@ export const TransactionArea: React.FC = () => {
   }
 
   function onCategoriesUpdated(categories: Set<string>) {
-    setCategories([...categories]);
+    const sortedCategories = [...categories];
+    sortedCategories.sort();
+    setCategories(sortedCategories);
   }
 
   function onTransactionCategorized() {
@@ -150,7 +161,7 @@ export const TransactionArea: React.FC = () => {
       <>
         <div className={styles['transaction-stats']}>
           <div>Total:</div>
-          <div style={{ color: total > 0 ? 'lime' : '#e76d6d' }}>${Math.abs(total).toFixed(2)}</div>
+          <Currency amount={total} />
         </div>
         <div className={styles['transaction-stats']}>
           <div>Transactions:</div>
@@ -162,6 +173,15 @@ export const TransactionArea: React.FC = () => {
 
   function exportReport(data: TransactionData[]) {
     TellerManager.exportReport(data);
+  }
+
+  function onCategoryChanged(category: string | null) {
+    setCategoryFilter(category)
+    setView(ViewMode.Transaction);
+  }
+
+  function toggleViewMode() {
+    setView(view === ViewMode.Summary ? ViewMode.Transaction : ViewMode.Summary);
   }
 
   function renderControls(filteredTransactions: TransactionData[]) {
@@ -189,11 +209,15 @@ export const TransactionArea: React.FC = () => {
               </Dropdown.Item>
             ))}
           </DropdownButton>
-          <DropdownButton title={categoryFilter ?? 'Categories'} disabled={categoryFilter === null && categories.length === 0}>
+          <DropdownButton title={categoryFilter ?? 'Filter'} disabled={categoryFilter === null && categories.length === 0}>
+            <Dropdown.Item onClick={toggleViewMode}>
+              {view === ViewMode.Summary ? 'All Transactions' : 'Summary'}
+            </Dropdown.Item>
+            <Dropdown.Divider />
             {[null, ...categories].reduce((elems: JSX.Element[], category, index) => {
               if (category || categoryFilter !== null) {
                 elems.push(
-                  <Dropdown.Item key={index} active={categoryFilter === category} onSelect={() => setCategoryFilter(category)}>
+                  <Dropdown.Item key={index} active={categoryFilter === category} onSelect={() => onCategoryChanged(category)}>
                     {category ?? 'Clear Filter...'}
                   </Dropdown.Item>
                 );
@@ -239,7 +263,7 @@ export const TransactionArea: React.FC = () => {
       const category = TellerManager.getTransactionCategory(t.id);
       const date = moment(t.date);
       if (categoryFilter === IGNORED_TRANSACTION_CATEGORY) {
-        if (category === IGNORED_TRANSACTION_CATEGORY && 
+        if (category === IGNORED_TRANSACTION_CATEGORY &&
           (date.month() === month && date.year() === year)) {
           return true;
         }
@@ -250,6 +274,7 @@ export const TransactionArea: React.FC = () => {
           return true;
         }
       }
+      return false
     });
     sortTransactions(filteredTransactions);
     return filteredTransactions;
@@ -268,6 +293,30 @@ export const TransactionArea: React.FC = () => {
     }
   }
 
+  function renderSummary(transactions: TransactionData[]) {
+    const categoryTotals = new Map<string, number>();
+    for (const data of transactions) {
+      const category = TellerManager.getTransactionCategory(data.id) ?? 'Uncategorized';
+      let amount = categoryTotals.get(category) ?? 0;
+      amount += data.amount;
+      categoryTotals.set(category, amount);
+    }
+    console.log(categoryTotals, transactions)
+    return (
+      <>
+        {categories.map(cat => {
+          const total = categoryTotals.get(cat) ?? 0
+          return (
+            <div className={styles['transaction-stats']}>
+              <div>{cat}</div>
+              <Currency amount={total} />
+            </div>
+          )
+        })}
+      </>
+    );
+  }
+
   function render(): JSX.Element | null {
     if (transactions && accounts) {
       const filteredTransactions = processTransactions();
@@ -275,7 +324,7 @@ export const TransactionArea: React.FC = () => {
         <>
           {renderControls(filteredTransactions)}
           <div className={styles['transactions-container']}>
-            {renderTransactions(filteredTransactions)}
+            {view === ViewMode.Transaction ? renderTransactions(filteredTransactions) : renderSummary(filteredTransactions)}
           </div>
         </>
       )

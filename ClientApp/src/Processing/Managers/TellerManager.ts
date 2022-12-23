@@ -76,7 +76,9 @@ class TellerManager {
   }
 
   public get categoryNames() {
-    return [...this.categories];
+    const sorted =  [...this.categories];
+    sorted.sort();
+    return sorted;
   }
 
   public getTransactions() {

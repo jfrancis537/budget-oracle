@@ -235,7 +235,7 @@ export class UIHeader extends React.Component<{}, IUIHeaderState> {
     return (
       <>
         <Row>
-          <Navbar collapseOnSelect bg="dark" expand='xl' variant='dark' className={navStyles['navbar']}>
+          <Navbar collapseOnSelect bg="primary" expand='xl' variant='dark' className={navStyles['navbar']}>
             <Navbar.Brand>Budget Oracle</Navbar.Brand>
             <Navbar.Toggle />
             <Navbar.Collapse>
