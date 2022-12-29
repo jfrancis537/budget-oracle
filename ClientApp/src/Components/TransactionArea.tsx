@@ -80,7 +80,7 @@ const TransactionItem: React.FC<ITransactionItemProps> = props => {
     return (
       <div className={styles['transaction-body']}>
         <div>{t.description}</div>
-        <Currency amount={t.amount} />
+        <Currency amount={value} />
         <div>{t.date}</div>
         <div className={styles['category-container']}>
           <DropdownButton title={title} >

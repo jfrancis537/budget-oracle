@@ -12,7 +12,7 @@ import { InvestmentItem } from "./InvestmentItem";
 import { InvestmentGroupManager } from "../../Processing/Managers/InvestmentGroupManager";
 import { GroupType } from "../../Processing/Enums/GroupType";
 import { InvestmentManager } from "../../Processing/Managers/InvestmentManger";
-import { Currency } from "../Currency";
+import { Currency, CurrencyColorMode } from "../Currency";
 
 interface IGroupProps {
   name: string;
@@ -34,7 +34,7 @@ abstract class Group<P extends IGroupProps, S = {}> extends React.Component<P, S
 
   public render() {
     return (
-      <Card className={groupStyles['card']}  text='light'>
+      <Card className={groupStyles['card']} text='light'>
         <Card.Header className={groupStyles['header']}>
           <div className={groupStyles['group-title']}>{this.renderTitle()}</div>
           <div className={groupStyles['button-group']}>
@@ -218,7 +218,7 @@ export class InvestmentGroup extends Group<IGroupProps, IInvestmentGroupState> {
     let costBasisTotal = 0;
     let totalValue = 0;
     let investmentsCalculated = 0;
-    let gainColorIndex = 1;
+    let gainColor = CurrencyColorMode.Neutral;
     let value = 0;
     for (const id of this.props.items) {
       const investment = AppStateManager.getInvestment(id);
@@ -230,14 +230,14 @@ export class InvestmentGroup extends Group<IGroupProps, IInvestmentGroupState> {
     }
     if (investmentsCalculated > 0) {
       const change = totalValue - costBasisTotal;
-      gainColorIndex = change > 0 ? 2 : (change < 0 ? 0 : 1);
+      gainColor = change > 0 ? CurrencyColorMode.Positive : (change < 0 ? CurrencyColorMode.Negative : CurrencyColorMode.Neutral);
       valueReady = true;
       value = this.state.mode === 'value' ? totalValue : change;
     }
     return (
       <>
         <span>{this.props.name}&nbsp;:&nbsp;</span>
-        {valueReady ? <Currency amount={value} tag='span' onclick={this.changeMode}/> : <span>---</span>}
+        {valueReady ? <Currency amount={value} tag='span' onclick={this.changeMode} color={gainColor}/> : <span>---</span>}
       </>
     );
   }
