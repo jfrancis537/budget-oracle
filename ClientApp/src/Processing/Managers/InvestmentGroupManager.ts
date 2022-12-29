@@ -159,7 +159,7 @@ private async reload() {
 
 public async export() {
   if (UserManager.isLoggedIn) {
-    return await DataAPI.getGroupData();
+    return await DataAPI.getInvestmentGroupData();
   }
 }
 
