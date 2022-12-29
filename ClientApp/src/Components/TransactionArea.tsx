@@ -297,8 +297,13 @@ export const TransactionArea: React.FC = () => {
     const categoryTotals = new Map<string, number>();
     for (const data of transactions) {
       const category = TellerManager.getTransactionCategory(data.id) ?? 'Uncategorized';
+      const account = accounts?.find(acct => acct.id === data.accountId);
+      let value = data.amount;
+      if (account) {
+        value = account.type === 'credit' ? value * -1 : value;
+      }
       let amount = categoryTotals.get(category) ?? 0;
-      amount += data.amount;
+      amount += value;
       categoryTotals.set(category, amount);
     }
     console.log(categoryTotals, transactions)
