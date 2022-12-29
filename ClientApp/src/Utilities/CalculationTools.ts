@@ -138,9 +138,7 @@ export namespace CalculationTools {
       marginInterest += margin;
       const investmentCostBasis = (investment.costBasisPerShare * investment.shares) - investment.marginDebt;
       costBasis += investmentCostBasis;
-      if ((investmentValue - investmentCostBasis) < 0) {
-        totalUnrealizedLosses += (investmentValue - investmentCostBasis);
-      }
+      totalUnrealizedLosses += (investmentValue - investmentCostBasis);
     }
     const result: InvestmentCalculation = {
       totalValue: value,
