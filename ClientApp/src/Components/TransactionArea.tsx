@@ -281,7 +281,7 @@ export const TransactionArea: React.FC = () => {
   }
 
   function renderTransactions(filteredTransactions: TransactionData[]) {
-    if (month > 0 && year > 0) {
+    if (month >= 0 && year > 0) {
       return (
         <>
           {renderStats(filteredTransactions)}
