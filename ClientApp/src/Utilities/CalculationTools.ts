@@ -56,6 +56,18 @@ export namespace CalculationTools {
   }
 
   export function calculateTotal(calcs: CalculationResult, displayUnrealized: boolean) {
+
+    const investmentsWithUnrealized = calcs.investmentResults.totalValue;
+    let investmentsBaseValue = 0;
+    if(calcs.investmentResults.totalCostBasis > calcs.investmentResults.totalValue)
+    {
+      investmentsBaseValue = calcs.investmentResults.totalValue;
+    } else {
+      investmentsBaseValue = calcs.investmentResults.totalCostBasis;
+    }
+
+    // (calcs.investmentResults.totalCostBasis - calcs.investmentResults.totalUnrealizedLosses)) -
+    //   calcs.investmentResults.totalInterestOwed;
     const totals =
       calcs.accountTotal +
       calcs.linkedAccountTotal.accountsValue -
@@ -65,8 +77,7 @@ export namespace CalculationTools {
       calcs.billResults.allBills[1] +
       calcs.scheduledVestsResult[1] +
       calcs.scheduledPaymentsResult[1] +
-      (displayUnrealized ? calcs.investmentResults.totalValue : (calcs.investmentResults.totalCostBasis - calcs.investmentResults.totalUnrealizedLosses)) -
-      calcs.investmentResults.totalInterestOwed;
+      (displayUnrealized ? investmentsWithUnrealized : investmentsBaseValue) - calcs.investmentResults.totalInterestOwed
     return totals;
   }
 
