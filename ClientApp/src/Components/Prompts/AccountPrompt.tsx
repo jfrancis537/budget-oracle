@@ -72,7 +72,6 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
       PromptManager.requestClosePrompt();
     } catch (err)
     {
-      console.log(err);
       this.setState({
         error: "Failed to update"
       });

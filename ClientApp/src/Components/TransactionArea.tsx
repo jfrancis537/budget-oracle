@@ -94,7 +94,7 @@ const TransactionItem: React.FC<ITransactionItemProps> = props => {
               }
               return filteredItems;
             }, [])}
-            <Dropdown.Item onSelect={addCategory}>
+            <Dropdown.Item onClick={addCategory}>
               Add Category
             </Dropdown.Item>
           </DropdownButton>
@@ -197,14 +197,14 @@ export const TransactionArea: React.FC = () => {
         <div className={styles['container']}>
           <DropdownButton title={month >= 0 ? getMonthNameFromNumber(month) : 'Month'}>
             {[...months].sort(Sorting.num).map(monthNum => (
-              <Dropdown.Item key={monthNum} active={monthNum === month} onSelect={() => setMonth(monthNum)}>
+              <Dropdown.Item key={monthNum} active={monthNum === month} onClick={() => setMonth(monthNum)}>
                 {getMonthNameFromNumber(monthNum)}
               </Dropdown.Item>
             ))}
           </DropdownButton>
           <DropdownButton title={year >= 0 ? year : 'Year'}>
             {[...years].sort(Sorting.num).map(yearNum => (
-              <Dropdown.Item key={yearNum} active={yearNum === month} onSelect={() => setYear(yearNum)}>
+              <Dropdown.Item key={yearNum} active={yearNum === month} onClick={() => setYear(yearNum)}>
                 {yearNum}
               </Dropdown.Item>
             ))}
@@ -217,7 +217,7 @@ export const TransactionArea: React.FC = () => {
             {[null, ...categories].reduce((elems: JSX.Element[], category, index) => {
               if (category || categoryFilter !== null) {
                 elems.push(
-                  <Dropdown.Item key={index} active={categoryFilter === category} onSelect={() => onCategoryChanged(category)}>
+                  <Dropdown.Item key={index} active={categoryFilter === category} onClick={() => onCategoryChanged(category)}>
                     {category ?? 'Clear Filter...'}
                   </Dropdown.Item>
                 );
@@ -306,7 +306,6 @@ export const TransactionArea: React.FC = () => {
       amount += value;
       categoryTotals.set(category, amount);
     }
-    console.log(categoryTotals, transactions)
     return (
       <>
         {categories.map(cat => {

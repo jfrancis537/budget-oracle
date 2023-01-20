@@ -183,7 +183,6 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
             marginInterestRate: 0
           }
           investments.set(investment.symbol, investment);
-          console.log(investments);
         }
       }
       await InvestmentGroupManager.clearGroup(this.props.groupName);
