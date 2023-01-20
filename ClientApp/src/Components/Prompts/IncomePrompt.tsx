@@ -1,6 +1,6 @@
 import moment, { Moment } from "moment";
 import React from "react"
-import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
+import { Button, Form, InputGroup, Modal } from "react-bootstrap"
 import { IncomeFrequency } from "../../Processing/Enums/IncomeFrequency";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
@@ -155,7 +155,7 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
         </Modal.Header>
         <Modal.Body>
           <InputGroup className="mb-3">
-            <FormControl
+            <Form.Control
               placeholder="Name"
               aria-label="income source name"
               onChange={this.handleNameChanged}
@@ -163,21 +163,16 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
             />
           </InputGroup>
           <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>$</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
+            <InputGroup.Text>$</InputGroup.Text>
+            <Form.Control
               aria-label="Amount (to the nearest dollar)"
               onChange={this.handleValueChanged}
               value={this.state.value}
             />
           </InputGroup>
           <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>Pay Frequency</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
-              as='select'
+            <InputGroup.Text>Pay Frequency</InputGroup.Text>
+            <Form.Select
               onChange={this.handleFrequencyChanged}
               value={this.state.incomeFrequency}
             >
@@ -188,14 +183,12 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
               <option value={IncomeFrequency.Monthly}>Monthly</option>
               <option value={IncomeFrequency.Quarterly}>Quarterly</option>
               <option disabled value={IncomeFrequency.Anually}>Anually</option>
-            </FormControl>
+            </Form.Select>
           </InputGroup>
           <InputGroup className="mb-3" hidden={this.state.incomeFrequency !== IncomeFrequency.Biweekly}>
-            <InputGroup.Prepend>
-              <InputGroup.Text>
-                <i className="bi bi-calendar-event" />
-              </InputGroup.Text>
-            </InputGroup.Prepend>
+            <InputGroup.Text>
+              <i className="bi bi-calendar-event" />
+            </InputGroup.Text>
             <DatePicker defaultDate={this.state.startDate} calendarIconBackgroundEnabled className="form-control" onChange={this.handleStartDateChanged} />
           </InputGroup>
           <InputGroup
@@ -205,27 +198,21 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
               this.state.incomeFrequency >= IncomeFrequency.Monthly
             }
           >
-            <InputGroup.Prepend>
-              <InputGroup.Text>Pays on Weekends</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
-              as='select'
+            <InputGroup.Text>Pays on Weekends</InputGroup.Text>
+            <Form.Select
               onChange={this.handlePaysOnWeekendsChanged}
               value={`${this.state.paysOnWeekends}`}
             >
               <option value={`${true}`}>Yes</option>
               <option value={`${false}`}>No</option>
-            </FormControl>
+            </Form.Select>
           </InputGroup>
           <InputGroup
             className="mb-3"
             hidden={this.state.incomeFrequency !== IncomeFrequency.Monthly}
           >
-            <InputGroup.Prepend>
-              <InputGroup.Text>Day of Month</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
-              as='select'
+            <InputGroup.Text>Day of Month</InputGroup.Text>
+            <Form.Select
               onChange={this.handleDayOfMonthChanged}
               value={`${this.state.dayOfMonth}`}
             >
@@ -236,7 +223,7 @@ export class IncomePrompt extends React.Component<IIncomePromptProps, IIncomePro
                 }
                 return results;
               }()}
-            </FormControl>
+            </Form.Select>
           </InputGroup>
         </Modal.Body>
         <Modal.Footer>

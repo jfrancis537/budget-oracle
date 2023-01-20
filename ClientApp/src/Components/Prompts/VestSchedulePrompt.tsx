@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { Button, ButtonGroup, FormControl, InputGroup, Modal, Table } from "react-bootstrap"
+import { Button, ButtonGroup, Form, InputGroup, Modal, Table } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { autobind } from "../../Utilities/Decorators";
@@ -12,6 +12,7 @@ import { CurrencyInput } from "../Inputs/CurrencyInput";
 import { NumberInput } from "../Inputs/NumberInput";
 import { DatePicker } from "../Inputs/DatePicker";
 import moment from "moment";
+import { CSVParseError } from "../../Utilities/CSVParser";
 
 export interface IVestSchedulePromptProps {
   editing: boolean;
@@ -75,7 +76,7 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
   }
 
   @autobind
-  private handleCreateModeChanged(event: React.ChangeEvent<HTMLInputElement>) {
+  private handleCreateModeChanged(event: React.ChangeEvent<HTMLSelectElement>) {
     let value = event.target.value as VestScheduleCreateMode;
     this.setState({
       createMode: value
@@ -252,10 +253,16 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
         this.setState({
           vests: schedule.vests
         });
-      } catch {
-        this.setState({
-          errorMessage: "Failed to upload CSV. Ensure the document was formatted correctly."
-        });
+      } catch (err) {
+        if (err instanceof CSVParseError) {
+          this.setState({
+            errorMessage: "Failed to upload CSV. The document should have headers: [" + err.headers.join(" ,") + "]"
+          });
+        } else {
+          this.setState({
+            errorMessage: "Failed to upload CSV. Ensure the document was formatted correctly."
+          });
+        }
       }
     }
   }
@@ -280,7 +287,7 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
       return (
         <>
           <InputGroup className="mb-3">
-            <FormControl
+            <Form.Control
               placeholder="Name"
               aria-label="name"
               onChange={this.handleNameChanged}
@@ -288,14 +295,13 @@ export class VestSchedulePrompt extends React.Component<IVestSchedulePromptProps
             />
           </InputGroup>
           <InputGroup className="mb-3">
-            <FormControl
-              as='select'
+            <Form.Select
               onChange={this.handleCreateModeChanged}
               value={this.state.createMode}
             >
               <option value={VestScheduleCreateMode.csv}>CSV</option>
               <option value={VestScheduleCreateMode.manual}>Manual Input</option>
-            </FormControl>
+            </Form.Select>
           </InputGroup>
           {this.renderControlsForMode()}
         </>
@@ -397,7 +403,7 @@ const VestEditor: React.FC<IVestEditorProps> = (props) => {
   return (
     <>
       <InputGroup className="mb-3">
-        <FormControl
+        <Form.Control
           placeholder="Name"
           aria-label="name"
           onChange={e => setName(e.target.value)}
@@ -405,7 +411,7 @@ const VestEditor: React.FC<IVestEditorProps> = (props) => {
         />
       </InputGroup>
       <InputGroup className="mb-3">
-        <FormControl
+        <Form.Control
           placeholder="Symbol"
           aria-label="Ticker Symbol"
           onChange={e => setSymbol(e.target.value)}
@@ -414,25 +420,19 @@ const VestEditor: React.FC<IVestEditorProps> = (props) => {
         />
       </InputGroup>
       <InputGroup className="mb-3">
-        <InputGroup.Prepend>
-          <InputGroup.Text>
-            <i className="bi bi-calendar-event" />
-          </InputGroup.Text>
-        </InputGroup.Prepend>
+        <InputGroup.Text>
+          <i className="bi bi-calendar-event" />
+        </InputGroup.Text>
         <DatePicker defaultDate={date} calendarIconBackgroundEnabled className="form-control" onChange={setDate} />
       </InputGroup>
       <InputGroup className="mb-3">
-        <InputGroup.Prepend>
-          <InputGroup.Text>Tax Rate</InputGroup.Text>
-        </InputGroup.Prepend>
+        <InputGroup.Text>Tax Rate</InputGroup.Text>
         <NumberInput
           defaultValue={taxRate}
           ariaLabel="tax rate"
           onChange={val => setTaxRate(val / 100)}
         />
-        <InputGroup.Append>
-          <InputGroup.Text>%</InputGroup.Text>
-        </InputGroup.Append>
+        <InputGroup.Text>%</InputGroup.Text>
       </InputGroup>
       <label>Cost Basis</label>
       <InputGroup className="mb-3">
@@ -441,22 +441,16 @@ const VestEditor: React.FC<IVestEditorProps> = (props) => {
           ariaLabel="Number of shares"
           onChange={setShares}
         />
-        <InputGroup.Append>
-          <InputGroup.Text>Shares</InputGroup.Text>
-        </InputGroup.Append>
+        <InputGroup.Text>Shares</InputGroup.Text>
       </InputGroup>
       <InputGroup className="mb-3">
-        <InputGroup.Prepend>
-          <InputGroup.Text>@</InputGroup.Text>
-        </InputGroup.Prepend>
+        <InputGroup.Text>@</InputGroup.Text>
         <CurrencyInput
           ariaLabel="Cost basis per share"
           defaultValue={costBasis}
           onChange={setCostBasis}
         />
-        <InputGroup.Append>
-          <InputGroup.Text>Per Share</InputGroup.Text>
-        </InputGroup.Append>
+        <InputGroup.Text>Per Share</InputGroup.Text>
       </InputGroup>
 
     </>
@@ -575,9 +569,7 @@ const GlobalVestEditor: React.FC<IGlobalVestEditorProps> = (props) => {
     return (
       <>
         <InputGroup className="mb-3">
-          <InputGroup.Prepend>
-            <InputGroup.Text>Split Multiplier</InputGroup.Text>
-          </InputGroup.Prepend>
+          <InputGroup.Text>Split Multiplier</InputGroup.Text>
           <NumberInput
             defaultValue={splitMultiplier}
             ariaLabel="Share multiplier"

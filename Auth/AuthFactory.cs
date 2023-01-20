@@ -65,7 +65,7 @@ namespace BudgetOracle.Auth
 
       return user;
     }
-    private string BuildToken(User user)
+    private static string BuildToken(User user)
     {
       var claims = new[] {
             new Claim(ClaimTypes.Name, user.Username)
@@ -73,7 +73,7 @@ namespace BudgetOracle.Auth
 
       var credentials = new SigningCredentials(AuthConstants.PrivateKey, SecurityAlgorithms.HmacSha256Signature);
       var now = DateTimeOffset.UtcNow;
-      var tokenDescriptor = new JwtSecurityToken(AuthConstants.Issuer, AuthConstants.Audience, claims, expires: now.AddHours(5).LocalDateTime, signingCredentials: credentials);
+      var tokenDescriptor = new JwtSecurityToken(AuthConstants.Issuer, AuthConstants.Audience, claims, expires: now.AddHours(24).LocalDateTime, signingCredentials: credentials);
       return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
     }
 

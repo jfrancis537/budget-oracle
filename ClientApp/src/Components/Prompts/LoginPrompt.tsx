@@ -1,5 +1,5 @@
 import React from "react";
-import { FormControl, InputGroup } from "react-bootstrap";
+import { Form,InputGroup } from "react-bootstrap";
 import { Button, Modal } from "react-bootstrap";
 import { UserManager } from "../../Processing/Managers/UserManager";
 import { LinkButton } from "../LinkButton";
@@ -144,7 +144,7 @@ export class LoginPrompt extends React.Component<ILoginPromptProps, ILoginPrompt
     if (this.state.registering) {
       return (
         <InputGroup className="mb-3">
-          <FormControl
+          <Form.Control
             placeholder="Confirm Password"
             aria-label="ConfirmPassword"
             type="password"
@@ -194,7 +194,7 @@ export class LoginPrompt extends React.Component<ILoginPromptProps, ILoginPrompt
 
         <Modal.Body>
           <InputGroup className="mb-3">
-            <FormControl
+            <Form.Control
               placeholder="Username"
               aria-label="Username"
               onChange={this.handleUsernameChanged}
@@ -202,7 +202,7 @@ export class LoginPrompt extends React.Component<ILoginPromptProps, ILoginPrompt
             />
           </InputGroup>
           <InputGroup className="mb-3">
-            <FormControl
+            <Form.Control
               placeholder="Password"
               aria-label="Password"
               type="password"

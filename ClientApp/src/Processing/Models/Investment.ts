@@ -7,7 +7,7 @@ export enum InvestmentType {
   MutualFund
 }
 
-interface InvestmentOptions extends IdentifiableOptions {
+export interface InvestmentOptions extends IdentifiableOptions {
   name: string;
   shares: number;
   symbol: string;

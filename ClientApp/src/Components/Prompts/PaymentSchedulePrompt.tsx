@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { Button, ButtonGroup, FormControl, InputGroup, Modal, Table } from "react-bootstrap"
+import { Button, ButtonGroup, Form, InputGroup, Modal, Table } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { autobind } from "../../Utilities/Decorators";
@@ -11,6 +11,7 @@ import { CurrencyInput } from "../Inputs/CurrencyInput";
 import { DatePicker } from "../Inputs/DatePicker";
 import moment from "moment";
 import { PaymentSchedule, ScheduledPayment, ScheduledPaymentOptions } from "../../Processing/Models/ScheduledPayment";
+import { CSVParseError } from "../../Utilities/CSVParser";
 
 export interface IPaymentSchedulePromptProps {
   editing: boolean;
@@ -69,7 +70,7 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
   }
 
   @autobind
-  private handleCreateModeChanged(event: React.ChangeEvent<HTMLInputElement>) {
+  private handleCreateModeChanged(event: React.ChangeEvent<HTMLSelectElement>) {
     let value = event.target.value as CreateMode;
     this.setState({
       createMode: value
@@ -203,10 +204,16 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
         this.setState({
           payments: schedule.payments
         });
-      } catch {
-        this.setState({
-          errorMessage: "Failed to upload CSV. Ensure the document was formatted correctly."
-        });
+      } catch (err) {
+        if (err instanceof CSVParseError) {
+          this.setState({
+            errorMessage: "Failed to upload CSV. The document should have headers: [" + err.headers.join(" ,") + "]"
+          });
+        } else {
+          this.setState({
+            errorMessage: "Failed to upload CSV. Ensure the document was formatted correctly."
+          });
+        }
       }
     }
   }
@@ -223,7 +230,7 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
       return (
         <>
           <InputGroup className="mb-3">
-            <FormControl
+            <Form.Control
               placeholder="Name"
               aria-label="name"
               onChange={this.handleNameChanged}
@@ -231,14 +238,13 @@ export class PaymentSchedulePrompt extends React.Component<IPaymentSchedulePromp
             />
           </InputGroup>
           <InputGroup className="mb-3">
-            <FormControl
-              as='select'
+            <Form.Select
               onChange={this.handleCreateModeChanged}
               value={this.state.createMode}
             >
               <option value={CreateMode.csv}>CSV</option>
               <option value={CreateMode.manual}>Manual Input</option>
-            </FormControl>
+            </Form.Select>
           </InputGroup>
           {this.renderControlsForMode()}
         </>
@@ -309,7 +315,7 @@ const PaymentEditor: React.FC<IPaymentEditorProps> = (props) => {
   return (
     <>
       <InputGroup className="mb-3">
-        <FormControl
+        <Form.Control
           placeholder="Name"
           aria-label="name"
           onChange={e => setName(e.target.value)}
@@ -317,11 +323,9 @@ const PaymentEditor: React.FC<IPaymentEditorProps> = (props) => {
         />
       </InputGroup>
       <InputGroup className="mb-3">
-        <InputGroup.Prepend>
-          <InputGroup.Text>
-            <i className="bi bi-calendar-event" />
-          </InputGroup.Text>
-        </InputGroup.Prepend>
+        <InputGroup.Text>
+          <i className="bi bi-calendar-event" />
+        </InputGroup.Text>
         <DatePicker defaultDate={date} calendarIconBackgroundEnabled className="form-control" onChange={setDate} />
       </InputGroup>
       <InputGroup className="mb-3">

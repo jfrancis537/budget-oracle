@@ -1,13 +1,13 @@
 import moment, { Moment } from "moment";
 import React from "react"
-import { Form } from "react-bootstrap";
-import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
+import { Button, Form, InputGroup, Modal } from "react-bootstrap"
 import { FrequencyType } from "../../Processing/Enums/FrequencyType";
 import { GroupType } from "../../Processing/Enums/GroupType";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { GroupManager } from "../../Processing/Managers/GroupManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { autobind } from "../../Utilities/Decorators";
+import { CurrencyInput } from "../Inputs/CurrencyInput";
 import { LoadingButton } from "./LoadingButton";
 
 export interface IBillPromptProps {
@@ -75,13 +75,10 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
   }
 
   @autobind
-  private handleValueChanged(event: React.ChangeEvent<HTMLInputElement>) {
-    const newValue = Number(event.target.value);
-    if (!isNaN(newValue)) {
-      this.setState({
-        value: Number(event.target.value)
-      });
-    }
+  private handleValueChanged(newVal: number) {
+    this.setState({
+      value: newVal
+    });
   }
 
   @autobind
@@ -95,7 +92,7 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
   }
 
   @autobind
-  private handleFrequencyTypeChanged(event: React.ChangeEvent<HTMLInputElement>) {
+  private handleFrequencyTypeChanged(event: React.ChangeEvent<HTMLSelectElement>) {
     const newValue = Number(event.target.value);
     if (!isNaN(newValue)) {
       this.setState({
@@ -164,7 +161,7 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
         </Modal.Header>
         <Modal.Body>
           <InputGroup className="mb-3">
-            <FormControl
+            <Form.Control
               placeholder="Name"
               aria-label="name"
               onChange={this.handleNameChanged}
@@ -172,31 +169,24 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
             />
           </InputGroup>
           <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>$</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
-              aria-label="Amount (to the nearest dollar)"
+            <CurrencyInput
+              ariaLabel="Bill amount"
+              defaultValue={this.state.value}
               onChange={this.handleValueChanged}
-              value={this.state.value}
+              symbolLocation='label'
             />
           </InputGroup>
           <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>Interval</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
+            <InputGroup.Text>Interval</InputGroup.Text>
+            <Form.Control
               aria-label="interval"
               onChange={this.handleFrequencyChanged}
               value={this.state.frequency}
             />
           </InputGroup>
           <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>Frequency</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
-              as='select'
+            <InputGroup.Text>Frequency</InputGroup.Text>
+            <Form.Select
               onChange={this.handleFrequencyTypeChanged}
               value={this.state.frequencyType}
             >
@@ -204,13 +194,11 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
               <option value={FrequencyType.Weekly}>Weekly</option>
               <option value={FrequencyType.Monthly}>Monthly</option>
               <option value={FrequencyType.Anually}>Anually</option>
-            </FormControl>
+            </Form.Select>
           </InputGroup>
           <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>Inital Date</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
+            <InputGroup.Text>Inital Date</InputGroup.Text>
+            <Form.Control
               type='date'
               aria-label="date"
               onChange={this.handleDateChanged}

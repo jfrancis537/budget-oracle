@@ -1,5 +1,5 @@
 import React from "react"
-import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
+import { Button, Form,InputGroup, Modal } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
 import { LoadingButton } from "./LoadingButton";
@@ -96,7 +96,7 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
         </Modal.Header>
         <Modal.Body>
           <InputGroup className="mb-3">
-            <FormControl
+            <Form.Control
               placeholder="Account Name"
               aria-label="account name"
               onChange={this.handleNameChanged}
@@ -104,10 +104,8 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
             />
           </InputGroup>
           <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>$</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
+                          <InputGroup.Text>$</InputGroup.Text>
+                        <Form.Control
               aria-label="Amount (to the nearest dollar)"
               onChange={this.handleValueChanged}
               value={this.state.value}

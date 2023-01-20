@@ -1,0 +1,33 @@
+.modal {
+  max-height: 90vh;
+}
+
+.modal-body {
+  display: flex;
+  flex-flow: column;
+  overflow: hidden;
+}
+
+
+.upload-button-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.upload-button-container > button {
+  flex: 1;
+}
+
+.table-container {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.table-container th {
+  text-align: center;
+}
+
+.table-container td {
+  text-align: center;
+}

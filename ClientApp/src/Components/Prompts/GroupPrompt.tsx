@@ -1,5 +1,5 @@
 import React from "react"
-import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
+import { Button, Form,InputGroup, Modal } from "react-bootstrap"
 import { GroupType } from "../../Processing/Enums/GroupType";
 import { GroupManager } from "../../Processing/Managers/GroupManager";
 import { InvestmentGroupManager } from "../../Processing/Managers/InvestmentGroupManager";
@@ -133,17 +133,17 @@ export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptS
         </Modal.Header>
         <Modal.Body>
           <InputGroup className="mb-3" hasValidation>
-            <FormControl
+            <Form.Control
               placeholder="Group Name"
               aria-label="group name"
               onChange={this.handleNameChanged}
               value={this.state.name}
               isInvalid={!this.checkNameValid()}
             />
-            <FormControl.Feedback type="invalid">Group already exists!</FormControl.Feedback>
+            <Form.Control.Feedback type="invalid">Group already exists!</Form.Control.Feedback>
           </InputGroup>
           <InputGroup className="mb-3">
-            <FormControl
+            <Form.Select
               as='select'
               onChange={this.handleGroupTypeChanged}
               value={this.state.groupType}
@@ -152,7 +152,7 @@ export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptS
               <option value={GroupType.Bill}>Bill</option>
               <option value={GroupType.Debt}>Debt</option>
               <option value={GroupType.Investment}>Investment</option>
-            </FormControl>
+            </Form.Select>
           </InputGroup>
         </Modal.Body>
         <Modal.Footer>

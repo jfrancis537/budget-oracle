@@ -25,14 +25,15 @@ export class PaymentSchedule extends Identifiable {
   }
   //TODO FIGURE OUT HOW TO DO INVESTMENTS THAT WILL ALSO HAVE AN AMOUNT TAKEN OUT
   static fromCSV(name: string, csvFile: string) {
-    const reader = new CSVParser(['name', "date", 'amount']);
+    const headers = ['name', "date", 'amount'] as const;
+    const reader = new CSVParser(headers);
     let file = reader.parse(csvFile);
     let payments: ScheduledPayment[] = [];
-    for (let line of file) {
+    for (let i = 0; i < file.length; i++) {
       const payment = new ScheduledPayment({
-        name: line[0],
-        date: moment(line[1]),
-        amount: Number(line[2])
+        name: file.data.name[i] ?? 'undefined',
+        date: moment(file.data.date[i]),
+        amount: Number(file.data.amount[i])
       });
       payments.push(payment);
     }

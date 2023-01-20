@@ -1,9 +1,10 @@
 import React from "react"
-import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
+import { Button, Form, InputGroup, Modal } from "react-bootstrap"
 import { GroupType } from "../../Processing/Enums/GroupType";
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { GroupManager } from "../../Processing/Managers/GroupManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
+import { CurrencyInput } from "../Inputs/CurrencyInput";
 import { LoadingButton } from "./LoadingButton";
 
 export interface IDebtPromptProps {
@@ -55,13 +56,10 @@ export class DebtPrompt extends React.Component<IDebtPromptProps, IDebtPromptSta
     });
   }
 
-  private handleValueChanged(event: React.ChangeEvent<HTMLInputElement>) {
-    const newValue = Number(event.target.value);
-    if (!isNaN(newValue)) {
-      this.setState({
-        value: Number(event.target.value)
-      });
-    }
+  private handleValueChanged(newVal: number) {
+    this.setState({
+      value: newVal
+    });
   }
 
   private async accept() {
@@ -97,7 +95,7 @@ export class DebtPrompt extends React.Component<IDebtPromptProps, IDebtPromptSta
         </Modal.Header>
         <Modal.Body>
           <InputGroup className="mb-3">
-            <FormControl
+            <Form.Control
               placeholder="Name"
               aria-label="account name"
               onChange={this.handleNameChanged}
@@ -105,13 +103,11 @@ export class DebtPrompt extends React.Component<IDebtPromptProps, IDebtPromptSta
             />
           </InputGroup>
           <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>$</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
-              aria-label="Amount (to the nearest dollar)"
+          <CurrencyInput
+              ariaLabel="Debt amount"
+              defaultValue={this.state.value}
               onChange={this.handleValueChanged}
-              value={this.state.value}
+              symbolLocation='label'
             />
           </InputGroup>
         </Modal.Body>

@@ -12,5 +12,10 @@
 }
 
 .chart-area {
+  position: relative;
   margin-bottom: 1rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex: 1;
 }

@@ -42,7 +42,7 @@ abstract class Group<P extends IGroupProps, S = {}> extends React.Component<P, S
               <Button onClick={this.add}>
                 <i className="bi bi-plus-square"></i>
               </Button>
-              <Button onClick={this.delete} variant='secondary'>
+              <Button onClick={this.delete} variant='dark'>
                 <i className="bi bi-trash"></i>
               </Button>
               {this.renderAdditionalButtons()}
@@ -168,7 +168,7 @@ export class InvestmentGroup extends Group<IGroupProps, IInvestmentGroupState> {
 
   protected renderAdditionalButtons(): JSX.Element | null {
     return (
-      <Button onClick={this.refresh} variant='secondary'>
+      <Button onClick={this.refresh} variant='dark'>
         <i className="bi bi-arrow-clockwise"></i>
       </Button>
     )

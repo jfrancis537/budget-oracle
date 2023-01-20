@@ -1,7 +1,7 @@
 import React from "react";
 import divStyles from "./AnimatedHeightDiv.module.css";
 
-interface IAnimatedHeightDivProps {
+interface IAnimatedHeightDivProps extends React.PropsWithChildren{
   open?: boolean
 }
 

@@ -9,7 +9,7 @@ import { Account, SerializedAccount } from "../Models/Account";
 import { Bill, SerializedBill } from "../Models/Bill";
 import { Debt, SerializedDebt } from "../Models/Debt";
 import { IncomeSource, SerializedIncomeSource } from "../Models/IncomeSource";
-import { Investment, SerializedInvestment } from "../Models/Investment";
+import { Investment, InvestmentOptions, SerializedInvestment } from "../Models/Investment";
 import { PaymentSchedule, SerializedPaymentSchedule } from "../Models/ScheduledPayment";
 import { SerializedVestSchedule, VestSchedule } from "../Models/VestSchedule";
 import { GroupManager } from "./GroupManager";
@@ -327,6 +327,33 @@ class AppStateManager {
     marginDebt: number,
     marginInterestRate: number) {
     return await this.updateInvestment(undefined, name, shares, symbol, costBasisPerShare, marginDebt, marginInterestRate);
+  }
+
+  public async addInvestments(investments: InvestmentOptions[]) {
+    const blocked = this.oninvestmentsupdated.setBlocked(true);
+    const blocked2 = this.onspecificinvestmentupdated.setBlocked(true);
+    this.blockSave = true;
+    const ids = [];
+    for (const investment of investments) {
+      ids.push(
+        await this.addInvestment(
+          investment.name,
+          investment.shares,
+          investment.symbol,
+          investment.costBasisPerShare,
+          investment.marginDebt,
+          investment.marginInterestRate
+        ));
+    }
+    this.oninvestmentsupdated.setBlocked(blocked);
+    this.onspecificinvestmentupdated.setBlocked(blocked2);
+    this.blockSave = false;
+    this.oninvestmentsupdated.invoke(this.investments);
+    for (let id of ids) {
+      this.onspecificinvestmentupdated.invoke(this._investments.get(id)!)
+    }
+    await this.save();
+    return ids;
   }
 
   public async updateInvestment(id: string | undefined,

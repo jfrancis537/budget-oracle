@@ -6,10 +6,16 @@ namespace BudgetOracle.Auth
 {
   public class AuthConstants
   {
-    public static readonly SecurityKey PrivateKey = CryptographyHelper.GenerateSymmetricKey();
-    public static readonly string Issuer = "jfrancis.us:BudgetOracle";
+    private static SecurityKey PrivateKey_ = CryptographyHelper.GenerateSymmetricKey();
+    public static SecurityKey PrivateKey { get { return PrivateKey_; } }
+    public static readonly string Issuer = "budgetoracle.net";
     public static readonly string TokenCookieName = "JWTAuthCookie";
 
     public static readonly string Audience = "BudgetOracleUser";
+
+    public static void InvalidateAllTokens()
+    {
+      PrivateKey_ = CryptographyHelper.GenerateSymmetricKey();
+    }
   }
 }

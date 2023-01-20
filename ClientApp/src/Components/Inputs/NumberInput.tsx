@@ -1,5 +1,5 @@
 import React from "react";
-import { FormControl } from "react-bootstrap";
+import { Form} from "react-bootstrap";
 import { autobind } from "../../Utilities/Decorators";
 
 interface INumberInputProps {
@@ -57,7 +57,7 @@ export class NumberInput extends React.Component<INumberInputProps, INumberInput
 
   public render() {
     return (
-      <FormControl
+      <Form.Control
         aria-label={this.props.ariaLabel}
         onChange={this.onChange}
         value={this.state.strValue}

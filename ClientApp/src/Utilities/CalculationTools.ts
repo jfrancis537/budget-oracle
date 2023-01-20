@@ -66,8 +66,6 @@ export namespace CalculationTools {
       investmentsBaseValue = calcs.investmentResults.totalCostBasis;
     }
 
-    // (calcs.investmentResults.totalCostBasis - calcs.investmentResults.totalUnrealizedLosses)) -
-    //   calcs.investmentResults.totalInterestOwed;
     const totals =
       calcs.accountTotal +
       calcs.linkedAccountTotal.accountsValue -

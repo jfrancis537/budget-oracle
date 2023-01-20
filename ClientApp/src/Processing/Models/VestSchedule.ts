@@ -24,17 +24,18 @@ export class VestSchedule extends Identifiable {
   }
   //TODO FIGURE OUT HOW TO DO INVESTMENTS THAT WILL ALSO HAVE AN AMOUNT TAKEN OUT
   static fromCSV(name: string, csvFile: string) {
-    const reader = new CSVParser(["name", "symbol", "shares", "cost basis", "tax rate", "date"]);
+    const headers = ["name", "symbol", "shares", "cost basis", "tax rate", "date"] as const;
+    const reader = new CSVParser(headers);
     let file = reader.parse(csvFile);
     let vests: ScheduledStockVest[] = [];
-    for (let line of file) {
+    for (let i = 0; i < file.length; i++) {
       const payment = new ScheduledStockVest({
-        name: line[0],
-        symbol: line[1],
-        shares: Number(line[2]),
-        costBasisPerShare: Number(line[3]),
-        taxPercentage: Number(line[4]),
-        date: moment(line[5])
+        name: file.data.name[i] ?? 'undefined',
+        symbol: file.data.symbol[i] ?? 'undefined',
+        shares: Number(file.data.shares[i]),
+        costBasisPerShare: Number(file.data["cost basis"][i]),
+        taxPercentage: Number(file.data["tax rate"][i]),
+        date: moment(file.data.date[i])
       });
       vests.push(payment);
     }

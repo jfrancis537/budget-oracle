@@ -1,12 +1,22 @@
 import React from "react"
-import { Button, FormControl, InputGroup, Modal } from "react-bootstrap"
+import { Button, Form, InputGroup, Modal, Table } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { InvestmentGroupManager } from "../../Processing/Managers/InvestmentGroupManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
+import { CSVFile, CSVParseError, CSVParser } from "../../Utilities/CSVParser";
 import { autobind } from "../../Utilities/Decorators";
+import { FileLoader } from "../../Utilities/FileUtils";
 import { CurrencyInput } from "../Inputs/CurrencyInput";
 import { NumberInput } from "../Inputs/NumberInput";
 import { LoadingButton } from "./LoadingButton";
+
+import styles from '../../styles/InvestmentPrompt.module.css';
+import { InvestmentOptions } from "../../Processing/Models/Investment";
+
+enum EditMode {
+  Individual,
+  Upload
+}
 
 export interface IInvestmentPromptProps {
   editing: boolean;
@@ -22,6 +32,12 @@ interface IInvestmentPromptState {
   marginDebt: number;
   marginInterestRate: number;
   isSaving: boolean;
+  mode: EditMode;
+  csv?: CSVFile<{
+    symbol: any;
+    units: any;
+    cost_basis: any;
+  }, string>
 }
 
 export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, IInvestmentPromptState> {
@@ -40,7 +56,9 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
           costBasisPerShare: investment.costBasisPerShare,
           marginDebt: investment.marginDebt,
           marginInterestRate: investment.marginInterestRate,
-          isSaving: false
+          isSaving: false,
+          mode: EditMode.Individual,
+          csv: undefined
         }
       } else {
         throw new Error('An account to edit must be provided if editing flag is true');
@@ -53,7 +71,9 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
         costBasisPerShare: 0,
         isSaving: false,
         marginDebt: 0,
-        marginInterestRate: 0
+        marginInterestRate: 0,
+        mode: EditMode.Individual,
+        csv: undefined
       };
     }
   }
@@ -100,6 +120,12 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
     });
   }
 
+  @autobind
+  private handleEditModeChanged(event: React.ChangeEvent<HTMLSelectElement>) {
+    this.setState({
+      mode: Number(event.currentTarget.value)
+    });
+  }
 
   @autobind
   private async accept() {
@@ -138,21 +164,123 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
     PromptManager.requestClosePrompt();
   }
 
-  render() {
+  @autobind
+  private async acceptUpload() {
+    if (this.state.csv) {
+      this.setState({
+        isSaving: true
+      });
+      let investments = new Map<string, InvestmentOptions>();
+      for (const line of this.state.csv) {
+        if (!investments.has(line.symbol)) {
+          const costBasisPerShare = Number((Number(line.cost_basis) / Number(line.units)).toFixed(2));
+          let investment: InvestmentOptions = {
+            shares: Number(line.units),
+            name: line.symbol,
+            symbol: line.symbol,
+            costBasisPerShare: costBasisPerShare,
+            marginDebt: 0,
+            marginInterestRate: 0
+          }
+          investments.set(investment.symbol, investment);
+          console.log(investments);
+        }
+      }
+      await InvestmentGroupManager.clearGroup(this.props.groupName);
+      const ids = await AppStateManager.addInvestments([...investments.values()]);
+      for (let id of ids) {
+        await InvestmentGroupManager.addItemToGroup(id, this.props.groupName);
+      }
+    }
+    this.setState({
+      isSaving: false
+    });
+    PromptManager.requestClosePrompt();
+  }
+
+  @autobind
+  private async upload() {
+    try {
+      const file = await FileLoader.openWithDialog();
+      const csvText = await FileLoader.readAsText(file);
+      const parser = new CSVParser(['symbol', 'units', 'cost_basis']);
+      const csv = parser.parseStrict(csvText);
+      this.setState({
+        csv
+      });
+    } catch (err) {
+      if (err instanceof CSVParseError) {
+        throw err;
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  private renderCsv(): JSX.Element | null {
+    const csv = this.state.csv;
+    if (csv) {
+      const elements = new Map<string, JSX.Element>();
+      for (let line of csv) {
+        const costBasisPerShare = (Number(line.cost_basis) / Number(line.units));
+        if (Number.isNaN(costBasisPerShare)) {
+          return <div>Error</div>
+        }
+        if (!elements.has(line.symbol)) {
+          elements.set(line.symbol, (
+            <tr>
+              <td>{line.symbol}</td>
+              <td>{line.units}</td>
+              <td>${costBasisPerShare.toFixed(2)}</td>
+            </tr>
+          ));
+        }
+      }
+      return (
+        <div className={styles['table-container']}>
+          <Table responsive={"sm"}>
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>#</th>
+                <th>
+                  <i className="bi bi-currency-dollar"></i>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...elements.values()]}
+            </tbody>
+          </Table>
+        </div>
+      )
+    }
+    return null;
+  }
+
+  private renderIndividual() {
     return (
-      <Modal
-        show
-        onHide={this.cancel}
-        backdrop="static"
-        keyboard={false}
-      >
+      <>
         <Modal.Header closeButton>
           <Modal.Title>{this.props.editing ? "Update" : "Add"} Investment</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className={styles['modal-body']}>
+          {!this.props.editing && (
+            <>
+              <label>Mode</label>
+              <Form.Select
+                onChange={this.handleEditModeChanged}
+                value={this.state.mode}
+                disabled={this.props.editing}
+              >
+                <option value={EditMode.Individual}>Individual</option>
+                <option value={EditMode.Upload}>Upload</option>
+              </Form.Select>
+            </>
+          )}
           <label>General</label>
           <InputGroup className="mb-3">
-            <FormControl
+            <Form.Control
               placeholder="Name"
               aria-label="investment name"
               onChange={this.handleNameChanged}
@@ -160,7 +288,7 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
             />
           </InputGroup>
           <InputGroup className="mb-3">
-            <FormControl
+            <Form.Control
               placeholder="Symbol"
               aria-label="Ticker Symbol"
               onChange={this.handleSymbolChanged}
@@ -175,22 +303,16 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
               ariaLabel="Number of shares"
               onChange={this.handleSharesChanged}
             />
-            <InputGroup.Append>
-              <InputGroup.Text>Shares</InputGroup.Text>
-            </InputGroup.Append>
+            <InputGroup.Text>Shares</InputGroup.Text>
           </InputGroup>
           <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text>@</InputGroup.Text>
-            </InputGroup.Prepend>
+            <InputGroup.Text>@</InputGroup.Text>
             <CurrencyInput
               ariaLabel="Cost basis per share"
               defaultValue={this.state.costBasisPerShare}
               onChange={this.handleCostBasisChanged}
             />
-            <InputGroup.Append>
-              <InputGroup.Text>Per Share</InputGroup.Text>
-            </InputGroup.Append>
+            <InputGroup.Text>Per Share</InputGroup.Text>
           </InputGroup>
           <label>Margin</label>
           <InputGroup className="mb-3">
@@ -199,9 +321,7 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
               defaultValue={this.state.marginDebt}
               onChange={this.handleMarginDebtChanged}
             />
-            <InputGroup.Append>
-              <InputGroup.Text>Margin Debt</InputGroup.Text>
-            </InputGroup.Append>
+            <InputGroup.Text>Margin Debt</InputGroup.Text>
           </InputGroup>
           <InputGroup className="mb-3">
             <NumberInput
@@ -209,29 +329,8 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
               defaultValue={this.state.marginInterestRate}
               onChange={this.handleMarginInterestChanged}
             />
-            <InputGroup.Append>
-              <InputGroup.Text>%</InputGroup.Text>
-            </InputGroup.Append>
+            <InputGroup.Text>%</InputGroup.Text>
           </InputGroup>
-          {/* <InputGroup className="mb-3"> //TODO investment type
-            <InputGroup.Prepend>
-              <InputGroup.Text>Pay Frequency</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
-              as='select'
-              onChange={this.handleFrequencyChanged}
-              value={this.state.incomeFrequency}
-            >
-              <option value={IncomeFrequency.Weekly}>Weekly</option>
-              <option value={IncomeFrequency.BiWeeklyEven}>Bi-Weekly Even Weeks</option>
-              <option value={IncomeFrequency.BiWeeklyOdd}>Bi-Weekly Odd Weeks</option>
-              <option value={IncomeFrequency.SemiMonthlyMiddleOM}>Semi-Monthly (1st pay @ Middle of month)</option>
-              <option value={IncomeFrequency.SemiMonthlyStartOM}>Semi-Monthly (1st pay @ start of month)</option>
-              <option value={IncomeFrequency.Monthly}>Monthly</option>
-              <option value={IncomeFrequency.Quarterly}>Quarterly</option>
-              <option disabled value={IncomeFrequency.Anually}>Anually</option>
-            </FormControl>
-          </InputGroup> */}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={this.cancel}>
@@ -241,6 +340,60 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
             {this.props.editing ? "Update" : "Add"}
           </LoadingButton>
         </Modal.Footer>
+      </>
+    );
+  }
+
+  private renderUpload() {
+    return (
+      <>
+        <Modal.Header closeButton>
+          <Modal.Title>Upload Investments</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className={styles['modal-body']}>
+          <label>Mode</label>
+          <Form.Select
+            onChange={this.handleEditModeChanged}
+            value={this.state.mode}
+            disabled={this.props.editing}
+          >
+            <option value={EditMode.Individual}>Individual</option>
+            <option value={EditMode.Upload}>Upload</option>
+          </Form.Select>
+          {this.renderCsv()}
+          <div className={styles['upload-button-container']}>
+            <Button onClick={this.upload}>Upload CSV</Button>
+          </div>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.cancel}>
+              Cancel
+            </Button>
+            <LoadingButton
+              isLoading={this.state.isSaving}
+              loadingText="Saving..."
+              variant="primary"
+              onClick={this.acceptUpload}
+              disabled={!this.state.csv || this.state.isSaving}>
+              Accept
+            </LoadingButton>
+          </Modal.Footer>
+        </Modal.Body>
+      </>
+    )
+  }
+
+  render() {
+    return (
+      <Modal
+        show
+        onHide={this.cancel}
+        backdrop="static"
+        keyboard={false}
+        contentClassName={styles['modal']}
+      >
+        {this.state.mode === EditMode.Individual ?
+          this.renderIndividual() :
+          this.renderUpload()}
       </Modal>
     )
   }

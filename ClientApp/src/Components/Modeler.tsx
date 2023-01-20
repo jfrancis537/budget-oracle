@@ -9,7 +9,7 @@ import {
 } from "chart.js";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import { FormControl, InputGroup } from "react-bootstrap";
+import { Form, InputGroup } from "react-bootstrap";
 import { Line } from "react-chartjs-2";
 import styles from "../styles/Modeler.module.css";
 import { CalculationResult } from "../Processing/Managers/CalculationsManager";
@@ -210,7 +210,6 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
             yAxis: {
               beginAtZero: false,
               grid: {
-                borderColor: "white",
                 color: "white"
               },
               ticks: {
@@ -218,9 +217,8 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
                   family: "consolas"
                 },
                 color: "white",
-                callback: (val,i,vals) => {
-                  if(val >= 10000)
-                  {
+                callback: (val, i, vals) => {
+                  if (val >= 10000) {
                     return (Number(val) / 1000).toFixed(0) + "k"
                   } else {
                     return val;
@@ -230,7 +228,6 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
             },
             xAxis: {
               grid: {
-                borderColor: "white",
                 color: "white"
               },
               ticks: {
@@ -248,13 +245,13 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
     );
   }
 
-  function handleResolutionChanged(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleResolutionChanged(event: React.ChangeEvent<HTMLSelectElement>) {
     const value = Number(event.currentTarget.value) as ModelerResolution;
     setResolution(value);
     setCount(ModelerResolution.getDefaultCount(value));
   }
 
-  function handleCountChanged(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleCountChanged(event: React.ChangeEvent<HTMLSelectElement>) {
     const value = Number(event.currentTarget.value);
     setCount(value as ModelerResolution);
   }
@@ -293,11 +290,8 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
     return (
       <div>
         <InputGroup className="mb-3">
-          <InputGroup.Prepend>
-            <InputGroup.Text>Resolution</InputGroup.Text>
-          </InputGroup.Prepend>
-          <FormControl
-            as='select'
+          <InputGroup.Text>Resolution</InputGroup.Text>
+          <Form.Select
             onChange={handleResolutionChanged}
             value={resolution}
           >
@@ -305,19 +299,16 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
             <option value={ModelerResolution.Weeks}>Weeks</option>
             <option value={ModelerResolution.Months}>Months</option>
             <option value={ModelerResolution.Years}>Years</option>
-          </FormControl>
+          </Form.Select>
         </InputGroup>
         <InputGroup className="mb-3">
-          <InputGroup.Prepend>
-            <InputGroup.Text>Nodes</InputGroup.Text>
-          </InputGroup.Prepend>
-          <FormControl
-            as='select'
+          <InputGroup.Text>Nodes</InputGroup.Text>
+          <Form.Select
             onChange={handleCountChanged}
             value={count}
           >
             {generateOptions()}
-          </FormControl>
+          </Form.Select>
         </InputGroup>
       </div>
     );
@@ -325,7 +316,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
 
   function render() {
     return (
-      <div style={{ display: props.visible ? undefined : "none"}} className={styles.container}>
+      <div style={{ display: props.visible ? undefined : "none" }} className={styles.container}>
         <div className={styles["chart-area"]}>
           {calculations.length !== 0 && renderLineChart()}
         </div>
