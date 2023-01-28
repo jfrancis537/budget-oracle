@@ -20,6 +20,7 @@ class UserManager {
     }
     if (this.isLoggedIn) {
       this.onuserloggedin.invoke();
+      this.autoLogout();
     }
   }
 
@@ -57,6 +58,15 @@ class UserManager {
 
   public async register(username: string, password: string, confirmPassword: string) {
     await AuthAPI.register(username, password, confirmPassword);
+  }
+
+  public async autoLogout() {
+    while (this.isLoggedIn) {
+      if (!(await AuthAPI.getUsername())) {
+        this.logout();
+      }
+      await new Promise(resolve => setTimeout(resolve, 1 * 60 * 1000));
+    }
   }
 }
 
