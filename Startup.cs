@@ -48,6 +48,7 @@ namespace BudgetOracle
         .UseNpgsql($"Host=localhost;Database=budget_oracle;Username=www-data;Password={password}")
         .UseSnakeCaseNamingConvention();
       });
+      services.AddLogging();
 
       if (Environment.IsDevelopment())
       {

@@ -2,6 +2,8 @@
 using BudgetOracle.Exceptions;
 using BudgetOracle.Models;
 using BudgetOracle.Models.Teller;
+using DnsClient.Internal;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -15,9 +17,11 @@ namespace BudgetOracle.Providers
   public class TellerProvider
   {
     private readonly IHttpClientFactory httpClientFactory;
-    public TellerProvider(IHttpClientFactory httpClientFactory)
+    private readonly ILogger<TellerProvider> logger;
+    public TellerProvider(IHttpClientFactory httpClientFactory, ILogger<TellerProvider> logger)
     {
       this.httpClientFactory = httpClientFactory;
+      this.logger = logger;
     }
     public async Task<List<LinkedAccountDetails>> GetAccountDetailsForEnrollment(Enrollment enrollment)
     {

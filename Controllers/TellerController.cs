@@ -3,8 +3,10 @@ using BudgetOracle.Models.Configuration;
 using BudgetOracle.Models.Teller;
 using BudgetOracle.Providers;
 using BudgetOracle.Storage;
+using DnsClient.Internal;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -22,15 +24,18 @@ namespace BudgetOracle.Controllers
     private readonly TellerConfiguration configuration;
     private readonly TellerProvider provider;
     private readonly IUserDatabase database;
+    private readonly ILogger<TellerController> logger;
     public TellerController(
       TellerProvider provider,
       IOptions<TellerConfiguration> configuration,
-      IUserDatabase datebase
+      IUserDatabase datebase,
+      ILogger<TellerController> logger
       )
     {
       this.configuration = configuration.Value ?? throw new ArgumentNullException(nameof(configuration));
       this.provider = provider;
       this.database = datebase;
+      this.logger = logger;
     }
 
     [HttpGet]
@@ -60,8 +65,9 @@ namespace BudgetOracle.Controllers
           return Ok(user.TellerUserId);
         }
       }
-      catch
+      catch (Exception ex)
       {
+        logger.LogError(ex, "Exception occurred when getting userId for: {user}", username);
         return StatusCode(500);
       }
     }
@@ -78,8 +84,9 @@ namespace BudgetOracle.Controllers
         await database.SetTellerUserId(username, id);
         return StatusCode(201);
       }
-      catch (Exception)
+      catch (Exception ex)
       {
+        logger.LogError(ex, "Failed to set userId", id);
         return StatusCode(500);
       }
     }
@@ -96,8 +103,9 @@ namespace BudgetOracle.Controllers
         var results = await database.GetAllLinkedAccountDetails(username);
         return Ok(results ?? Enumerable.Empty<LinkedAccountDetails>());
       }
-      catch (Exception)
+      catch (Exception ex)
       {
+        logger.LogError(ex, "Exception occurred when getting accounts");
         return StatusCode(500);
       }
     }
@@ -117,8 +125,9 @@ namespace BudgetOracle.Controllers
         }
         return StatusCode(201);
       }
-      catch (Exception)
+      catch (Exception ex)
       {
+        logger.LogError(ex, "Failed to add accounts");
         return StatusCode(500);
       }
     }
@@ -136,8 +145,9 @@ namespace BudgetOracle.Controllers
         var deleted = await database.DeleteLinkedAccount(user.TellerUserId, id);
         return Accepted();
       }
-      catch (Exception)
+      catch (Exception ex)
       {
+        logger.LogError(ex, "Failed to get delete account with id: {accountId}", id);
         return StatusCode(500);
       }
     }
@@ -164,8 +174,9 @@ namespace BudgetOracle.Controllers
         var balance = await provider.GetBalanceAsync(account);
         return Ok(balance);
       }
-      catch
+      catch (Exception ex)
       {
+        logger.LogError(ex, "Failed to get account balance for {accountId}", accountId);
         return StatusCode(500);
       }
     }
@@ -184,8 +195,9 @@ namespace BudgetOracle.Controllers
         var transactions = await provider.GetTransactionsAsync(account);
         return Ok(transactions);
       }
-      catch
+      catch (Exception ex)
       {
+        logger.LogError(ex, "Failed to get transactions balance for {accountId}", accountId);
         return StatusCode(500);
       }
     }
