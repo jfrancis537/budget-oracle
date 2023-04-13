@@ -263,15 +263,15 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
     switch (resolution) {
       case ModelerResolution.Days:
         start = 5;
-        end = 10;
+        end = 14;
         break;
       case ModelerResolution.Weeks:
         start = 3;
-        end = 12;
+        end = 18;
         break;
       case ModelerResolution.Months:
         start = 4;
-        end = 19;
+        end = 18;
         break;
       case ModelerResolution.Years:
         start = 3;
