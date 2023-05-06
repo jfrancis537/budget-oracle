@@ -524,11 +524,11 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
             </Form.Select>
           </InputGroup>
         </div>
-        <div className={styles["chart-area"]}>
-          {renderChart()}
-        </div>
         <div>
           {renderControls()}
+        </div>
+        <div className={styles["chart-area"]}>
+          {renderChart()}
         </div>
       </div>
     );
