@@ -399,7 +399,14 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
       {
         data[index] = 0;
       }
-      data[index] += t.amount;
+      // Spending is usually negative so subtract it.
+      let value = t.amount;
+      const account = TellerManager.getAccount(t.id);
+      if(account)
+      {
+        value = account.type === 'credit' ? value *= -1 : value;
+      }
+      data[index] -= value;
     }
     return {
       labels: generateSpendingByMonthLabels(),
