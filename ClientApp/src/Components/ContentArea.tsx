@@ -77,6 +77,7 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     AppStateManager.onpaymentschedulesupdated.addListener(this.handlePaymentSchedulesUpdated);
     AppStateManager.onvestschedulesupdated.addListener(this.handleVestSchedulesUpdated);
     TellerManager.onlinkedaccountsupdated.addListener(this.handleLinkedAccountsUpdated);
+    TellerManager.oncategorynamesupdated.addListener(this.handleCategoryNamesUpdated);
   }
 
   componentWillUnmount() {
@@ -90,6 +91,8 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     AppStateManager.onpaymentschedulesupdated.removeListener(this.handlePaymentSchedulesUpdated);
     AppStateManager.onvestschedulesupdated.removeListener(this.handleVestSchedulesUpdated);
     TellerManager.onlinkedaccountsupdated.removeListener(this.handleLinkedAccountsUpdated);
+    TellerManager.oncategorynamesupdated.removeListener(this.handleCategoryNamesUpdated);
+
   }
 
   @autobind
@@ -97,6 +100,11 @@ export class ContentArea extends React.Component<{}, ContentAreaState> {
     this.setState({
       linkedAccounts: data
     });
+  }
+
+  @autobind 
+ private handleCategoryNamesUpdated() {
+  this.forceUpdate()
   }
 
   @autobind

@@ -81,6 +81,12 @@ class TellerManager {
     return sorted;
   }
 
+  public get categoryNamesNotIgnored() {
+    const sorted =  [...this.categories].filter(c => c !== IGNORED_TRANSACTION_CATEGORY);
+    sorted.sort();
+    return sorted;
+  }
+
   public getTransactions() {
     return [...this.transactions.values()].flat();
   }

@@ -170,14 +170,15 @@ class AppStateManager {
     }
   }
 
-  public async addAccount(name: string, amount: number) {
-    await this.updateAccount(undefined, name, amount);
+  public async addAccount(name: string, amount: number, liquid: boolean) {
+    await this.updateAccount(undefined, name, amount, liquid);
   }
-  public async updateAccount(id: string | undefined, name: string, amount: number) {
+  public async updateAccount(id: string | undefined, name: string, amount: number, liquid: boolean) {
     const account = new Account({
-      name: name,
-      amount: amount,
-      id: id
+      name,
+      amount,
+      liquid,
+      id
     });
     this._accounts.set(account.id, account);
     this.onaccountsupdated.invoke(this.accounts);

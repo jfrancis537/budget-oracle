@@ -1,0 +1,17 @@
+.item {
+  display: flex !important;
+}
+
+.item input {
+  height: 1.5rem;
+  width: 1.5rem;
+  /* font-size: 2rem; */
+  border: white 3px solid;
+  pointer-events: none;
+}
+
+.item span {
+  flex: 1;
+    display: flex;
+    justify-content: center;
+}

@@ -108,7 +108,6 @@ export class GroupPrompt extends React.Component<IGroupPromptProps, GroupPromptS
         return !InvestmentGroupManager.hasGroup(this.state.name);
       }
     }
-
   }
 
   private acceptEnabled() {

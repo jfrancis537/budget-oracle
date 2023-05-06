@@ -2,6 +2,7 @@ import React from "react"
 import { Button, Form,InputGroup, Modal } from "react-bootstrap"
 import { AppStateManager } from "../../Processing/Managers/AppStateManager";
 import { PromptManager } from "../../Processing/Managers/PromptManager";
+import { autobind } from "../../Utilities/Decorators";
 import { LoadingButton } from "./LoadingButton";
 
 export interface IAccountPromptProps {
@@ -12,6 +13,7 @@ export interface IAccountPromptProps {
 interface AccountPromptState {
   name: string,
   value: number,
+  liquid: boolean,
   isSaving: boolean,
   error?: string
 }
@@ -28,6 +30,7 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
         this.state = {
           name: account.name,
           value: account.amount,
+          liquid: account.liquid,
           isSaving: false
         }
       } else {
@@ -37,22 +40,23 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
       this.state = {
         name: '',
         value: 0,
+        liquid: true,
         isSaving: false
       };
     }
 
     this.accept = this.accept.bind(this);
     this.cancel = this.cancel.bind(this);
-    this.handleNameChanged = this.handleNameChanged.bind(this);
-    this.handleValueChanged = this.handleValueChanged.bind(this);
   }
 
+  @autobind
   private handleNameChanged(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
       name: event.target.value
     });
   }
 
+  @autobind
   private handleValueChanged(event: React.ChangeEvent<HTMLInputElement>) {
     const newValue = Number(event.target.value);
     if (!isNaN(newValue)) {
@@ -62,12 +66,18 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
     }
   }
 
+  private handleLiquidChanged(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({
+      liquid: event.target.checked
+    });
+  }
+
   private async accept() {
     try {
       if (this.props.editing) {
-        await AppStateManager.updateAccount(this.props.accountToEdit, this.state.name, this.state.value);
+        await AppStateManager.updateAccount(this.props.accountToEdit, this.state.name, this.state.value,this.state.liquid);
       } else {
-        await AppStateManager.addAccount(this.state.name, this.state.value);
+        await AppStateManager.addAccount(this.state.name, this.state.value,this.state.liquid);
       }
       PromptManager.requestClosePrompt();
     } catch (err)
@@ -109,6 +119,17 @@ export class AccountPrompt extends React.Component<IAccountPromptProps, AccountP
               onChange={this.handleValueChanged}
               value={this.state.value}
             />
+          </InputGroup>
+          <InputGroup>
+            <Form.Group>
+              <Form.Check
+                label="Liquid"
+                type="checkbox"
+                aria-label="Liquid Account"
+                onChange={this.handleLiquidChanged}
+                checked={this.state.liquid}
+              />
+            </Form.Group>
           </InputGroup>
         </Modal.Body>
         <Modal.Footer>

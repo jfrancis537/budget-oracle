@@ -187,7 +187,7 @@ export class InvestmentPrompt extends React.Component<IInvestmentPromptProps, II
       }
       await InvestmentGroupManager.clearGroup(this.props.groupName);
       const ids = await AppStateManager.addInvestments([...investments.values()]);
-      for (let id of ids) {
+      for (const id of ids) {
         await InvestmentGroupManager.addItemToGroup(id, this.props.groupName);
       }
     }
