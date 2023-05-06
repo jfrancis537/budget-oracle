@@ -401,12 +401,11 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
       }
       // Spending is usually negative so subtract it.
       let value = t.amount;
-      const account = TellerManager.getAccount(t.id);
+      const account = TellerManager.getAccount(t.accountId);
       if(account)
       {
         value = account.type === 'credit' ? value *= -1 : value;
       }
-      console.log(t.description,account?.name,value);
       data[index] -= value;
     }
     return {
