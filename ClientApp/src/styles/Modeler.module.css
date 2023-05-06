@@ -24,3 +24,7 @@
 .category-select > *{
   width: 100%;
 }
+
+.category-select > div {
+  height: 40vh;
+}

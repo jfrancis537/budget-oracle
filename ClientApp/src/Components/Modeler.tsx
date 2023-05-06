@@ -406,6 +406,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
       {
         value = account.type === 'credit' ? value *= -1 : value;
       }
+      console.log(t.description,account?.name,value);
       data[index] -= value;
     }
     return {
