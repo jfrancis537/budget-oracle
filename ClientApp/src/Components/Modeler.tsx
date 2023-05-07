@@ -358,7 +358,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
 
   function calculateSpendingByMonthTransactions() {
     const today = moment().endOf('day');
-    let start = today.clone().startOf('month').subtract(sbmChartMonthsCount, 'months');
+    let start = today.clone().startOf('month').subtract(sbmChartMonthsCount - 1, 'months');
     let transactions: [TransactionData, Moment][] = TellerManager.getTransactions()
       .map(t => [t, moment(t.date)]);
     transactions = transactions.filter(kvp => {
