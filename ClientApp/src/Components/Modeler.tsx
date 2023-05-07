@@ -389,7 +389,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
     let index = 0;
     for(const [t,date] of sbmTransactions)
     {
-      if(date.isAfter(endOfCurrentMonth))
+      while(date.isAfter(endOfCurrentMonth))
       {
         endOfCurrentMonth = endOfCurrentMonth.add(1,'month');
         endOfCurrentMonth.endOf('month');
