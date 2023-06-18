@@ -521,7 +521,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
       }
       data.set(categoryName, data.get(categoryName)! + transaction.amount);
     }
-    const colors = palette('cb-Pastel1', data.size).map((str: string) => `#${str}`);
+    const colors = palette('cb-Pastel1', sbcChartCategories.length).map((str: string) => `#${str}`);
     const result = {
       labels: [...data.keys()],
       datasets: [
