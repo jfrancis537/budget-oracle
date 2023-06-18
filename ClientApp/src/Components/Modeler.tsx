@@ -500,7 +500,6 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
       const [, bDate] = b;
       return aDate.valueOf() - bDate.valueOf();
     });
-    console.log(transactions);
     return transactions;
   }
 
@@ -521,7 +520,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
       }
       data.set(categoryName, data.get(categoryName)! + transaction.amount);
     }
-    const colors = palette('cb-Pastel1', sbcChartCategories.length).map((str: string) => `#${str}`);
+    const colors = palette('rainbow', sbcChartCategories.length).map((str: string) => `#${str}`);
     const result = {
       labels: [...data.keys()],
       datasets: [
@@ -534,7 +533,6 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
         }
       ]
     };
-    console.log(result)
     return result;
   }
 
