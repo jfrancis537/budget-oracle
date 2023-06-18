@@ -29,3 +29,22 @@
   height: 40vh;
   overflow-y: scroll;
 }
+
+.month-picker {
+  flex: 1;
+  border: none;
+  padding-left: 1rem;
+  color: black;
+  background-color: white;
+  border-radius: .375rem;
+  border-bottom-left-radius: 0px;
+  border-top-left-radius: 0px;
+}
+
+.pie-chart-container {
+  max-height: 90%;
+    flex: 1 1 0%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}

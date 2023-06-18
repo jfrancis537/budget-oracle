@@ -428,7 +428,7 @@ const VestEditor: React.FC<IVestEditorProps> = (props) => {
       <InputGroup className="mb-3">
         <InputGroup.Text>Tax Rate</InputGroup.Text>
         <NumberInput
-          defaultValue={taxRate}
+          defaultValue={Number(taxRate.toFixed(4)) * 100}
           ariaLabel="tax rate"
           onChange={val => setTaxRate(val / 100)}
         />

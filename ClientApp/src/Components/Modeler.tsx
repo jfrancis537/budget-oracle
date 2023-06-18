@@ -7,12 +7,15 @@ import {
   LineElement,
   Chart,
   ChartData,
-  BarElement
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend
 } from "chart.js";
 import moment, { Moment } from "moment";
 import React, { useEffect, useState } from "react";
 import { Form, InputGroup } from "react-bootstrap";
-import { Bar, Line } from "react-chartjs-2";
+import { Bar, Doughnut, Line, Pie } from "react-chartjs-2";
 import styles from "../styles/Modeler.module.css";
 import { CalculationResult } from "../Processing/Managers/CalculationsManager";
 import { CalculationTools } from "../Utilities/CalculationTools";
@@ -25,7 +28,10 @@ Chart.register(
   LinearScale,
   PointElement,
   LineElement,
-  BarElement
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend
 );
 
 enum ModelerResolution {
@@ -85,6 +91,10 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
   const [sbmChartMonthsCount, setSbmChartMonthsCount] = useState(4);
   const [sbmChartCategories, setSbmChartCategories] = useState(TellerManager.categoryNamesNotIgnored);
   const [sbmTransactions, setSbmTransactions] = useState(calculateSpendingByMonthTransactions());
+  // Spending by category chart
+  const [sbcChartMonth, setSbcChartMonth] = useState(moment().format('YYYY-MM'));
+  const [sbcChartCategories, setSbcChartCategories] = useState(TellerManager.categoryNamesNotIgnored);
+  const [sbcTransactions, setSbcTransactions] = useState(calculateSpendingByCategoryTransactions());
   //TODO: Display Unrealized
   //TODO: Add estimated stock growth - do this via a new anticipated growth field on investmetns. 
   //Allow for zero value investments.
@@ -99,7 +109,11 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
 
   useEffect(() => {
     setSbmTransactions(calculateSpendingByMonthTransactions());
-  },[sbmChartCategories,sbmChartMonthsCount,props.visible])
+  }, [sbmChartCategories, sbmChartMonthsCount, props.visible]);
+
+  useEffect(() => {
+    setSbcTransactions(calculateSpendingByCategoryTransactions());
+  }, [sbcChartCategories, sbcChartMonth, props.visible]);
 
   useEffect(() => {
     TellerManager.ontransactioncategorized.addListener(onTransactionsCategorized);
@@ -163,6 +177,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
 
   function onTransactionsCategorized() {
     setSbmTransactions(calculateSpendingByMonthTransactions());
+    setSbcTransactions(calculateSpendingByCategoryTransactions());
   }
 
   // GROWTH CHART
@@ -365,20 +380,18 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
       const [t, date] = kvp;
       const category = TellerManager.getTransactionCategory(t.id);
       return date.isBetween(start, today) && category && sbmChartCategories.includes(category);
-    }).sort((a,b) => {
-      const [,aDate] = a;
-      const [,bDate] = b;
+    }).sort((a, b) => {
+      const [, aDate] = a;
+      const [, bDate] = b;
       return aDate.valueOf() - bDate.valueOf();
     });
     return transactions;
   }
 
-  function handleSbmChartCategoriesChanged(categories: string[])
-  {
+  function handleSbmChartCategoriesChanged(categories: string[]) {
     setSbmChartCategories(categories);
   }
-  function handleSbmChartMonthsCountChanged(event: React.ChangeEvent<HTMLSelectElement>)
-  {
+  function handleSbmChartMonthsCountChanged(event: React.ChangeEvent<HTMLSelectElement>) {
     setSbmChartMonthsCount(Number(event.target.value));
   }
 
@@ -387,23 +400,19 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
     let endOfCurrentMonth = moment().endOf('month').subtract(sbmChartMonthsCount - 1, 'months');
     const data: number[] = [];
     let index = 0;
-    for(const [t,date] of sbmTransactions)
-    {
-      while(date.isAfter(endOfCurrentMonth))
-      {
-        endOfCurrentMonth = endOfCurrentMonth.add(1,'month');
+    for (const [t, date] of sbmTransactions) {
+      while (date.isAfter(endOfCurrentMonth)) {
+        endOfCurrentMonth = endOfCurrentMonth.add(1, 'month');
         endOfCurrentMonth.endOf('month');
         index++;
       }
-      if(!data[index])
-      {
+      if (!data[index]) {
         data[index] = 0;
       }
       // Spending is usually negative so subtract it.
       let value = t.amount;
       const account = TellerManager.getAccount(t.accountId);
-      if(account)
-      {
+      if (account) {
         value = account.type === 'credit' ? value *= -1 : value;
       }
       data[index] -= value;
@@ -437,7 +446,6 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
     return (
       <Bar
         data={generateSpendingByMonthData()}
-
       />
     )
   }
@@ -451,7 +459,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
     }
     return nodes;
   }
-  
+
 
   function renderSpendingByMonthControls() {
     return (
@@ -476,6 +484,97 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
     )
   }
 
+  // SPENDING BY CATEGORY
+
+  function calculateSpendingByCategoryTransactions() {
+    let start = moment(sbcChartMonth);
+    let end = start.clone().endOf('month');
+    let transactions: [TransactionData, Moment][] = TellerManager.getTransactions()
+      .map(t => [t, moment(t.date)]);
+    transactions = transactions.filter(kvp => {
+      const [t, date] = kvp;
+      const category = TellerManager.getTransactionCategory(t.id);
+      return date.isBetween(start, end) && category && sbcChartCategories.includes(category);
+    }).sort((a, b) => {
+      const [, aDate] = a;
+      const [, bDate] = b;
+      return aDate.valueOf() - bDate.valueOf();
+    });
+    console.log(transactions);
+    return transactions;
+  }
+
+  function handleSbcChartCategoriesChanged(categories: string[]) {
+    setSbcChartCategories(categories);
+  }
+
+  function handleSbcMonthChanged(event: React.ChangeEvent<HTMLInputElement>) {
+    setSbcChartMonth(event.target.value);
+  }
+
+  function generateSpendingByCategoryData(): ChartData<"doughnut", number[], string> {
+    const data: Map<string, number> = new Map();
+    for (const [transaction,] of sbcTransactions) {
+      const categoryName = TellerManager.getTransactionCategory(transaction.id) ?? 'Uncategorized';
+      if (!data.has(categoryName)) {
+        data.set(categoryName, 0);
+      }
+      data.set(categoryName, data.get(categoryName)! + transaction.amount);
+    }
+    const colors = palette('cb-Pastel1', data.size).map((str: string) => `#${str}`);
+    const result = {
+      labels: [...data.keys()],
+      datasets: [
+        {
+          label: 'data',
+          data: [...data.values()],
+          backgroundColor: colors,
+          hoverOffset: 0,
+          borderColor: colors,
+        }
+      ]
+    };
+    console.log(result)
+    return result;
+  }
+
+  function renderSpendingByCategoryChart() {
+    return (
+      <div className={styles['pie-chart-container']}>
+        <Doughnut 
+        data={generateSpendingByCategoryData()}
+        options={{
+          responsive: true
+        }}
+        />
+      </div>
+    )
+  }
+
+  function renderSpendingByCateogryControls() {
+    return (
+      <>
+        <InputGroup className="mb-3">
+          <InputGroup.Text>Month</InputGroup.Text>
+          <input
+            type="month"
+            className={styles["month-picker"]}
+            onChange={handleSbcMonthChanged}
+            value={sbcChartMonth}
+            onClick={(e) => {e.currentTarget.showPicker(); e.stopPropagation();}}
+          />
+        </InputGroup>
+        <MultiSelect
+          variant="secondary"
+          className={styles['category-select']}
+          onValuesChanged={handleSbcChartCategoriesChanged}
+          values={TellerManager.categoryNamesNotIgnored}
+          title="Categories"
+          selectedValues={sbcChartCategories} />
+      </>
+    );
+  }
+
   // GENERIC
 
   function handleModeChanged(event: React.ChangeEvent<HTMLSelectElement>) {
@@ -490,7 +589,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
       case ModelerMode.Growth:
         return renderGrowthControls();
       case ModelerMode.SpendingByCategory:
-        return renderGrowthControls();
+        return renderSpendingByCateogryControls();
       case ModelerMode.SpendingByMonth:
         return renderSpendingByMonthControls();
     }
@@ -502,7 +601,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
       case ModelerMode.Growth:
         return calculations.length !== 0 ? renderGrowthChart() : null;
       case ModelerMode.SpendingByCategory:
-        return renderGrowthControls();
+        return renderSpendingByCategoryChart();
       case ModelerMode.SpendingByMonth:
         return renderSpendingByMonthChart();
     }
@@ -519,7 +618,7 @@ export const Modeler: React.FC<IModelerProps> = (props) => {
               value={mode}
             >
               <option value={ModelerMode.Growth}>{ModelerMode.toString(ModelerMode.Growth)}</option>
-              <option disabled value={ModelerMode.SpendingByCategory}>{ModelerMode.toString(ModelerMode.SpendingByCategory)}</option>
+              <option value={ModelerMode.SpendingByCategory}>{ModelerMode.toString(ModelerMode.SpendingByCategory)}</option>
               <option value={ModelerMode.SpendingByMonth}>{ModelerMode.toString(ModelerMode.SpendingByMonth)}</option>
             </Form.Select>
           </InputGroup>
