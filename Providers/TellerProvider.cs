@@ -64,12 +64,28 @@ namespace BudgetOracle.Providers
       if (response.IsSuccessStatusCode)
       {
         JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
-        return new BalanceData()
+        var data = new BalanceData()
         {
-          Available = double.Parse(json["available"].ToString()),
-          Current = double.Parse(json["ledger"].ToString()),
           Id = json["account_id"].ToString()
         };
+        if (double.TryParse(json["available"].ToString(), out double available))
+        {
+          data.Available = available;
+        }
+        else
+        {
+          data.Available = double.NaN;
+        }
+
+        if (double.TryParse(json["ledger"].ToString(), out double current))
+        {
+          data.Current = current;
+        }
+        else
+        {
+          data.Current = double.NaN;
+        }
+        return data;
       }
       else
       {
