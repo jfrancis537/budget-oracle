@@ -83,14 +83,14 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
           unavoidable.push(
             <div key={bill.id}>
               <label>{bill.name}:&nbsp;</label>
-              <Currency amount={cost}/>
+              <Currency amount={-cost}/>
             </div>
           );
         } else {
           avoidable.push(
             <div key={bill.id}>
               <label>{bill.name}:&nbsp;</label>
-              <Currency amount={cost}/>
+              <Currency amount={-cost}/>
             </div>
           );
         }
@@ -99,7 +99,7 @@ export class DetailedResults extends React.Component<IDetailedResultsProps, IDet
       unavoidable.push(
         <div key='Investment Margin Interest'>
           <label>{"Margin Interest"}:&nbsp;</label>
-          <Currency amount={this.props.calculations.investmentResults.totalInterestOwed}/>
+          <Currency amount={-this.props.calculations.investmentResults.totalInterestOwed}/>
         </div>
       );
       return (
