@@ -226,6 +226,7 @@ class AppStateManager {
     frequency: number,
     frequencyType: FrequencyType,
     initialDate: Moment,
+    endDate: Moment | undefined,
     unavoidable: boolean
   ) {
     const bill = new Bill({
@@ -234,6 +235,7 @@ class AppStateManager {
       frequencyType: frequencyType,
       frequency: frequency,
       initialDate: initialDate,
+      endDate: endDate,
       id: id,
       unavoidable: unavoidable
     });
@@ -248,9 +250,10 @@ class AppStateManager {
     frequency: number,
     frequencyType: FrequencyType,
     initialDate: Moment,
+    endDate: Moment | undefined,
     unavoidable: boolean
   ) {
-    return await this.updateBill(undefined, name, amount, frequency, frequencyType, initialDate, unavoidable);
+    return await this.updateBill(undefined, name, amount, frequency, frequencyType, initialDate,endDate, unavoidable);
   }
 
   //Payment Schedules

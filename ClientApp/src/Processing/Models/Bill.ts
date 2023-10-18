@@ -3,11 +3,12 @@ import { FrequencyType } from "../Enums/FrequencyType";
 import { Identifiable, IdentifiableOptions, SerializedIdentifiable } from "./Identifiable";
 import { IValued } from "./Valued";
 
-interface BillOptions extends IdentifiableOptions{
+export interface BillOptions extends IdentifiableOptions{
   amount: number;
   frequency: number;
   frequencyType: FrequencyType;
   initialDate: Moment;
+  endDate?: Moment;
   name: string;
   unavoidable: boolean;
 }
@@ -17,6 +18,7 @@ export interface SerializedBill extends SerializedIdentifiable{
   frequency: number;
   frequencyType: number;
   initialDate: string;
+  endDate?: string;
   name: string;
   unavoidable: boolean;
 }
@@ -27,6 +29,7 @@ export class Bill extends Identifiable implements IValued {
   readonly frequency: number;
   readonly frequencyType: FrequencyType;
   readonly initialDate: Moment;
+  readonly endDate?: Moment;
   readonly name: string;
   readonly unavoidable: boolean;
 
@@ -36,6 +39,7 @@ export class Bill extends Identifiable implements IValued {
     this.frequency = options.frequency;
     this.frequencyType = options.frequencyType;
     this.initialDate = options.initialDate;
+    this.endDate = options.endDate;
     this.name = options.name;
     this.unavoidable = options.unavoidable;
   }
@@ -46,6 +50,7 @@ export class Bill extends Identifiable implements IValued {
       frequency: data.frequency,
       id: data.id,
       initialDate: moment(data.initialDate),
+      endDate: data.endDate ? moment(data.endDate) : undefined,
       amount: data.amount,
       frequencyType: data.frequencyType,
       unavoidable: !!data.unavoidable

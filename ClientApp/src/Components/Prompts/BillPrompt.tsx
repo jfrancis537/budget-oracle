@@ -22,6 +22,7 @@ interface BillPromptState {
   frequency: number,
   frequencyType: FrequencyType,
   initalDate: Moment,
+  endDate?: Moment,
   unavoidable: boolean,
   isSaving: boolean
 }
@@ -42,7 +43,8 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
           frequency: bill.frequency,
           initalDate: bill.initialDate,
           unavoidable: bill.unavoidable,
-          isSaving: false
+          isSaving: false,
+          endDate: bill.endDate,
         }
       } else {
         throw new Error('A Bill to edit must be provided if editing flag is true');
@@ -55,7 +57,8 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
         frequency: 1,
         frequencyType: FrequencyType.Monthly,
         isSaving: false,
-        unavoidable: false
+        unavoidable: false,
+        endDate: undefined,
       };
     }
   }
@@ -92,6 +95,31 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
   }
 
   @autobind
+  private handleEndDateEnabledStateChanged(event: React.ChangeEvent<HTMLInputElement>) {
+    const enabled = event.target.checked;
+    if (enabled) {
+      this.setState({
+        endDate: moment()
+      });
+    } else {
+      this.setState({
+        endDate: undefined
+      });
+    }
+  }
+
+  @autobind
+  private handleEndDateChanged(event: React.ChangeEvent<HTMLInputElement>) {
+    const value = moment(event.target.value);
+    if (value.isValid()) {
+      this.setState({
+        endDate: value
+      });
+    }
+  }
+
+
+  @autobind
   private handleFrequencyTypeChanged(event: React.ChangeEvent<HTMLSelectElement>) {
     const newValue = Number(event.target.value);
     if (!isNaN(newValue)) {
@@ -124,7 +152,8 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
         this.state.frequency,
         this.state.frequencyType,
         this.state.initalDate,
-        this.state.unavoidable
+        this.state.endDate,
+        this.state.unavoidable,
       );
     } else {
       let billId = await AppStateManager.addBill(
@@ -133,6 +162,7 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
         this.state.frequency,
         this.state.frequencyType,
         this.state.initalDate,
+        this.state.endDate,
         this.state.unavoidable
       );
       await GroupManager.addItemToGroup(billId, GroupType.Bill, this.props.groupName);
@@ -214,6 +244,27 @@ export class BillPrompt extends React.Component<IBillPromptProps, BillPromptStat
                 onChange={this.handleUnavoidableChanged}
                 checked={this.state.unavoidable}
               />
+            </Form.Group>
+          </InputGroup>
+          <InputGroup>
+
+            <Form.Group>
+              <Form.Text style={{ fontSize: '1.1rem', color: "white" }}>End Date</Form.Text>
+              <Form.Check
+                label="Enabled"
+                type="checkbox"
+                aria-label="bill ends"
+                onChange={this.handleEndDateEnabledStateChanged}
+                checked={!!this.state.endDate}
+              />
+              {this.state.endDate && (
+                <Form.Control
+                  type='date'
+                  aria-label="date"
+                  onChange={this.handleEndDateChanged}
+                  value={this.state.endDate.format("YYYY-MM-DD")}
+                />
+              )}
             </Form.Group>
           </InputGroup>
         </Modal.Body>

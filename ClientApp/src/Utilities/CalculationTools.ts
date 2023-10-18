@@ -182,7 +182,12 @@ export namespace CalculationTools {
     let value = 0;
     let promises: Promise<[Bill, number]>[] = [];
     for (let bill of bills) {
-      promises.push(calculateCostForBill(bill, start, end));
+      let actualEnd = end;
+      if(bill.endDate && bill.endDate.isBefore(end))
+      {
+        actualEnd = bill.endDate.clone();
+      }
+      promises.push(calculateCostForBill(bill, start, actualEnd));
     }
     let results = await Promise.all(promises);
     let billMap = new Map<Bill, number>();

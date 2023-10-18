@@ -1,7 +1,7 @@
 import moment from "moment";
 import { FrequencyType } from "../Processing/Enums/FrequencyType";
 import { CalculationsManager } from "../Processing/Managers/CalculationsManager";
-import { Bill } from "../Processing/Models/Bill";
+import { Bill, BillOptions } from "../Processing/Models/Bill";
 import { CalculationTools } from "../Utilities/CalculationTools";
 
 describe('Bill calc weekly - simple', () => {
@@ -40,13 +40,14 @@ describe('Bill calc weekly - simple', () => {
 
 describe('Bill calc daily', () => {
   //Setup
-  let options = {
+  let options: BillOptions = {
     amount: 10,
     frequency: 1,
     frequencyType: FrequencyType.Daily,
     initialDate: moment('2021-09-01'),
     name: 'SampleBill',
-    unavoidable: false
+    unavoidable: false,
+    endDate: undefined
   }
   let bills = new Set<Bill>();
   test('Start after bill date', async () => {
@@ -57,7 +58,7 @@ describe('Bill calc daily', () => {
   });
 
   test('Tri-Daily', async () => {
-    bills.clear()
+    bills.clear();
     let opts = { ...options };
     opts.frequency = 3;
     opts.initialDate = opts.initialDate.clone();
@@ -67,7 +68,7 @@ describe('Bill calc daily', () => {
   });
 
   test('Tri-Daily Less than two occurances', async () => {
-    bills.clear()
+    bills.clear();
     let opts = { ...options };
     opts.frequency = 3;
     opts.initialDate = opts.initialDate.clone();
@@ -77,7 +78,7 @@ describe('Bill calc daily', () => {
   });
 
   test('5-Daily', async () => {
-    bills.clear()
+    bills.clear();
     let opts = { ...options };
     opts.frequency = 5;
     opts.initialDate = opts.initialDate.clone();
@@ -87,13 +88,23 @@ describe('Bill calc daily', () => {
   });
 
   test('bi-Daily', async () => {
-    bills.clear()
+    bills.clear();
     let opts = { ...options };
     opts.frequency = 2;
     opts.initialDate = opts.initialDate.clone();
     bills.add(new Bill(opts));
     let result = await CalculationTools.calculateAllBillsCost(moment('2021-08-30'), moment('2021-09-10'), bills.values())
     expect(result[1]).toEqual(50);
+  });
+
+  test('daily with end date', async () => {
+    bills.clear();
+    let opts = { ...options };
+    opts.initialDate = opts.initialDate.clone();
+    opts.endDate = opts.initialDate.clone().add(10,"days");
+    bills.add(new Bill(opts));
+    let result = await CalculationTools.calculateAllBillsCost(moment('2021-09-02'), moment('2021-09-27'), bills.values())
+    expect(result[1]).toEqual(100);
   });
 });
 
