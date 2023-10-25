@@ -72,7 +72,7 @@ export namespace TellerAPI {
     }
   }
 
-  export async function getAccountBalance(accountId: string, initalRequest: boolean = true) {
+  export async function getAccountBalance(accountId: string, initalRequest: boolean = true): Promise<BalanceData> {
     const url = `${baseUrl}/get/balance/${accountId}`;
     let response = await fetch(url);
     if (response.ok) {
@@ -85,7 +85,7 @@ export namespace TellerAPI {
         if (accountDetails) {
           if (await TellerManager.reauthExisting(accountDetails.enrollmentId)) {
             // Try again.
-            return getAccountBalance(accountId, false);
+            return await getAccountBalance(accountId, false);
           }
         }
       }
@@ -93,7 +93,7 @@ export namespace TellerAPI {
     }
   }
 
-  export async function getAccountTransactions(accountId: string, initalRequest: boolean = true) {
+  export async function getAccountTransactions(accountId: string, initalRequest: boolean = true): Promise<TransactionData[]> {
     const url = `${baseUrl}/get/transactions/${accountId}`;
     let response = await fetch(url);
     if (response.ok) {
@@ -106,7 +106,7 @@ export namespace TellerAPI {
         if (accountDetails) {
           if (await TellerManager.reauthExisting(accountDetails.enrollmentId)) {
             // Try again.
-            return getAccountTransactions(accountId, false);
+            return await getAccountTransactions(accountId, false);
           }
         }
       }
