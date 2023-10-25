@@ -140,7 +140,7 @@ class TellerManager {
           reject(false);
         }
       }
-      TellerConnect.setup(options);
+      TellerConnect.setup(options).open();
     });
 
   }
@@ -239,7 +239,7 @@ class TellerManager {
     } catch (err: any) {
       this.handleError(err as Error);
     }
-    
+
     // const [balance, transactions] = await Promise.all([TellerAPI.getAccountBalance(id), TellerAPI.getAccountTransactions(id)]);
     // this.onlinkedbalanceupdated.invoke(balance);
     // this.onlinkedtransactionsupdated.invoke(transactions);
