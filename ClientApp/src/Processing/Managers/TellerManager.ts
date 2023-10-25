@@ -119,6 +119,31 @@ class TellerManager {
     });
   }
 
+  public async reauthExisting(enrollmentId: string): Promise<boolean> {
+    const userId = await TellerAPI.getUserId();
+    if(!userId)
+    {
+      return Promise.resolve(false);
+    }
+    return new Promise((resolve,reject) => {
+      const options: TellerSetupArgs = {
+        environment: 'development',
+        applicationId: applicationId,
+        enrollmentId: enrollmentId,
+        onSuccess: () => {
+          resolve(true);
+        },
+        onExit: () => {
+          reject(false);
+        },
+        onFailure: () => {
+          reject(false);
+        }
+      }
+    });
+
+  }
+
   public getAccount(id: string) {
     return this.accounts.get(id);
   }

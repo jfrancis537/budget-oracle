@@ -1,3 +1,4 @@
+import { TellerManager } from "../Processing/Managers/TellerManager"
 import { TellerEnrollment } from "../Types/Teller"
 
 export interface LinkedAccountDetails {
@@ -71,24 +72,44 @@ export namespace TellerAPI {
     }
   }
 
-  export async function getAccountBalance(accountId: string) {
+  export async function getAccountBalance(accountId: string, initalRequest: boolean = true) {
     const url = `${baseUrl}/get/balance/${accountId}`;
     let response = await fetch(url);
     if (response.ok) {
       return (await response.json()) as BalanceData;
     }
     else {
+      if (initalRequest) {
+        // First try and fix the account by reauthorizing.
+        const accountDetails = TellerManager.getAccount(accountId);
+        if (accountDetails) {
+          if (await TellerManager.reauthExisting(accountDetails.enrollmentId)) {
+            // Try again.
+            return getAccountBalance(accountId, false);
+          }
+        }
+      }
       throw new Error("Failed to get linked accounts");
     }
   }
 
-  export async function getAccountTransactions(accountId: string) {
+  export async function getAccountTransactions(accountId: string, initalRequest: boolean = true) {
     const url = `${baseUrl}/get/transactions/${accountId}`;
     let response = await fetch(url);
     if (response.ok) {
       return (await response.json()) as TransactionData[];
     }
     else {
+      if (initalRequest) {
+        // First try and fix the account by reauthorizing.
+        const accountDetails = TellerManager.getAccount(accountId);
+        if (accountDetails) {
+          if (await TellerManager.reauthExisting(accountDetails.enrollmentId)) {
+            // Try again.
+            return getAccountTransactions(accountId, false);
+          }
+        }
+      }
       throw new Error("Failed to get linked accounts");
     }
   }
@@ -114,8 +135,7 @@ export namespace TellerAPI {
     }
   }
 
-  export async function deleteAccount(id: string)
-  {
+  export async function deleteAccount(id: string) {
     const url = `${baseUrl}/delete/account/${id}`;
     let response = await fetch(url, {
       method: "DELETE"
