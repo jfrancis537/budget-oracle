@@ -140,6 +140,7 @@ class TellerManager {
           reject(false);
         }
       }
+      TellerConnect.setup(options);
     });
 
   }
@@ -218,16 +219,27 @@ class TellerManager {
     console.warn(err);
   }
 
-  private loadAccountData(id: string) {
-    TellerAPI.getAccountBalance(id).then(balance => {
-      this.balances.set(id, balance);
-      this.onlinkedbalanceupdated.invoke(balance);
-    }).catch(this.handleError);
+  private async loadAccountData(id: string) {
 
-    TellerAPI.getAccountTransactions(id).then(transactions => {
+    // Get balances first
+    try {
+      const balance = await TellerAPI.getAccountBalance(id);
+      this.balances.set(id,balance);
+      this.onlinkedbalanceupdated.invoke(balance);
+    } catch (err: any) {
+      this.handleError(err as Error);
+    }
+
+    // Then transactions to avoid a race condition with reauth.
+
+    try {
+      const transactions = await TellerAPI.getAccountTransactions(id);
       this.transactions.set(id, transactions);
       this.onlinkedtransactionsupdated.invoke(transactions);
-    }).catch(this.handleError);
+    } catch (err: any) {
+      this.handleError(err as Error);
+    }
+    
     // const [balance, transactions] = await Promise.all([TellerAPI.getAccountBalance(id), TellerAPI.getAccountTransactions(id)]);
     // this.onlinkedbalanceupdated.invoke(balance);
     // this.onlinkedtransactionsupdated.invoke(transactions);
