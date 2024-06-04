@@ -21,10 +21,14 @@ namespace BudgetOracle_.Providers
       return GetStockPriceNowAsync(symbol).Result;
     }
 
-    public async Task<double> GetStockPriceNowAsync(string symbol)
+    public async Task<double> GetStockPriceNowAsync(string symbol, string userAgentOverride = null)
     {
       var url = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol;
       using var client = httpClientFactory.CreateClient();
+      if(userAgentOverride != null)
+      {
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(userAgentOverride);
+      }
       var response = await client.GetAsync(url);
       if (response.IsSuccessStatusCode)
       {

@@ -22,7 +22,7 @@ namespace BudgetOracle_.Controllers
     {
       try
       {
-        var price = await stockDataProvider.GetStockPriceNowAsync(symbol);
+        var price = await stockDataProvider.GetStockPriceNowAsync(symbol,Request.Headers.UserAgent);
         if (price > 0)
         {
           return Ok(price);
